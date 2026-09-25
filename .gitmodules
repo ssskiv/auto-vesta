@@ -1,0 +1,6 @@
+[submodule "oscc"]
+	path = oscc
+	url = https://github.com/ssskiv/oscc
+[submodule "ros2_ws/src/ros2cco"]
+	path = ros2_ws/src/ros2cco
+	url = https://github.com/WATonomous/ros2cco
