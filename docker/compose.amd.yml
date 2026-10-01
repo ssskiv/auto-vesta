@@ -1,0 +1,13 @@
+# RU: AMD. Работает через открытый драйвер Mesa: нужен доступ к
+#     /dev/dri и членство в группах video и render.
+# EN: AMD. Uses the open Mesa driver: requires access to /dev/dri and
+#     membership in the video and render groups.
+services:
+  sim:
+    devices:
+      - /dev/dri:/dev/dri
+    group_add:
+      - video
+      - render
+    environment:
+      - LIBVA_DRIVER_NAME=radeonsi

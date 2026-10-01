@@ -1,0 +1,11 @@
+# RU: Без ускорения. Программный рендеринг Mesa llvmpipe.
+#     Gazebo пойдёт, но медленно: ожидайте 5-15 кадров в секунду.
+#     Для отладки API этого достаточно, для визуальной оценки — нет.
+# EN: No acceleration. Mesa llvmpipe software rendering.
+#     Gazebo will run, but slowly: expect 5-15 frames per second.
+#     Fine for API testing, not for visual evaluation.
+services:
+  sim:
+    environment:
+      - LIBGL_ALWAYS_SOFTWARE=1
+      - GALLIUM_DRIVER=llvmpipe
