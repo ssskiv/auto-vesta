@@ -1,0 +1,17 @@
+# RU: NVIDIA. Требует nvidia-container-toolkit на хосте.
+#     Библиотеки драйвера пробрасываются с хоста, ставить их в образ не нужно.
+# EN: NVIDIA. Requires nvidia-container-toolkit on the host.
+#     Driver libraries are injected from the host; no need to install them.
+services:
+  sim:
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=all
+      - __GLX_VENDOR_LIBRARY_NAME=nvidia
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu, graphics, display]

@@ -1,0 +1,11 @@
+# RU: Intel. Встроенная графика через Mesa.
+# EN: Intel. Integrated graphics via Mesa.
+services:
+  sim:
+    devices:
+      - /dev/dri:/dev/dri
+    group_add:
+      - video
+      - render
+    environment:
+      - LIBVA_DRIVER_NAME=iHD

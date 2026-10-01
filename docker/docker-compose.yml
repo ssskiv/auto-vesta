@@ -1,0 +1,53 @@
+# =========================================================================
+# RU: Базовая конфигурация. Настройки видеокарты подключаются отдельным
+#     файлом: compose.nvidia.yml, compose.amd.yml, compose.intel.yml или
+#     compose.cpu.yml. Скрипты start.sh и start.ps1 выбирают его сами.
+#
+# EN: Base configuration. GPU settings come from a separate overlay file:
+#     compose.nvidia.yml, compose.amd.yml, compose.intel.yml or
+#     compose.cpu.yml. The start.sh and start.ps1 scripts pick one
+#     automatically.
+# =========================================================================
+services:
+  sim:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: vesta-sim:latest
+    container_name: vesta_sim
+    hostname: vesta-sim
+
+    environment:
+      - ROS_DOMAIN_ID=0
+      - RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+      - DISPLAY=${DISPLAY:-:0}
+      - QT_X11_NO_MITSHM=1
+      - XDG_RUNTIME_DIR=/tmp/runtime-root
+      # RU: WSLg на Windows подставляет свой сокет Wayland.
+      # EN: WSLg on Windows provides its own Wayland socket.
+      - WAYLAND_DISPLAY=${WAYLAND_DISPLAY:-}
+      - PULSE_SERVER=${PULSE_SERVER:-}
+
+    volumes:
+      - ../src:/ros2_ws/src:rw
+      # RU: Артефакты сборки живут на хосте: пересборка не нужна при
+      #     каждом запуске контейнера.
+      # EN: Build artifacts live on the host, so the workspace is not
+      #     rebuilt on every container start.
+      - ../.build/build:/ros2_ws/build:rw
+      - ../.build/install:/ros2_ws/install:rw
+      - ../.build/log:/ros2_ws/log:rw
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+
+    ports:
+      # RU: Панель управления и API. EN: Control panel and API.
+      - "8080:8080"
+
+    # RU: Gazebo и DDS активно используют разделяемую память.
+    # EN: Gazebo and DDS rely heavily on shared memory.
+    ipc: host
+    shm_size: '2gb'
+
+    stdin_open: true
+    tty: true
+    command: bash
