@@ -360,7 +360,7 @@ def generate_launch_description():
     webots = WebotsLauncher(world=PathJoinSubstitution([package_dir, 'worlds', world]), ros2_supervisor=True, stream=True)
     robot_description_path = os.path.join(package_dir, pathlib.Path(os.path.join(package_dir, 'resource', 'vesta.urdf')))
     vehicle_driver = WebotsController(
-        robot_name='vehicle',
+        robot_name='vesta',
         parameters=[
             {'robot_description': robot_description_path}
         ],

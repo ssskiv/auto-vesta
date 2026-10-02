@@ -1070,6 +1070,11 @@ PlasticBarrel {
   translation 112.888 -12.3338 0.1
   name "PlasticBarrel(3)"
 }
+DEF Vesta1 LadaVesta {
+  translation 2.43536 -2.26087 0.4
+  name "vesta"
+  controller "<extern>"
+}
 DEF Gazelle1 GazelleNext {
   translation 2.43536 -4.76087 0.5
   controller "<extern>"

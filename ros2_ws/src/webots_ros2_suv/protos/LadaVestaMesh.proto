@@ -1,0 +1,28 @@
+#VRML_SIM R2023b utf8
+# license: Copyright Cyberbotics Ltd. Licensed for use only with Webots.
+# license url: https://cyberbotics.com/webots_assets_license
+# tags: hidden
+# Visual body of the Lada Vesta, exported as a single multi-material mesh
+# (body paint, brakes, glass, lights, chrome trim) from models/vesta/vesta.blend.
+# CadShape is used instead of a per-part PBRAppearance/Mesh split because the
+# DAE already embeds its own materials (see ../resource/vesta.mtl).
+
+PROTO LadaVestaMesh [
+]
+{
+  Group {
+    children [
+      DEF VESTA_BODY Pose {
+        translation 0 0 0
+        rotation -0.57735 0.57735 0.57735 2.0944
+        children [
+          CadShape {
+            url [
+              "../resource/vesta.obj"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
