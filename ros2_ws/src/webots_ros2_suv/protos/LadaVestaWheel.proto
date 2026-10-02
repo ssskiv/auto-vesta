@@ -1,10 +1,9 @@
 #VRML_SIM R2023b utf8
 # license: Copyright Cyberbotics Ltd. Licensed for use only with Webots.
 # license url: https://cyberbotics.com/webots_assets_license
-# documentation url: https://webots.cloud/run?url=https://github.com/cyberbotics/webots/blob/released/projects/vehicles/protos/bmw/BmwX5Wheel.proto
 # keywords: vehicle/wheel
-# Model of the BMW X5 wheels using the generic VehicleWheel PROTO including physic properties and baseColorMaps.
-# This model was sponsored by the [CTI project RO2IVSim](http://transport.epfl.ch/simulator-for-mobile-robots-and-intelligent-vehicles).
+# Model of the Lada Vesta wheels using the generic VehicleWheel PROTO including physic properties and baseColorMaps.
+# Tire/rim radii correspond to a stock 185/65R15 fitment.
 
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2022b/projects/vehicles/protos/abstract/VehicleWheel.proto"
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2022b/projects/vehicles/protos/abstract/GenericTireAppearance.proto"
@@ -14,19 +13,19 @@ PROTO LadaVestaWheel [
   field       SFNode   physics        NULL            # Is `VehicleWheel.physics`.
   field       SFBool   boundingObject TRUE            # Is `VehicleWheel.boundingObject`.
   field       SFBool   wheelSide      FALSE           # Is `VehicleWheel.wheelSide`.
-  hiddenField SFFloat  tireRadius     0.43            # Is `VehicleWheel.tireRadius`. We need to make this value 'visible' to the car PROTO so that the tire radius can be sent to the controller.
+  hiddenField SFFloat  tireRadius     0.315           # Is `VehicleWheel.tireRadius`. We need to make this value 'visible' to the car PROTO so that the tire radius can be sent to the controller.
 ]
 {
   VehicleWheel {
     name IS name
-    thickness 0.27
+    thickness 0.2
     tireRadius IS tireRadius
-    rimRadius 0.28
-    rimBeamWidth 0.12
-    centralInnerRadius 0.1
-    centralOuterRadius 0.18
-    rimBeamThickness 0.08
-    rimBeamOffset 0.065
+    rimRadius 0.19
+    rimBeamWidth 0.09
+    centralInnerRadius 0.07
+    centralOuterRadius 0.13
+    rimBeamThickness 0.06
+    rimBeamOffset 0.047
     wheelSide IS wheelSide
     tireAppearance GenericTireAppearance {
     }
@@ -46,14 +45,14 @@ PROTO LadaVestaWheel [
               metalness 0
               baseColorMap ImageTexture {
                 url [
-                  "textures/uaz_logo.jpg"
+                  "../resource/textures/gerb.png"
                 ]
               }
             }
             geometry Cylinder {
               bottom FALSE
-              height 0.21
-              radius 0.036
+              height 0.15
+              radius 0.026
               side FALSE
               subdivision 24
             }

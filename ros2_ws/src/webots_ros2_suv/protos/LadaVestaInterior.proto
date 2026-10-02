@@ -1,0 +1,18 @@
+#VRML_SIM R2023b utf8
+# license: Copyright Cyberbotics Ltd. Licensed for use only with Webots.
+# license url: https://cyberbotics.com/webots_assets_license
+# tags: hidden
+# Unlike Tuman/UazAvion/UazPatriot, the Lada Vesta was not exported as
+# separate body/interior DAE files: models/vesta/vesta.dae already contains
+# the full model (including cabin parts) loaded by LadaVestaMesh. This proto
+# is kept so LadaVesta.proto can still plug it into the "interior" slot like
+# the other vehicles, but it has no geometry of its own.
+
+PROTO LadaVestaInterior [
+]
+{
+  Group {
+    children [
+    ]
+  }
+}
