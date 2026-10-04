@@ -28,6 +28,7 @@
   <exec_depend>robot_localization</exec_depend>
   <exec_depend>robot_state_publisher</exec_depend>
   <exec_depend>slam_toolbox</exec_depend>
+  <exec_depend>pointcloud_to_laserscan</exec_depend>
   <exec_depend>launch_ros</exec_depend>
   <exec_depend>navigation2</exec_depend>
   <exec_depend>nav2_common</exec_depend>

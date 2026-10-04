@@ -21,7 +21,7 @@ data_files = [
         ['resource/' + package_name]),
     ('share/' + package_name, ['package.xml']),
 ]
-for directory in ('launch', 'worlds', 'protos', 'resource'):
+for directory in ('launch', 'config', 'maps', 'worlds', 'protos', 'resource'):
     data_files += package_files(directory)
 
 setup(

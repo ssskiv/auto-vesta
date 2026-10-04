@@ -55,6 +55,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         ros-humble-nav2-rviz-plugins \
     && rm -rf /var/lib/apt/lists/*
 
+RUN apt-get update && apt-get install -y --no-install-recommends \
+     ros-humble-pointcloud-to-laserscan \
+    && rm -rf /var/lib/apt/lists/*
+
 
 ENV RMW_IMPLEMENTATION=rmw_fastrtps_cpp
 ENV ROS_DOMAIN_ID=0
