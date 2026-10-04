@@ -110,7 +110,8 @@ class VestaDriver:
         self.__cruising_speed_kmh = linear_x * 3.6
         self.__brake = 0.0
         if abs(linear_x) > 1e-3:
-            self.__steer = _clamp(math.atan2(-msg.angular.z * WHEELBASE, linear_x), -MAX_STEER, MAX_STEER)
+            # atan, not atan2: atan2 maps any negative linear_x to ~+-pi (full lock when reversing).
+            self.__steer = _clamp(math.atan(-msg.angular.z * WHEELBASE / linear_x), -MAX_STEER, MAX_STEER)
         self.__last_cmd_time = time.monotonic()
 
     def step(self):
