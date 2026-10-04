@@ -12,6 +12,7 @@ EXTERNPROTO "../protos/GiveWaySign.proto"
 EXTERNPROTO "../protos/PlasticBarrel.proto"
 EXTERNPROTO "../protos/LadaVesta.proto"
 
+
 WorldInfo {
   ERP 0.6
   basicTimeStep 10
@@ -1074,83 +1075,134 @@ DEF Vesta1 LadaVesta {
   translation 2.43536 -2.26087 0.4
   name "vesta"
   controller "<extern>"
-}
-DEF Gazelle1 GazelleNext {
-  translation 2.43536 -4.76087 0.5
-  controller "<extern>"
   supervisor TRUE
   sensorsSlotFront [
-    Lidar {
-      translation -0.95 0 1.52
-      name "lidar_base"
-      horizontalResolution 1024
-      fieldOfView 6.28318
-      verticalFieldOfView 0.6
-      numberOfLayers 64
-      minRange 1.5
-      maxRange 100
-    }
-    RangeFinder {
-      translation 0 0 0.2
-      name "range_finder"
-      fieldOfView 1
-      width 840
-      height 480
-      minRange 0.5
-      maxRange 40
-    }
     Camera {
-      translation -0.25 0 1.15
+      translation -2.21 0 0.42
+      rotation 0 0 1 0
+      name "rgb_camera"
+      width 1280
+      height 720
+      fieldOfView 1.0
+      near 0.1
       children [
-        Pose {
-          translation -0.05 0 0
-          rotation 0 -1 0 1.5708
-          children [
-            Shape {
-              appearance PBRAppearance {
-                baseColor 0.8 0.8 0.8
-                roughness 1
-                metalness 0
-              }
-              geometry Cylinder {
-                height 0.1
-                radius 0.04
-              }
-            }
-          ]
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.05 0.05 0.05
+            metalness 0.3
+            roughness 0.5
+          }
+          geometry Box {
+            size 0.04 0.03 0.03
+          }
         }
       ]
-      fieldOfView 1
-      width 840
-      height 480
+    }
+    Radar {
+      translation -0.48 -0.06 -0.09
+      rotation 0 0 1 0
+      name "radar"
+      minRange 0.2
+      maxRange 250
+      horizontalFieldOfView 1.57
+      verticalFieldOfView 0.3
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.08 0.08 0.08
+            metalness 0.1
+            roughness 0.7
+          }
+          geometry Box {
+            size 0.032 0.09 0.07
+          }
+        }
+      ]
     }
   ]
   sensorsSlotTop [
-    Compass {
-      translation 0.4 0 0.3
-    }
-    InertialUnit {
-      translation 0.4 0 0.3
-      name "inertial_unit"
-    }
-    Accelerometer {
-      translation 0.4 0 0
-    }
-    Gyro {
+    Lidar {
+      translation -1.29 0 -0.07
+      rotation 0 0 1 0
+      name "lidar"
+      type "rotating"
+      horizontalResolution 1800
+      fieldOfView 6.283185307
+      verticalFieldOfView 0.5236
+      numberOfLayers 16
+      near 0.05
+      minRange 0.3
+      maxRange 100
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.03 0.03 0.03
+            metalness 0.6
+            roughness 0.3
+          }
+          geometry Cylinder {
+            height 0.0717
+            radius 0.0517
+          }
+        }
+      ]
     }
     GPS {
-      translation 0.4 0 0.3
+      translation -1.6 0 -0.27
+      rotation 0 0 1 0
+      name "gps"
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.05 0.05 0.05
+            metalness 0.2
+            roughness 0.6
+          }
+          geometry Cylinder {
+            height 0.015
+            radius 0.025
+          }
+        }
+      ]
     }
   ]
   sensorsSlotCenter [
-    Radar {
-    }
-    Display {
-      width 200
-      height 160
+      Solid {
+      translation -0.3 0 0.5
+      rotation 0 0 1 0
+      physics Physics {
+        density -1
+        mass 0.2
+      }
+      boundingObject Box {
+        size 0.0574 0.0428 0.0235
+      }
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.12 0.12 0.14
+            metalness 0.6
+            roughness 0.3
+          }
+          geometry Box {
+            size 0.0574 0.0428 0.0235
+          }
+        }
+        InertialUnit {
+          name "imu"
+        }
+        Gyro {
+          name "imu_gyro"
+        }
+        Accelerometer {
+          name "imu_accelerometer"
+        }
+        
+      ]
     }
   ]
 }
+
 PlasticBarrel {
   translation 19.9235 -4.10833 0.1
   name "PlasticBarrel(2)"
