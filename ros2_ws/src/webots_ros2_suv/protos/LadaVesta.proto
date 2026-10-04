@@ -15,6 +15,7 @@ EXTERNPROTO "LadaVestaMesh.proto"
 EXTERNPROTO "LadaVestaInterior.proto"
 EXTERNPROTO "LadaVestaSteeringWheel.proto"
 
+
 PROTO LadaVesta [
   field SFVec3f      translation              0 0 0.4
   field SFRotation   rotation                 0 0 1 0
@@ -112,6 +113,18 @@ PROTO LadaVesta [
       Transform {
         children IS sensorsSlotCenter
       }
+      # Built-in sensor suite (not configurable via a field - see VelodyneVLP16/
+      # ARS408Radar/XsensMti710.proto for body/device details). Positions are
+      # local to the vehicle origin, which sits 0.4m above ground: Velodyne at
+      # x=0 y=0, 1.87m above ground; ARS408 at x=1m y=0, 1.05m above ground;
+      # Xsens at x=0 y=0, 0.5m above the vehicle origin itself.
+      
+      
+      
+      # GPS: roof-mounted, clear of the Velodyne. Camera: windshield-mounted,
+      # facing forward (+x), near the top of the cabin.
+      
+      
       %< if (interior) { >%
           DEF INTERIOR_RIGHT_INDICATOR LED {
             children [

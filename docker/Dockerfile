@@ -69,6 +69,8 @@ RUN echo 'source /opt/ros/humble/setup.bash' >> /root/.bashrc && \
     echo '[ -f /ros2_ws/install/setup.bash ] && source /ros2_ws/install/setup.bash' \
         >> /root/.bashrc && \
     echo "PS1='${debian_chroot:+($debian_chroot)}\[\033[01;31m\]\u@\h\[\033[00m\]:\[\033[01;33m\]\w\[\033[00m\]\$ '" \
+        >> /root/.bashrc && \
+    echo "USERNAME=root" \
         >> /root/.bashrc
 
 WORKDIR /ros2_ws

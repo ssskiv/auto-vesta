@@ -1,1 +1,202 @@
-<robot name="vesta"></robot>
+<?xml version="1.0" ?>
+<robot name="vesta">
+    <link name="base_link"/>
+
+    <!-- Body: the same 3 stacked boxes LadaVesta.proto uses as its boundingObject
+         (hood/cabin/trunk), so this matches the real sim collision geometry. -->
+    <link name="body_link">
+        <visual>
+            <origin xyz="2.6775 0 0.29"/>
+            <geometry><box size="2.0 1.73 0.76"/></geometry>
+        </visual>
+        <visual>
+            <origin xyz="0.5875 0 0.63"/>
+            <geometry><box size="2.14 1.73 1.44"/></geometry>
+        </visual>
+        <visual>
+            <origin xyz="-0.1725 0 0.53"/>
+            <geometry><box size="1.41 1.73 0.78"/></geometry>
+        </visual>
+    </link>
+    <joint name="body_joint" type="fixed">
+        <parent link="base_link"/>
+        <child link="body_link"/>
+    </joint>
+
+    <!-- Wheels: LadaVesta.proto wheelbase=2.648 (rear axle at x=0, front at
+         x=wheelbase), trackFront=trackRear=1.512 (+-0.756 either side of
+         centerline), tireRadius=0.315, thickness=0.2. Wheel center z=-0.085 is
+         an approximation (puts the tire's bottom at world ground level given
+         the vehicle's root sits 0.4m up); the real proto's suspension travel
+         isn't modeled here. Front wheels get a steering joint; rear don't. -->
+    <link name="front_left_steer_link"/>
+    <joint name="front_left_steer_joint" type="revolute">
+        <parent link="base_link"/>
+        <child link="front_left_steer_link"/>
+        <origin xyz="2.648 0.756 -0.085"/>
+        <axis xyz="0 0 1"/>
+        <limit lower="-0.6" upper="0.6" effort="100" velocity="10"/>
+    </joint>
+    <link name="front_left_wheel_link">
+        <visual>
+            <origin rpy="1.5708 0 0"/>
+            <geometry><cylinder radius="0.315" length="0.2"/></geometry>
+        </visual>
+    </link>
+    <joint name="front_left_wheel_joint" type="continuous">
+        <parent link="front_left_steer_link"/>
+        <child link="front_left_wheel_link"/>
+        <axis xyz="0 1 0"/>
+    </joint>
+
+    <link name="front_right_steer_link"/>
+    <joint name="front_right_steer_joint" type="revolute">
+        <parent link="base_link"/>
+        <child link="front_right_steer_link"/>
+        <origin xyz="2.648 -0.756 -0.085"/>
+        <axis xyz="0 0 1"/>
+        <limit lower="-0.6" upper="0.6" effort="100" velocity="10"/>
+    </joint>
+    <link name="front_right_wheel_link">
+        <visual>
+            <origin rpy="1.5708 0 0"/>
+            <geometry><cylinder radius="0.315" length="0.2"/></geometry>
+        </visual>
+    </link>
+    <joint name="front_right_wheel_joint" type="continuous">
+        <parent link="front_right_steer_link"/>
+        <child link="front_right_wheel_link"/>
+        <axis xyz="0 1 0"/>
+    </joint>
+
+    <link name="rear_left_wheel_link">
+        <visual>
+            <origin rpy="1.5708 0 0"/>
+            <geometry><cylinder radius="0.315" length="0.2"/></geometry>
+        </visual>
+    </link>
+    <joint name="rear_left_wheel_joint" type="continuous">
+        <parent link="base_link"/>
+        <child link="rear_left_wheel_link"/>
+        <origin xyz="0 0.756 -0.085"/>
+        <axis xyz="0 1 0"/>
+    </joint>
+
+    <link name="rear_right_wheel_link">
+        <visual>
+            <origin rpy="1.5708 0 0"/>
+            <geometry><cylinder radius="0.315" length="0.2"/></geometry>
+        </visual>
+    </link>
+    <joint name="rear_right_wheel_joint" type="continuous">
+        <parent link="base_link"/>
+        <child link="rear_right_wheel_link"/>
+        <origin xyz="0 -0.756 -0.085"/>
+        <axis xyz="0 1 0"/>
+    </joint>
+
+    <!-- lidar VLP-16: 103.3mm diameter x 71.7mm cylinder, 1.87m above ground
+         (1.47m above base_link, since base_link sits 0.4m above ground). -->
+    <link name="lidar_link">
+        <visual>
+            <geometry>
+                <cylinder radius="0.0517" length="0.0717"/>
+            </geometry>
+        </visual>
+    </link>
+    <joint name="lidar_joint" type="fixed">
+        <parent link="base_link"/>
+        <child link="lidar_link"/>
+        <origin xyz="0.7 0 1.57" rpy="0 0 0"/>
+    </joint>
+
+    <!-- Continental radar-21 radar: ~32x90x70mm box, 1.05m above ground (0.65m
+         above base_link), 1m forward of base_link, on the vehicle centerline. -->
+    <link name="radar_link">
+        <visual>
+            <geometry>
+                <box size="0.032 0.09 0.07"/>
+            </geometry>
+        </visual>
+    </link>
+    <joint name="radar_joint" type="fixed">
+        <parent link="base_link"/>
+        <child link="radar_link"/>
+        <origin xyz="3.53 -0.06 0.35" rpy="0 0 0"/>
+    </joint>
+
+    <!-- Xsens MTi-710: ~57.4x42.8x23.5mm box, 0.5m above base_link. -->
+    <link name="imu_link">
+        <visual>
+            <geometry>
+                <box size="0.0574 0.0428 0.0235"/>
+            </geometry>
+        </visual>
+    </link>
+    <joint name="imu_joint" type="fixed">
+        <parent link="base_link"/>
+        <child link="imu_link"/>
+        <origin xyz="-0.3 0 0.5" rpy="0 0 0"/>
+    </joint>
+
+    <!-- Generic GPS: small antenna puck, roof-mounted, clear of the lidar. -->
+    <link name="gps_link">
+        <visual>
+            <geometry>
+                <cylinder radius="0.025" length="0.015"/>
+            </geometry>
+        </visual>
+    </link>
+    <joint name="gps_joint" type="fixed">
+        <parent link="base_link"/>
+        <child link="gps_link"/>
+        <origin xyz="0.3 0 1.4" rpy="0 0 0"/>
+    </joint>
+
+    <!-- Generic RGB camera: windshield-mounted, facing forward. -->
+    <link name="camera_link">
+        <visual>
+            <geometry>
+                <box size="0.04 0.03 0.03"/>
+            </geometry>
+        </visual>
+    </link>
+    <joint name="camera_joint" type="fixed">
+        <parent link="base_link"/>
+        <child link="camera_link"/>
+        <origin xyz="1.55 0 1.05" rpy="0 0 0"/>
+    </joint>
+
+    <webots>
+        <device reference="gps" type="GPS">
+            <ros>
+                <enabled>true</enabled>
+                <alwaysOn>true</alwaysOn>
+                <updateRate>10</updateRate>
+                <topicName>/gps/fix</topicName>
+                <frameName>gps_link</frameName>
+            </ros>
+        </device>
+        <device reference="rgb_camera" type="Camera">
+            <ros>
+                <enabled>true</enabled>
+                <alwaysOn>true</alwaysOn>
+                <updateRate>30</updateRate>
+                <topicName>/camera/image_raw</topicName>
+                <frameName>camera_link</frameName>
+            </ros>
+        </device>
+
+        <plugin type="webots_ros2_driver::Ros2IMU">
+            <enabled>true</enabled>
+            <alwaysOn>true</alwaysOn>
+            <updateRate>100</updateRate>
+            <topicName>/vesta/imu/data</topicName>
+            <frameName>imu_link</frameName>
+            <inertialUnitName>imu</inertialUnitName>
+            <gyroName>imu_gyro</gyroName>
+            <accelerometerName>imu_accelerometer</accelerometerName>
+        </plugin>
+        <plugin type="webots_ros2_suv.vesta_driver.VestaDriver" />
+    </webots>
+</robot>

@@ -1,26 +1,13 @@
 #!/usr/bin/env bash
 # =========================================================================
-# RU: Запуск симуляции робота одной командой.
-#     Скрипт сам определяет видеокарту, настраивает доступ к дисплею,
-#     собирает образ при первом запуске и стартует симуляцию.
 #
-#     ./start.sh              запустить симуляцию с окном Gazebo
+#     ./start.sh              запустить контейнер 
 #     ./start.sh --headless   без графики, только API (быстрее)
 #     ./start.sh --shell      оболочка внутри контейнера
 #     ./start.sh --rebuild    пересобрать образ с нуля
 #     ./start.sh --stop       остановить
 #     ./start.sh --gpu amd    задать видеокарту вручную
-#
-# EN: Launch the simulation with a single command.
-#     The script detects the GPU, configures display access, builds the
-#     image on first run and starts the simulation.
-#
-#     ./start.sh              run the simulation with a Gazebo window
-#     ./start.sh --headless   no graphics, API only (faster)
-#     ./start.sh --shell      shell inside the container
-#     ./start.sh --rebuild    rebuild the image from scratch
-#     ./start.sh --stop       stop everything
-#     ./start.sh --gpu amd    select the GPU manually
+
 # =========================================================================
 set -uo pipefail
 
