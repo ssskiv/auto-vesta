@@ -5,3 +5,7 @@ log/
 __pycache__/
 *.pyc
 virtual/
+# RL training outputs
+ros2_ws/src/vesta_rl/runs/
+ros2_ws/src/vesta_rl/runs_backup/
+ros2_ws/src/vesta_rl/data/pool/previews/

@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Нейросетевой контроллер Lada Vesta</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+  onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});document.body.dataset.ready='1'"></script>
+<style>
+  @page { size: 1280px 720px; margin: 0; }
+  :root { --ink:#111827; --muted:#4b5563; --accent:#1d4ed8; --accent2:#ea580c; --soft:#eff6ff; --soft2:#fff7ed; --line:#e5e7eb; --ok:#15803d; --bad:#b91c1c; }
+  * { box-sizing: border-box; }
+  html, body { margin:0; padding:0; background:#fff; color:var(--ink); font-family:'DejaVu Sans','Liberation Sans',Arial,sans-serif; }
+  .slide { width:1280px; height:720px; padding:46px 60px 40px; position:relative; overflow:hidden; page-break-after:always; break-after:page; }
+  .slide:last-child { page-break-after:auto; }
+  .sec { font-size:13px; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); font-weight:700; margin-bottom:4px; }
+  h1 { font-size:34px; margin:0 0 18px; line-height:1.15; }
+  h2 { font-size:22px; margin:14px 0 8px; color:var(--accent); }
+  p, li { font-size:18.5px; line-height:1.42; margin:0 0 8px; }
+  ul, ol { margin:0 0 6px 0; padding-left:26px; }
+  li { margin-bottom:5px; }
+  .small, .small li, .small p { font-size:15.5px; }
+  .tiny, .tiny li, .tiny p, .tiny td, .tiny th { font-size:13.5px; }
+  .muted { color:var(--muted); }
+  .cols { display:flex; gap:34px; }
+  .cols > * { flex:1; min-width:0; }
+  .w40 { flex:0 0 40% !important; } .w60 { flex:0 0 57% !important; } .w35 { flex:0 0 35% !important; } .w65 { flex:0 0 62% !important; }
+  .note { background:var(--soft2); border-left:5px solid var(--accent2); padding:10px 16px; border-radius:6px; margin:10px 0; }
+  .note p, .note li { font-size:16.5px; margin-bottom:4px; }
+  .note b.t { color:var(--accent2); }
+  .box { background:var(--soft); border-left:5px solid var(--accent); padding:10px 16px; border-radius:6px; margin:10px 0; }
+  .box p, .box li { font-size:16.5px; }
+  table { border-collapse:collapse; width:100%; margin:6px 0; }
+  th, td { border-bottom:1px solid var(--line); padding:5px 8px; text-align:left; font-size:15.5px; vertical-align:top; }
+  th { background:#f3f4f6; }
+  img { max-width:100%; display:block; margin:0 auto; }
+  .foot { position:absolute; bottom:14px; left:60px; right:60px; display:flex; justify-content:space-between; font-size:12px; color:#9ca3af; }
+  .katex-display { margin:8px 0 !important; }
+  .katex { font-size:1.05em; }
+  code { font-family:'DejaVu Sans Mono',monospace; font-size:.88em; background:#f3f4f6; padding:1px 5px; border-radius:4px; }
+  pre { background:#0f172a; color:#e2e8f0; padding:12px 16px; border-radius:8px; font-size:13.5px; line-height:1.45; white-space:pre-wrap; margin:6px 0; }
+  .title { background:linear-gradient(135deg,#0f172a 0%,#1e3a8a 100%); color:#fff; }
+  .title h1 { font-size:46px; margin-top:120px; }
+  .title p { font-size:22px; color:#cbd5e1; }
+  .flow { display:flex; align-items:center; gap:10px; flex-wrap:nowrap; }
+  .node { border:2px solid var(--accent); border-radius:10px; padding:8px 12px; font-size:14.5px; background:#fff; text-align:center; line-height:1.3; }
+  .node.o { border-color:var(--accent2); }
+  .node.g { border-color:var(--ok); }
+  .node.k { border-color:#6b7280; }
+  .arrow { font-size:26px; color:#6b7280; }
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:10px 26px; }
+  .tag { display:inline-block; padding:1px 8px; border-radius:10px; font-size:13px; background:#e0e7ff; color:#3730a3; margin-right:4px; }
+  .center { text-align:center; }
+  .big { font-size:21px; }
+</style>
+</head>
+<body>
+
+<!-- 1 -->
+<section class="slide title">
+  <h1>Нейросетевой локальный планировщик<br>и контроллер для автономной Lada Vesta</h1>
+  <p>Обучение с подкреплением в симуляции, интеграция в ROS&nbsp;2 Nav2<br>и архитектура «нейросеть + классический контроллер» по схеме ровера Яндекса</p>
+  <p style="margin-top:60px;font-size:17px">Проект <b>auto-vesta</b>, ветка <code style="background:#1e293b;color:#e2e8f0">sim</code> · Webots + ROS&nbsp;2 Humble · октябрь 2026</p>
+</section>
+
+<!-- 2 -->
+<section class="slide">
+  <div class="sec">Содержание</div>
+  <h1>План доклада</h1>
+  <div class="cols">
+    <ol>
+      <li><b>Постановка задачи</b> и референс (ровер Яндекса)</li>
+      <li><b>Архитектура системы</b>: ROS 2, Nav2, системы координат, костмапы</li>
+      <li><b>Модель автомобиля</b>: кинематика и динамика приводов</li>
+      <li><b>Формализация RL</b>: наблюдение, действие, награда</li>
+      <li><b>Обучение</b>: политика, сеть, PPO, GAE, разминка</li>
+    </ol>
+    <ol start="6">
+      <li><b>2D-симулятор</b>: лидар, костмапа, процедурные трассы, рандомизация, учебный план</li>
+      <li><b>Внедрение</b>: плагин Nav2, арбитр, ONNX, проверка согласованности</li>
+      <li><b>Эксперименты</b>: история обучения, метрики, найденные проблемы</li>
+      <li><b>Ограничения и дальнейшие шаги</b>, запуск, глоссарий</li>
+    </ol>
+  </div>
+  <div class="note"><p><b class="t">Как читать.</b> Основной текст написан строго. Оранжевые блоки «простыми словами» объясняют то же для тех, кто не сталкивался с робототехникой или обучением с подкреплением. В конце есть глоссарий терминов.</p></div>
+  <div class="foot"><span>auto-vesta · RL controller</span><span>2</span></div>
+</section>
+
+<!-- 3 -->
+<section class="slide">
+  <div class="sec">1 · Постановка задачи</div>
+  <h1>Что нужно сделать</h1>
+  <div class="cols">
+    <div>
+      <h2>Дано</h2>
+      <ul>
+        <li>Автомобиль Lada Vesta в симуляторе <b>Webots</b> с лидаром VLP-16, GPS, IMU, радаром.</li>
+        <li>Карта трассы <b>robocross</b>: сетка занятости, записанная SLAM.</li>
+        <li>Глобальный путь от планировщика Nav2 (SmacPlannerHybrid).</li>
+        <li>Сигналы: одометрия <code>/odom</code>, локальная и глобальная <b>костмапы</b>. Камера <b>не используется</b>.</li>
+      </ul>
+    </div>
+    <div>
+      <h2>Требуется</h2>
+      <ul>
+        <li>Одна нейросеть, которая заменяет <b>локальный планировщик и контроллер</b>: по входам выдаёт команду скорости и руля 10 раз в секунду.</li>
+        <li>Обучение — <b>с подкреплением</b> (RL), выход — непосредственно <code>cmd_vel</code>.</li>
+        <li>Безопасность: команда не должна вести в препятствие, даже если сеть ошибается.</li>
+        <li>Учёт кинематики: машина не разворачивается на месте, $R_{\min}\approx 3.9$ м.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="note"><p><b class="t">Простыми словами.</b> Планировщик пути уже есть: он рисует «линию», по которой ехать. Нужен «водитель», который смотрит на карту препятствий вокруг и на эту линию и решает, сколько газа и куда руль. Этого водителя учим не правилами, а пробами и ошибками в симуляторе.</p></div>
+  <div class="foot"><span>auto-vesta · RL controller</span><span>3</span></div>
+</section>
+
+<!-- 4 -->
+<section class="slide">
+  <div class="sec">1 · Референс</div>
+  <h1>Схема ровера Яндекса</h1>
+  <div class="cols">
+    <div class="w60">
+      <ul>
+        <li>Роботы-доставщики Яндекса (2026): <b>нейросетевой планировщик (трансформер)</b> работает <b>параллельно</b> с алгоритмическим.</li>
+        <li>Каждый предлагает свою траекторию; выбирается лучшая <b>безопасная</b>. Нейросеть управляет ~80% пути.</li>
+        <li>Обучение — в симуляторе, суммарно «тысячи лет» виртуальной езды.</li>
+        <li>Глобальный маршрут — A* по HD-карте, восприятие — сетка занятости, контроль — PID + Pure Pursuit.</li>
+      </ul>
+      <h2>Как это перенесено на наш проект</h2>
+      <table class="small">
+        <tr><th>Ровер Яндекса</th><th>Наш проект</th></tr>
+        <tr><td>A* по HD-карте</td><td>Nav2 SmacPlannerHybrid по статической карте</td></tr>
+        <tr><td>Сетка занятости</td><td>local / global costmap Nav2 (лидар)</td></tr>
+        <tr><td>Нейропланировщик</td><td>RL-политика (CNN + MLP, ONNX)</td></tr>
+        <tr><td>Алгоритмический планировщик</td><td>Regulated Pure Pursuit (RPP)</td></tr>
+        <tr><td>Выбор лучшей траектории</td><td>Арбитр: прогон обеих команд на 2 с по костмапе</td></tr>
+        <tr><td>Симулятор</td><td>Свой 2D-симулятор + Webots для проверки</td></tr>
+      </table>
+    </div>
+    <div class="w40">
+      <div class="box"><p><b>Источник:</b> Хабр, «Роботы-доставщики Яндекса стали привозить заказы быстрее с помощью планировщика движения на основе нейросети» (2026); «Как устроен робот-доставщик Яндекса» (2024).</p></div>
+      <div class="note"><p><b class="t">Почему два «водителя».</b> Нейросеть лучше в нестандартных ситуациях, но может ошибиться. Классический алгоритм предсказуем, но консервативен. Арбитр берёт решение сети, только если оно не ведёт в столкновение — это даёт безопасность без отказа от обучения.</p></div>
+    </div>
+  </div>
+  <div class="foot"><span>auto-vesta · RL controller</span><span>4</span></div>
+</section>
+
+<!-- 5 -->
+<section class="slide">
+  <div class="sec">2 · Архитектура</div>
+  <h1>Архитектура системы управления</h1>
+  <div class="flow" style="margin:6px 0 16px">
+    <div class="node k">Webots<br><span class="tiny">физика, сенсоры</span></div><div class="arrow">→</div>
+    <div class="node">vesta_driver<br><span class="tiny">/odom, TF, /lidar</span></div><div class="arrow">→</div>
+    <div class="node">local_costmap<br><span class="tiny">лидар + inflation</span></div><div class="arrow">→</div>
+    <div class="node o">NeuralController<br><span class="tiny">плагин controller_server</span></div><div class="arrow">→</div>
+    <div class="node">/cmd_vel</div><div class="arrow">→</div>
+    <div class="node">vesta_driver<br><span class="tiny">газ, руль в Webots</span></div>
+  </div>
+  <div class="flow" style="margin:0 0 16px;justify-content:center">
+    <div class="node">map_server<br><span class="tiny">карта robocross</span></div><div class="arrow">→</div>
+    <div class="node">global_costmap</div><div class="arrow">→</div>
+    <div class="node">planner_server<br><span class="tiny">SmacHybrid</span></div><div class="arrow">→</div>
+    <div class="node">глобальный путь</div><div class="arrow">→</div>
+    <div class="node o">NeuralController</div>
+  </div>
+  <div class="cols small">
+    <div>
+      <h2>Внутри NeuralController (10 Гц)</h2>
+      <ol>
+        <li>Строит наблюдение: патч костмапы + путь + состояние.</li>
+        <li><b>Нейросеть</b> (ONNX Runtime) → команда $(v,\delta)_{NN}$.</li>
+        <li><b>RPP</b> (вложенный плагин) → команда $(v,\delta)_{RPP}$.</li>
+        <li>Обе проигрываются 2 с по модели машины на костмапе.</li>
+        <li>Выбирается NN / RPP / STOP, публикуется <code>cmd_vel</code>.</li>
+      </ol>
+    </div>
+    <div>
+      <h2>Где учится нейросеть</h2>
+      <ul>
+        <li>Пакет <code>vesta_rl</code>: свой быстрый 2D-симулятор, PPO, экспорт в ONNX.</li>
+        <li>Тот же код наблюдения на Python и C++ (проверяется тестом).</li>
+        <li>Webots — для калибровки, дообучения и итоговой проверки.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="foot"><span>auto-vesta · RL controller</span><span>5</span></div>
+</section>
+
+<!-- 6 -->
+<section class="slide">
+  <div class="sec">2 · Инструменты</div>
+  <h1>Программный стек</h1>
+  <table>
+    <tr><th style="width:22%">Компонент</th><th>Роль</th><th style="width:36%">Простыми словами</th></tr>
+    <tr><td><b>ROS 2 Humble</b></td><td>Middleware: процессы-«узлы» обмениваются сообщениями по «топикам» (publish/subscribe), сервисы, параметры, TF-дерево систем координат.</td><td class="muted">«Шина», по которой программы робота передают данные друг другу.</td></tr>
+    <tr><td><b>Webots</b></td><td>Физический 3D-симулятор: модель автомобиля, лидар, GPS, IMU, мир трассы.</td><td class="muted">Виртуальный полигон с реалистичной физикой.</td></tr>
+    <tr><td><b>Nav2</b></td><td>Стек навигации ROS 2: map_server, costmap_2d, planner_server, controller_server, lifecycle-менеджер, плагины.</td><td class="muted">Готовая «навигационная система», в которую мы встраиваем своего водителя.</td></tr>
+    <tr><td><b>PyTorch + Stable-Baselines3</b></td><td>Нейросети и реализация алгоритма PPO.</td><td class="muted">Библиотеки для обучения сетей.</td></tr>
+    <tr><td><b>Gymnasium</b></td><td>Стандартный интерфейс среды RL: <code>reset()</code>, <code>step(a) → (s', r, done)</code>.</td><td class="muted">Договорённость, как «тренажёр» общается с учеником.</td></tr>
+    <tr><td><b>ONNX / ONNX Runtime</b></td><td>Переносимый формат обученной сети и быстрый инференс из C++.</td><td class="muted">Сеть, «сохранённая» так, чтобы её мог запустить C++-код без Python.</td></tr>
+    <tr><td><b>Docker</b></td><td>Воспроизводимое окружение: ROS, Webots, onnxruntime, PyTorch.</td><td class="muted">Готовая «коробка» со всеми зависимостями.</td></tr>
+  </table>
+  <div class="foot"><span>auto-vesta · RL controller</span><span>6</span></div>
+</section>
+
+<!-- 7 -->
+<section class="slide">
+  <div class="sec">2 · Системы координат</div>
+  <h1>Фреймы map → odom → base_link</h1>
+  <div class="cols">
+    <div class="w60">
+      <ul>
+        <li><b>base_link</b> — система машины: начало на задней оси, $x$ вперёд, $y$ влево, $z$ вверх.</li>
+        <li><b>odom</b> — локально непрерывный фрейм одометрии. Драйвер считает
+          $$\mathbf{p}_{odom}=\mathbf{p}_{GPS}(t)-\mathbf{p}_{GPS}(0),\qquad \psi=\operatorname{atan2}\!\big(2(wz+xy),\,1-2(y^2+z^2)\big),$$
+          где $(w,x,y,z)$ — кватернион IMU. Скорость — проекция вектора скорости GPS на курс:
+          $v=\dot{\mathbf p}_{GPS}\cdot(\cos\psi,\sin\psi)$ (со знаком, назад — отрицательная).</li>
+        <li><b>map</b> — фрейм карты. Поскольку odom строится от GPS и <b>не дрейфует</b>, а карта записана от той же точки старта, преобразование $map\to odom$ — <b>статическое единичное</b> (параметры смещения задаются аргументами launch).</li>
+      </ul>
+    </div>
+    <div class="w40">
+      <div class="note"><p><b class="t">Простыми словами.</b> «Где машина» можно описывать относительно разных начал отсчёта. TF-дерево — это «таблица пересчёта» между ними. Обычная одометрия по колёсам постепенно «уплывает», поэтому в Nav2 есть отдельный локализатор (AMCL). У нас положение берётся из GPS — оно не накапливает ошибку, поэтому локализатор не нужен.</p></div>
+      <div class="box"><p>Глобальная костмапа и путь живут в <code>map</code>, локальная костмапа — в <code>odom</code>, команды сети — в <code>base_link</code>.</p></div>
+    </div>
+  </div>
+  <div class="foot"><span>auto-vesta · RL controller</span><span>7</span></div>
+</section>
+
+<!-- 8 -->
+<section class="slide">
+  <div class="sec">2 · Восприятие</div>
+  <h1>Костмапы и раздувание препятствий</h1>
+  <div class="cols">
+    <div>
+      <ul class="small">
+        <li><b>Сетка занятости</b>: плоскость разбита на клетки $h\times h$ ($h=0.1$–$0.2$ м), у каждой стоимость $c\in\{0,\dots,254\}$, 255 — «неизвестно».</li>
+        <li><b>global_costmap</b> (фрейм map): статическая карта + раздувание. По ней строится глобальный путь.</li>
+        <li><b>local_costmap</b> (фрейм odom, окно 30×30 м вокруг машины): отметки лидара (точки облака на высоте 0–1.6 м над землёй) + раздувание. Её видит сеть.</li>
+        <li><b>Раздувание</b> (InflationLayer) по расстоянию $d$ до ближайшей занятой клетки:
+        $$c(d)=\begin{cases}254,& d=0\\253,& d\le r_{ins}\\ \lfloor 252\,e^{-k(d-r_{ins})}\rfloor,& d\le r_{inf}\\ 0,& \text{иначе}\end{cases}$$
+        $r_{ins}=0.9$ м (вписанный радиус машины), $r_{inf}=2.0$ м, $k=2$.</li>
+      </ul>
+    </div>
+    <div>
+      <img src="img/fig_inflation.png" style="height:300px">
+      <div class="note"><p><b class="t">Простыми словами.</b> Вокруг каждого препятствия рисуется «ореол»: чем ближе к препятствию, тем «дороже» клетка. Так машину можно считать точкой: если её центр попал в клетку 253, корпус уже касается препятствия.</p></div>
+    </div>
+  </div>
+  <div class="foot"><span>auto-vesta · RL controller</span><span>8</span></div>
+</section>
+
+<!-- 9 -->
+<section class="slide">
+  <div class="sec">3 · Модель автомобиля</div>
+  <h1>Кинематическая велосипедная модель</h1>
+  <div class="cols">
+    <div class="w60">
+      <p>Два колеса каждой оси заменяются одним («велосипед»). Состояние — положение задней оси $(x,y)$, курс $\psi$, скорость $v$, угол руля $\delta$:</p>
+      $$\dot x=v\cos\psi,\qquad \dot y=v\sin\psi,\qquad \dot\psi=\frac{v\tan\delta}{L}.$$
+      <p>$L=2.648$ м (колёсная база Весты), $|\delta|\le\delta_{\max}=0.6$ рад. Мгновенный центр поворота лежит на продолжении задней оси на расстоянии
+      $$R=\frac{L}{\tan\delta},\qquad R_{\min}=\frac{L}{\tan 0.6}\approx 3.9\ \text{м}.$$</p>
+      <p class="small">Связь с командой ROS <code>Twist</code>: $\omega=\dot\psi=v\tan\delta/L$. Драйвер выполняет обратное преобразование $\delta=\arctan(\omega L/v)$. Нюанс: используется $\arctan$, а не $\operatorname{atan2}$, иначе при $v<0$ получается $\delta\approx\pm\pi$ и полный выворот руля — это был реальный найденный баг.</p>
+    </div>
+    <div class="w40">
+      <img src="img/fig_bicycle.png" style="height:330px">
+    </div>
+  </div>
+  <div class="note"><p><b class="t">Простыми словами.</b> Машина не может повернуть на месте: при максимально вывернутом руле она едет по окружности радиусом ~3.9 м. Эти три уравнения — всё, что нужно, чтобы предсказать, куда она приедет при заданных газе и руле.</p></div>
+  <div class="foot"><span>auto-vesta · RL controller</span><span>9</span></div>
+</section>
+
+<!-- 10 -->
+<section class="slide">
+  <div class="sec">3 · Модель автомобиля</div>
+  <h1>Динамика приводов: инерционное звено с насыщением</h1>
+  <div class="cols">
+    <div>
+      <p>Скорость и руль не отрабатывают команду мгновенно. Моделируем апериодическим звеном 1-го порядка с ограничением скорости изменения:</p>
+      $$\dot v=\operatorname{sat}_{a_{\max}}\!\Big(\frac{v_{cmd}-v}{\tau_v}\Big),\qquad \dot\delta=\operatorname{sat}_{\dot\delta_{\max}}\!\Big(\frac{\delta_{cmd}-\delta}{\tau_\delta}\Big).$$
+      <p class="small">Интегрирование — явный метод Эйлера с шагом $h=0.02$ с (5 подшагов на такт управления $\Delta t=0.1$ с). Номинал: $\tau_v=0.6$ с, $a_{\max}=2.5$ м/с², $\tau_\delta=0.1$ с, $\dot\delta_{\max}=1$ рад/с.</p>
+      <p class="small">Параметры <b>случайны в каждом эпизоде</b> (серые кривые) — это доменная рандомизация. Для точной подстройки к Webots есть <code>calibrate.py</code>: подаёт ступенчатые команды, записывает $v(t),\omega(t)$ и подбирает $(\tau_v,a_{\max},\tau_\delta,\dot\delta_{\max})$ поиском по сетке минимизацией СКО.</p>
+    </div>
+    <div>
+      <img src="img/fig_lag.png" style="height:255px">
+      <div class="note"><p><b class="t">Простыми словами.</b> Нажали газ — машина разгоняется не сразу, повернули руль — колёса доворачиваются за доли секунды. Сеть должна это учитывать, иначе будет «запаздывать» в поворотах.</p></div>
+    </div>
+  </div>
+  <div class="foot"><span>auto-vesta · RL controller</span><span>10</span></div>
+</section>
+
+<!-- 11 -->
+<section class="slide">
+  <div class="sec">4 · Формализация RL</div>
+  <h1>Задача как частично наблюдаемый марковский процесс</h1>
+  <div class="cols">
+    <div class="w60">
+      <p>Среда — MDP $\langle\mathcal S,\mathcal A,P,r,\gamma\rangle$: состояние $s_t$ (полная сцена), действие $a_t$, переход $s_{t+1}\sim P(\cdot\mid s_t,a_t)$, награда $r_t=r(s_t,a_t,s_{t+1})$. Агент видит лишь <b>наблюдение</b> $o_t=O(s_t)$ (локальную костмапу и путь) — это POMDP.</p>
+      <p>Ищется стохастическая политика $\pi_\theta(a\mid o)$, максимизирующая ожидаемый дисконтированный возврат:</p>
+      $$J(\theta)=\mathbb E_{\tau\sim\pi_\theta}\Big[\sum_{t=0}^{T}\gamma^t r_t\Big],\qquad \gamma=0.99.$$
+      <p class="small">Эффективный горизонт $1/(1-\gamma)=100$ тактов $=10$ с: сеть «думает» примерно на 10 секунд вперёд. Функции ценности: $V^\pi(s)=\mathbb E[\sum_k\gamma^k r_{t+k}\mid s_t=s]$, $Q^\pi(s,a)$, преимущество $A^\pi=Q^\pi-V^\pi$.</p>
+    </div>
+    <div class="w40">
+      <div class="note"><p><b class="t">Простыми словами.</b> Каждые 0.1 с сеть видит картинку вокруг и линию пути, выбирает газ и руль, получает «очки» (награду). Цель — набрать как можно больше очков за поездку. Очки за ближайшее будущее ценятся больше, чем за далёкое (множитель $\gamma$).</p></div>
+      <div class="box"><p><b>Эпизод</b> — одна поездка по случайному пути от старта до цели (или до аварии / ухода с пути / застревания / тайм-аута).</p></div>
+    </div>
+  </div>
+  <div class="foot"><span>auto-vesta · RL controller</span><span>11</span></div>
+</section>
+
+<!-- 12 -->
+<section class="slide">
+  <div class="sec">4 · Наблюдение</div>
+  <h1>Что видит сеть: $o_t=\{\text{costmap}\in[0,1]^{1\times64\times64},\ \text{vec}\in\mathbb R^{47}\}$</h1>
+  <table class="small">
+    <tr><th style="width:26%">Компонента</th><th style="width:10%">Размер</th><th>Определение и нормировка</th></tr>
+    <tr><td>Патч костмапы</td><td>64×64</td><td>Квадрат 16×16 м в осях машины: $x\in[-4,12)$, $y\in[-8,8)$, шаг 0.25 м. Значение $c/254$, «неизвестно» = 0.5.</td></tr>
+    <tr><td>Точки пути</td><td>2×20</td><td>Точки глобального пути на дуговом расстоянии 1, 2, …, 20 м впереди проекции машины, в base_link, делённые на 20 м.</td></tr>
+    <tr><td>До цели</td><td>1</td><td>$\min(1,\ (L_{path}-s)/50)$.</td></tr>
+    <tr><td>Скорость, рысканье</td><td>2</td><td>$v/v_{\max}$, $\omega$ (рад/с) — из <code>/odom</code>.</td></tr>
+    <tr><td>Прошлая команда</td><td>2</td><td>$v_{t-1}/v_{\max}$, $\delta_{t-1}/\delta_{\max}$ — сеть знает, что «уже нажато».</td></tr>
+    <tr><td>Ошибки слежения</td><td>2</td><td>Боковое отклонение $\operatorname{clip}(e_y/5,\pm1)$, ошибка курса $e_\psi/\pi$.</td></tr>
+  </table>
+  <div class="cols">
+    <div class="box"><p><b>Эгоцентричность.</b> Всё выражено относительно машины, глобальных координат сеть не видит. Поэтому она не может «запомнить трассу» — только научиться реагировать на локальную картину. Это ключ к обобщению на новые трассы.</p></div>
+    <div class="note"><p><b class="t">Простыми словами.</b> Сеть получает «картинку радара сверху» 64×64 и 47 чисел про путь и свою скорость. Всего 4143 числа 10 раз в секунду.</p></div>
+  </div>
+  <div class="foot"><span>auto-vesta · RL controller</span><span>12</span></div>
+</section>
+
+<!-- 13 -->
+<section class="slide">
+  <div class="sec">4 · Наблюдение</div>
+  <h1>Патч костмапы: преобразование координат</h1>
+  <div class="cols">
+    <div class="w40">
+      <p>Центр клетки $(i,j)$ патча в base_link:</p>
+      $$\mathbf b_{ij}=\big(x_{\min}+(i+\tfrac12)h_p,\ \ y_{\min}+(j+\tfrac12)h_p\big).$$
+      <p>Перевод в фрейм костмапы при позе $(x,y,\psi)$:</p>
+      $$\mathbf w_{ij}=\begin{pmatrix}x\\y\end{pmatrix}+R(\psi)\,\mathbf b_{ij},\quad R(\psi)=\begin{pmatrix}\cos\psi&-\sin\psi\\ \sin\psi&\cos\psi\end{pmatrix}.$$
+      <p>Индекс клетки костмапы: $m=\lfloor(\mathbf w-\mathbf o)/h\rfloor$ ($\mathbf o$ — угол карты). Значение — $c_m/254$ (ближайший сосед).</p>
+      <p class="small muted">Строка $i$ — вперёд, столбец $j$ — влево; патч поворачивается вместе с машиной.</p>
+    </div>
+    <div class="w60">
+      <img src="img/viewer3.png" style="height:360px">
+      <p class="tiny muted center">Просмотрщик: слева мир (тёмное — карта, коричневое — случайные препятствия, красное — отметки лидара, синее — раздувание, пунктир — область патча), справа — ровно то, что получает сеть.</p>
+    </div>
+  </div>
+  <div class="foot"><span>auto-vesta · RL controller</span><span>13</span></div>
+</section>
+
+<!-- 14 -->
+<section class="slide">
+  <div class="sec">4 · Наблюдение</div>
+  <h1>Проекция на путь (PathTracker)</h1>
+  <div class="cols">
+    <div class="w60">
+      <p>Путь — ломаная $\{\mathbf p_k\}$ с накопленной длиной $s_k$. Для отрезка $[\mathbf a,\mathbf b]$ ближайшая к машине $\mathbf q$ точка:</p>
+      $$t^*=\operatorname{clip}\!\Big(\frac{(\mathbf q-\mathbf a)\cdot(\mathbf b-\mathbf a)}{\|\mathbf b-\mathbf a\|^2},0,1\Big),\quad \mathbf q^*=\mathbf a+t^*(\mathbf b-\mathbf a),$$
+      $$s=s_k+t^*\|\mathbf b-\mathbf a\|.$$
+      <p>Минимум $\|\mathbf q-\mathbf q^*\|^2$ ищется только по отрезкам от последнего найденного индекса до $s_{idx}+10$ м — <b>окно поиска</b>.</p>
+      <ul class="small">
+        <li>$e_y$ — $y$-координата $\mathbf q^*$ в base_link (влево +), $e_\psi=\operatorname{wrap}(\theta_{seg}-\psi)$.</li>
+        <li>Точки входа: $\mathbf p(s+k\cdot 1\text{ м})$, $k=1..20$, линейная интерполяция, за концом — последняя точка.</li>
+        <li>$\operatorname{wrap}(\alpha)=((\alpha+\pi)\bmod 2\pi)-\pi$ — именно с питоновской семантикой $\bmod$ (знак делителя), что повторено в C++.</li>
+      </ul>
+    </div>
+    <div class="w40">
+      <div class="note"><p><b class="t">Зачем окно.</b> На трассе путь может проходить рядом сам с собой (параллельные участки, шпильки). Без окна машина «перепрыгнула» бы на чужой участок, оказавшийся ближе. Окно заставляет двигаться по пути вперёд монотонно.</p></div>
+      <div class="note"><p><b class="t">Простыми словами.</b> Находим «где мы на линии пути» (сколько метров проехали) и насколько сбились вбок и по курсу.</p></div>
+    </div>
+  </div>
+  <div class="foot"><span>auto-vesta · RL controller</span><span>14</span></div>
+</section>
+
+<!-- 15 -->
+<section class="slide">
+  <div class="sec">4 · Действие</div>
+  <h1>Пространство действий</h1>
+  <div class="cols">
+    <div class="w60">
+      <p>Сеть выдаёт $a=(a_v,a_\delta)\in[-1,1]^2$. Отображение в команду:</p>
+      $$\delta_{cmd}=\delta_{\max}\,a_\delta,\qquad v_{cmd}=v_{lim}(s)\cdot\frac{a_v+1}{2},$$
+      <p>где $v_{lim}(s)$ — <b>лимит скорости по пути</b> (следующий слайд). Затем ограничение скорости изменения за такт:</p>
+      $$|v_{cmd}-v_{t-1}|\le0.3\ \text{м/с},\qquad |\delta_{cmd}-\delta_{t-1}|\le0.1\ \text{рад},$$
+      <p>и перевод в <code>Twist</code>: $\ \texttt{linear.x}=v_{cmd},\ \ \texttt{angular.z}=v_{cmd}\tan\delta_{cmd}/L$.</p>
+      <p class="small">Только вперёд ($v\ge0$): задний ход не нужен на трассе и усложняет задачу.</p>
+    </div>
+    <div class="w40">
+      <div class="box"><p><b>Эволюция решения.</b> Изначально $v_{cmd}=v_{\max}(a_v+1)/2$. Сеть не научилась тормозить в поворотах из-за <b>насыщения действия</b> (раздел 8). Итог: газ — <b>доля допустимой скорости</b>; $a_v=1$ означает «ехать ровно на лимите», превысить его невозможно по построению.</p></div>
+      <div class="note"><p><b class="t">Простыми словами.</b> Руль — от −0.6 до 0.6 рад. Газ — «сколько процентов от безопасной скорости для этого места пути». Безопасную скорость считает не сеть, а формула.</p></div>
+    </div>
+  </div>
+  <div class="foot"><span>auto-vesta · RL controller</span><span>15</span></div>
+</section>
+
+<!-- 16 -->
+<section class="slide">
+  <div class="sec">4 · Действие</div>
+  <h1>Лимит скорости по пути $v_{lim}(s)$</h1>
+  <div class="cols">
+    <div class="w40">
+      <p class="small">Боковое ускорение в повороте кривизны $\kappa$: $a_{lat}=v^2\kappa\le a_{lat}^{\max}=2$ м/с², откуда</p>
+      $$v_{curve}(\kappa)=\sqrt{a_{lat}^{\max}/|\kappa|}.$$
+      <p class="small">Чтобы успеть затормозить с замедлением $a_{dec}=2$ м/с² до поворота на расстоянии $d$: $v\le\sqrt{v_{curve}^2+2a_{dec}d}$ (равнозамедленное движение). Аналогично к финишу со скоростью $v_{goal}=1$ м/с. Итог:</p>
+      $$\begin{aligned}v_{lim}(s)=\min\Big\{&v_{\max},\ \sqrt{v_{goal}^2+2a_{dec}(L-s)},\\ &\min_{k}\sqrt{v_{curve}(\kappa_k)^2+2a_{dec}d_k}\ \Big\}\end{aligned}$$
+      <p class="tiny">$\kappa_k=|\operatorname{wrap}(\theta_{k+1}-\theta_k)|/\Delta$ по точкам пути с шагом $\Delta=1$ м на 12 м вперёд, $d_k=(k-1)\Delta$.</p>
+    </div>
+    <div class="w60">
+      <img src="img/fig_speedlimit.png" style="height:255px">
+      <div class="note"><p><b class="t">Простыми словами.</b> Перед крутым поворотом (R=4.5 м) лимит плавно падает с 5 до 3 м/с, а у финиша — до 1 м/с. Это «правило из учебника вождения», вычисляемое по форме пути. Одна и та же функция работает в Python (обучение) и C++ (плагин); совпадение проверено до $10^{-9}$.</p></div>
+    </div>
+  </div>
+  <div class="foot"><span>auto-vesta · RL controller</span><span>16</span></div>
+</section>
+
+<!-- 17 -->
+<section class="slide">
+  <div class="sec">4 · Награда</div>
+  <h1>Функция награды</h1>
+  $$r_t=\underbrace{\operatorname{clip}(\Delta s,\pm1)}_{\text{прогресс}}-0.05|e_y|-0.05|e_\psi|-0.5\,\bar c_{fp}-0.05\Big(\tfrac{|\Delta v|}{v_{\max}}+\tfrac{|\Delta\delta|}{\delta_{\max}}\Big)-0.3\,(v-v_{lim})^+-0.01+r^{term}_t$$
+  <div class="cols">
+    <div>
+      <table class="small">
+        <tr><th>Член</th><th>Смысл</th></tr>
+        <tr><td>$\Delta s$</td><td>метры, пройденные <b>вдоль пути</b> за такт (основной стимул)</td></tr>
+        <tr><td>$e_y,e_\psi$</td><td>штраф за уход с пути и неверный курс</td></tr>
+        <tr><td>$\bar c_{fp}$</td><td>средняя стоимость костмапы под 240 точками корпуса / 254</td></tr>
+        <tr><td>$\Delta v,\Delta\delta$</td><td>плавность: штраф за рывки</td></tr>
+        <tr><td>$(v-v_{lim})^+$</td><td>превышение лимита скорости</td></tr>
+        <tr><td>$-0.01$</td><td>цена времени: стимул не стоять</td></tr>
+      </table>
+    </div>
+    <div>
+      <table class="small">
+        <tr><th>Терминальное событие</th><th>$r^{term}$</th></tr>
+        <tr><td>Столкновение (корпус ∩ препятствие)</td><td style="color:var(--bad)">−50</td></tr>
+        <tr><td>Цель: &lt; 1.5 м до конца пути</td><td style="color:var(--ok)">+50</td></tr>
+        <tr><td>Уход с пути $|e_y|&gt;5$ м</td><td>−20</td></tr>
+        <tr><td>Застревание: &lt; 1 м прогресса за 10 с</td><td>−20</td></tr>
+        <tr><td>Тайм-аут $(L/1.5+30)$ с</td><td>0 (усечение)</td></tr>
+      </table>
+      <div class="note"><p><b class="t">Простыми словами.</b> +1 очко за каждый метр по маршруту, мелкие штрафы за неаккуратность, большой штраф за аварию и бонус за финиш.</p></div>
+    </div>
+  </div>
+  <div class="foot"><span>auto-vesta · RL controller</span><span>17</span></div>
+</section>
+
+<!-- 18 -->
+<section class="slide">
+  <div class="sec">4 · Награда</div>
+  <h1>Почему награда устроена именно так</h1>
+  <ul>
+    <li><b>Плотная награда (reward shaping).</b> Только «+50 за финиш» — слишком редкий сигнал: случайная политика почти никогда не доедет. Прогресс $\Delta s$ даёт обратную связь каждые 0.1 с.</li>
+    <li><b>Прогресс вдоль пути, а не по прямой к цели</b>, иначе выгодно срезать через препятствия. Ограничение $|\Delta s|\le1$ защищает от скачков проекции.</li>
+    <li><b>Масштабы согласованы</b>: на 5 м/с прогресс ≈ +0.5 за такт; превышение лимита на 2 м/с даёт −0.6, т.е. делает такую езду невыгодной. Авария (−50) ≈ потеря 50 м прогресса.</li>
+    <li><b>Усечение по тайм-ауту ≠ терминальное состояние</b>: при тайм-ауте ценность следующего состояния в GAE бутстрапится, а не обнуляется (корректная обработка в SB3 через <code>truncated</code>).</li>
+    <li><b>Награда считается одинаково</b> в 2D-симуляторе и в Webots (общий модуль <code>reward.py</code>), но в Webots «столкновение» — это летальная клетка локальной костмапы под корпусом (истинной геометрии там нет).</li>
+  </ul>
+  <div class="note"><p><b class="t">Простыми словами.</b> Если хвалить только за финиш, ученик долго будет «тыкаться наугад». Мы хвалим за каждый правильный метр, а за опасное и рваное поведение — немного ругаем.</p></div>
+  <div class="foot"><span>auto-vesta · RL controller</span><span>18</span></div>
+</section>
+
+<!-- 19 -->
+<section class="slide">
+  <div class="sec">5 · Политика</div>
+  <h1>Стохастическая гауссова политика</h1>
+  <div class="cols">
+    <div class="w60">
+      <p>Сеть выдаёт среднее $\mu_\theta(o)$, разброс — обучаемые параметры $\log\sigma$ (не зависят от наблюдения):</p>
+      $$\pi_\theta(a\mid o)=\mathcal N\big(a;\ \mu_\theta(o),\ \operatorname{diag}\sigma^2\big),\qquad \mu_\theta(o)=\tanh\big(W h_\theta(o)+b\big).$$
+      $$\log\pi_\theta(a\mid o)=-\sum_{i=1}^{2}\Big[\frac{(a_i-\mu_i)^2}{2\sigma_i^2}+\log\sigma_i+\tfrac12\log2\pi\Big],\qquad \mathcal H=\sum_i\tfrac12\log(2\pi e\sigma_i^2).$$
+      <ul class="small">
+        <li>При обучении действие <b>сэмплируется</b> (исследование), среда обрезает его в $[-1,1]$.</li>
+        <li>При езде используется <b>среднее</b> $\mu_\theta(o)$ (детерминированно). Именно оно экспортируется в ONNX.</li>
+        <li>$\tanh$ на среднем добавлен после того, как обнаружилось насыщение (раздел 8).</li>
+      </ul>
+    </div>
+    <div class="w40">
+      <div class="note"><p><b class="t">Простыми словами.</b> Во время обучения сеть специально «немного дёргается» случайно вокруг своего лучшего решения — так она пробует новое и находит, что лучше. Величина этой случайности $\sigma$ тоже учится. На реальной машине случайности нет.</p></div>
+    </div>
+  </div>
+  <div class="foot"><span>auto-vesta · RL controller</span><span>19</span></div>
+</section>
+
+<!-- 20 -->
+<section class="slide">
+  <div class="sec">5 · Нейросеть</div>
+  <h1>Архитектура сети (661 605 параметров)</h1>
+  <div class="cols">
+    <div class="w60">
+      <table class="small">
+        <tr><th>Блок</th><th>Слои</th><th>Выход</th><th>Параметры</th></tr>
+        <tr><td>CNN по патчу</td><td>Conv 5×5/2 (16) → ReLU → Conv 3×3/2 (32) → ReLU → Conv 3×3/2 (32) → ReLU</td><td>32×6×6 = 1152</td><td>14 304</td></tr>
+        <tr><td>Голова CNN</td><td>Linear 1152→256, ReLU</td><td>256</td><td>295 168</td></tr>
+        <tr><td>MLP по вектору</td><td>Linear 47→128, ReLU, 128→128, ReLU</td><td>128</td><td>22 656</td></tr>
+        <tr><td colspan="2"><i>Общий экстрактор признаков (конкатенация)</i></td><td>384</td><td>332 128</td></tr>
+        <tr><td>Актёр $\pi$</td><td>384→256→256 (ReLU) → Linear→2, tanh</td><td>$\mu\in(-1,1)^2$</td><td>164 352 + 514</td></tr>
+        <tr><td>Критик $V$</td><td>384→256→256 (ReLU) → Linear→1</td><td>$V(o)$</td><td>164 352 + 257</td></tr>
+        <tr><td>$\log\sigma$</td><td>свободные параметры</td><td>2</td><td>2</td></tr>
+      </table>
+      <p class="tiny muted">Размер карт признаков CNN: 64 → 30 → 14 → 6 (свёртки без паддинга со страйдом 2).</p>
+    </div>
+    <div class="w40">
+      <div class="box"><p><b>Почему так.</b> Свёртки извлекают пространственные паттерны (стены, проходы, коридоры), инвариантные к сдвигу. Вектор пути и состояния обрабатывает MLP. Экстрактор общий для актёра и критика (экономия вычислений), головы раздельные.</p></div>
+      <div class="note"><p><b class="t">Простыми словами.</b> Одна часть сети «смотрит на картинку», другая «читает числа», дальше две небольшие «головы»: одна решает, что делать, вторая оценивает, насколько хороша ситуация.</p></div>
+      <p class="small">Инференс на CPU: доли миллисекунды — с запасом для 10 Гц.</p>
+    </div>
+  </div>
+  <div class="foot"><span>auto-vesta · RL controller</span><span>20</span></div>
+</section>
+
+<!-- 21 -->
+<section class="slide">
+  <div class="sec">5 · Алгоритм обучения</div>
+  <h1>Proximal Policy Optimization (PPO)</h1>
+  <div class="cols">
+    <div class="w60">
+      <p>Теорема о градиенте стратегии:</p>
+      $$\nabla_\theta J=\mathbb E\big[\nabla_\theta\log\pi_\theta(a_t\mid o_t)\,\hat A_t\big].$$
+      <p>Наивный шаг по нему нестабилен. PPO максимизирует суррогат с отсечением отношения вероятностей $r_t(\theta)=\pi_\theta(a_t\mid o_t)/\pi_{\theta_{old}}(a_t\mid o_t)$:</p>
+      $$L^{CLIP}(\theta)=\hat{\mathbb E}_t\Big[\min\big(r_t\hat A_t,\ \operatorname{clip}(r_t,1-\varepsilon,1+\varepsilon)\hat A_t\big)\Big],\ \ \varepsilon=0.2.$$
+      <p class="small">Полная функция потерь (минимизируется):</p>
+      $$\mathcal L=-L^{CLIP}+c_v\,\hat{\mathbb E}\big[(V_\theta(o_t)-\hat R_t)^2\big]-c_e\,\mathcal H[\pi_\theta],\quad c_v=0.5,\ c_e=0.003.$$
+    </div>
+    <div class="w40">
+      <img src="img/fig_ppo_clip.png" style="height:180px">
+      <div class="note"><p><b class="t">Простыми словами.</b> Если действие оказалось лучше ожидаемого — делаем его чуть вероятнее, хуже — чуть менее вероятным. «Чуть» ограничено (±20% за обновление), чтобы одно неудачное обновление не сломало всё выученное.</p></div>
+    </div>
+  </div>
+  <div class="foot"><span>auto-vesta · RL controller</span><span>21</span></div>
+</section>
+
+<!-- 22 -->
+<section class="slide">
+  <div class="sec">5 · Алгоритм обучения</div>
+  <h1>Оценка преимущества (GAE) и гиперпараметры</h1>
+  <div class="cols">
+    <div class="w60">
+      <p>Generalized Advantage Estimation:</p>
+      $$\delta_t=r_t+\gamma V(o_{t+1})(1-d_t)-V(o_t),\qquad \hat A_t=\sum_{l\ge0}(\gamma\lambda)^l\delta_{t+l},$$
+      $$\hat R_t=\hat A_t+V(o_t).$$
+      <p class="small">$\lambda$ задаёт компромисс смещение/дисперсия: $\lambda=0$ — одношаговая TD-оценка (смещённая), $\lambda=1$ — Монте-Карло (шумная). Используется $\lambda=0.95$.</p>
+      <p class="small"><b>Цикл:</b> 8 параллельных сред × 256 шагов = 2048 переходов → 5 эпох градиентного спуска (Adam) по этому буферу → новый сбор.</p>
+    </div>
+    <div class="w40">
+      <table class="small">
+        <tr><th>Гиперпараметр</th><th>Значение</th></tr>
+        <tr><td>$\gamma$ / $\lambda$</td><td>0.99 / 0.95</td></tr>
+        <tr><td>$\varepsilon$ (clip)</td><td>0.2</td></tr>
+        <tr><td>learning rate</td><td>$3\cdot10^{-4}$</td></tr>
+        <tr><td>n_steps × n_envs</td><td>256 × 8</td></tr>
+        <tr><td>batch / epochs</td><td>2048 / 5</td></tr>
+        <tr><td>$c_v$ / $c_e$</td><td>0.5 / 0.003</td></tr>
+        <tr><td>max grad norm</td><td>0.5</td></tr>
+        <tr><td>$\sigma_0$</td><td>$e^{-0.5}\approx0.61$</td></tr>
+      </table>
+      <div class="note"><p><b class="t">Простыми словами.</b> Критик предсказывает «сколько очков ещё наберём». Преимущество — насколько реальный результат оказался лучше этого прогноза.</p></div>
+    </div>
+  </div>
+  <div class="foot"><span>auto-vesta · RL controller</span><span>22</span></div>
+</section>
+
+<!-- 23 -->
+<section class="slide">
+  <div class="sec">5 · Разминка</div>
+  <h1>Поведенческое клонирование (BC) как старт</h1>
+  <div class="cols">
+    <div class="w60">
+      <ul>
+        <li>«Эксперт» — <b>pure pursuit</b> по пути: точка на расстоянии $l_d=\max(3,1.2v)$ м впереди, кривизна $\kappa=2y_t/l_d^2$, руль $\delta=\arctan(2Ly_t/l_d^2)$, скорость 3 м/с с замедлением в поворотах и у финиша. Препятствия он <b>не объезжает</b>.</li>
+        <li>Собираются пары $(o,a^{exp})$; в среде исполняется <b>зашумлённое</b> действие $a^{exp}+\xi$, $\xi\sim\mathcal N(0,0.15^2)$, а метка — чистое (DART). Так в данные попадают ситуации «я чуть сбился — как вернуться».</li>
+        <li>Актёр обучается регрессией: $\min_\theta\ \hat{\mathbb E}\|\mu_\theta(o)-a^{exp}\|^2$, затем стартует PPO.</li>
+        <li>Буфер хранится во float16 (значения патча = $c/254$ без потери смысла), батчи переводятся на GPU по частям — экономия памяти в ~4 раза.</li>
+      </ul>
+    </div>
+    <div class="w40">
+      <div class="note"><p><b class="t">Простыми словами.</b> Сначала сеть «подсматривает» за простым автопилотом и учится просто ехать по линии. С этого уровня RL стартует гораздо быстрее, чем со случайного поведения. Объезжать препятствия сеть учится уже сама, через награду.</p></div>
+    </div>
+  </div>
+  <div class="foot"><span>auto-vesta · RL controller</span><span>23</span></div>
+</section>
+
+<!-- 24 -->
+<section class="slide">
+  <div class="sec">6 · Симулятор</div>
+  <h1>Почему нужен собственный 2D-симулятор</h1>
+  <div class="cols">
+    <div class="w60">
+      <p>PPO на задачах такого класса требует $10^7$–$5\cdot10^7$ шагов. При $\Delta t=0.1$ с это</p>
+      $$3\cdot10^7\times0.1\ \text{с}\approx 830\ \text{ч}\ \text{езды}.$$
+      <ul class="small">
+        <li><b>Webots</b> с одной машиной: ускорение 2–10× к реальному времени → недели–месяцы.</li>
+        <li><b>2D-симулятор</b>: ~500–600 шагов/с на ядро, 8 процессов + обучение на GPU ≈ 850 шагов/с → $3\cdot10^7$ шагов за ~10 ч.</li>
+      </ul>
+      <p class="small"><b>Ключевой аргумент:</b> сеть не видит ни лидара, ни 3D-мира — только костмапу, путь и скорость. Значит, симулятору достаточно правдоподобно порождать <b>эти</b> величины; физика колёс и рендеринг не нужны.</p>
+    </div>
+    <div class="w40">
+      <table class="small">
+        <tr><th>Вариант</th><th>Вердикт</th></tr>
+        <tr><td>Isaac Lab</td><td>Быстро на GPU, но тяжело и избыточно для костмап</td></tr>
+        <tr><td>CARLA</td><td>Дороги + камеры, очень тяжёлый</td></tr>
+        <tr><td>MuJoCo/Brax</td><td>Хорошая физика, костмапу всё равно писать самим</td></tr>
+        <tr><td>Gazebo</td><td>Так же медленен, как Webots</td></tr>
+        <tr><td><b>Свой 2D</b></td><td><b>Выбран</b>; Webots — для дообучения и проверки</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="foot"><span>auto-vesta · RL controller</span><span>24</span></div>
+</section>
+
+<!-- 25 -->
+<section class="slide">
+  <div class="sec">6 · Симулятор</div>
+  <h1>Один шаг симулятора</h1>
+  <div class="flow" style="margin:14px 0 22px;justify-content:center">
+    <div class="node o">действие сети<br>$(a_v,a_\delta)$</div><div class="arrow">→</div>
+    <div class="node">команда<br>$v_{lim}$, ограничение скорости изменения</div><div class="arrow">→</div>
+    <div class="node">машина<br>5 подшагов Эйлера</div><div class="arrow">→</div>
+    <div class="node">лидар<br>720 лучей</div><div class="arrow">→</div>
+    <div class="node">костмапа<br>отметки + inflation</div><div class="arrow">→</div>
+    <div class="node g">наблюдение,<br>награда, конец?</div>
+  </div>
+  <div class="cols small">
+    <div>
+      <h2>reset (начало эпизода)</h2>
+      <ol>
+        <li>С вероятностью <code>procedural</code> — новый сгенерированный мир, иначе карта robocross и путь из библиотеки (400 путей).</li>
+        <li>Случайные препятствия, которых <b>не знает</b> глобальный путь.</li>
+        <li>«Призраки» (ложные отметки), доля пропусков лидара.</li>
+        <li>Старт: начало пути ± 0.3 м, ± 0.2 рад; случайные параметры машины.</li>
+      </ol>
+    </div>
+    <div>
+      <h2>Истина и восприятие разделены</h2>
+      <ul>
+        <li><b>Истинная</b> занятость (карта + препятствия) используется для лидара и проверки столкновений.</li>
+        <li><b>Сеть</b> видит только то, что «увидел» лидар и что попало в раздутую костмапу.</li>
+        <li>Если машина завернёт за угол, не посмотрев, — врежется, как в жизни.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="foot"><span>auto-vesta · RL controller</span><span>25</span></div>
+</section>
+
+<!-- 26 -->
+<section class="slide">
+  <div class="sec">6 · Симулятор</div>
+  <h1>Модель лидара и локальной костмапы</h1>
+  <div class="cols">
+    <div class="w60">
+      <ul class="small">
+        <li>Лидар на $x=0.7$ м в base_link (как в URDF). 720 лучей по кругу (0.5°), отсчёты с шагом 0.1 м до 15 м (дальность <code>obstacle_max_range</code>) — матрица 720×149 индексов клеток, обрабатывается векторно (numpy).</li>
+        <li>Для каждого луча — <b>первая</b> занятая клетка (<code>argmax</code> по булевой матрице попаданий). Она помечается как «увиденная»; всё за ней остаётся невидимым (окклюзия).</li>
+        <li>Отметки <b>накапливаются</b> за эпизод (marking в Nav2; мир статичен, clearing не нужен).</li>
+        <li>Раздувание по накопленным отметкам — в окне 48×48 м вокруг машины, пересчёт только при новых отметках или смещении > 8 м.</li>
+        <li>Расстояние до препятствий — евклидово преобразование расстояний (EDT). Замена scipy на <code>cv2.distanceTransform</code> (DIST_MASK_PRECISE, точный результат) ускорила его в 5 раз, шаг среды — с ~340 до ~520 шагов/с.</li>
+      </ul>
+    </div>
+    <div class="w40">
+      <div class="box"><p><b>Шум восприятия:</b></p><ul class="small"><li>доля потерянных лучей $p_{drop}\sim U(0,0.15)$;</li><li>«призраки»: в 30% эпизодов 1–5 пятен радиусом 0.2–0.5 м, которых нет в истинной карте;</li><li>шум одометрии: $\sigma_v=0.05$ м/с, $\sigma_\omega=0.02$ рад/с.</li></ul></div>
+      <div class="note"><p><b class="t">Простыми словами.</b> Симулятор «видит» так же, как настоящий лидар: только ближайшее в каждом направлении, иногда что-то пропускает, иногда видит то, чего нет.</p></div>
+    </div>
+  </div>
+  <div class="foot"><span>auto-vesta · RL controller</span><span>26</span></div>
+</section>
+
+<!-- 27 -->
+<section class="slide">
+  <div class="sec">6 · Миры</div>
+  <h1>Карта robocross, библиотека путей и случайные препятствия</h1>
+  <div class="cols">
+    <div class="w40">
+      <ul class="small">
+        <li><b>Пути</b>: A* на сетке 0.4 м по свободным клеткам с клиренсом ≥ 2 м (закрывает разрывы < 4 м между объектами барьеров), стоимость шага $\ell\,(1+3e^{-(c-2)/0.7})$ притягивает к центру прохода. Затем итеративное сглаживание $p_i\leftarrow p_i+\alpha(p_{i-1}+p_{i+1}-2p_i)$ с запретом нарушить клиренс и отбраковка путей с $\kappa_{\max}>1/3.9$.</li>
+        <li><b>Препятствия</b>: до $N_{\max}$ на эпизод — коробки 0.4–2.5 м, бочки ⌀0.5–1.2 м, отрезки стен 2–6 м поперёк пути; 35% прямо на пути (±1 м), остальные в полосе ±6 м.</li>
+        <li><b>Проходимость</b>: свободные клетки с зазором ≥ 1.2 м до любого препятствия (полуширина машины 0.9 м + запас) в коридоре ±4.5 м от пути (дальше эпизод обрывается) должны образовывать <b>связную область</b> от старта до цели (4-связная заливка). Если нет — удаляется препятствие, перекрывшее проезд. Прежняя проверка по отдельным сечениям пропускала 7% (robocross) и 15% (процедурные) непроходимых эпизодов.</li>
+      </ul>
+    </div>
+    <div class="w60">
+      <img src="img/obstacles.png" style="width:100%">
+      <p class="tiny muted center">Оранжевое — случайные препятствия, синее — глобальный путь (о препятствиях не знает), тёмное — карта.</p>
+      <div class="note"><p><b class="t">Простыми словами.</b> В реальности планировщик строит путь по старой карте и не знает о новых объектах. Мы тренируем ровно этот случай: путь проложен «сквозь» коробку, объехать её должна сеть.</p></div>
+    </div>
+  </div>
+  <div class="foot"><span>auto-vesta · RL controller</span><span>27</span></div>
+</section>
+
+<!-- 28 -->
+<section class="slide">
+  <div class="sec">6 · Миры</div>
+  <h1>Процедурная генерация трасс</h1>
+  <div class="cols">
+    <div class="w40">
+      <p class="small"><b>Путь</b> (шаг $\Delta s=0.5$ м) — клотоидоподобный: кривизна дрейфует к случайной цели,</p>
+      $$\kappa_{n+1}=\kappa_n+\operatorname{clip}(\kappa^*-\kappa_n,\pm\Delta\kappa),\quad \psi_{n+1}=\psi_n+\kappa_n\Delta s,$$
+      <p class="tiny">$\kappa^*$ перевыбирается с вероятностью 0.03: 0 (прямая) с вер. 0.35, иначе $U(-\kappa_{\max},\kappa_{\max})$, $\kappa_{\max}=1/4.5$; $\Delta\kappa\sim U(0.004,0.015)$. <b>Нет петель:</b> для точек с дуговым расстоянием $\ge10$ м требуется $\|p_i-p_j\|\ge\min(0.4\cdot\text{дуга},9\ \text{м})$.</p>
+      <p class="small"><b>Барьеры</b>: 2 стороны (60%), 1 (20%), нет (20%); на расстоянии $d(s)=\operatorname{clip}(d_0+n(s),3,10)$ м, $n$ — гладкий шум; стиль — пунктир с разрывами или ряд объектов (шины, коробки, X). Плюс фоновый «мусор».</p>
+      <p class="tiny"><b>Клиренс</b>: всё статическое ≥ 2 м от пути, путь продлён на 5 м за финиш (нос машины на 3.7 м впереди задней оси). Проверено: pure pursuit доезжает на 100/100 трассах без случайных препятствий.</p>
+    </div>
+    <div class="w60">
+      <img src="img/procgen.png" style="width:100%">
+      <div class="note"><p><b class="t">Простыми словами.</b> Чтобы сеть не «привыкла» к одной трассе, половину поездок она делает по свежим, каждый раз новым трассам.</p></div>
+    </div>
+  </div>
+  <div class="foot"><span>auto-vesta · RL controller</span><span>28</span></div>
+</section>
+
+<!-- 29 -->
+<section class="slide">
+  <div class="sec">6 · Обобщение</div>
+  <h1>Доменная рандомизация</h1>
+  <div class="cols">
+    <div class="w60">
+      <table class="small">
+        <tr><th>Величина</th><th>Распределение (на эпизод)</th></tr>
+        <tr><td>Постоянная скорости $\tau_v$</td><td>$U(0.3,1.2)$ с</td></tr>
+        <tr><td>Макс. ускорение $a_{\max}$</td><td>$U(1.5,3.5)$ м/с²</td></tr>
+        <tr><td>Постоянная руля $\tau_\delta$</td><td>$U(0.05,0.25)$ с</td></tr>
+        <tr><td>Скорость руля $\dot\delta_{\max}$</td><td>$U(0.5,1.5)$ рад/с</td></tr>
+        <tr><td>Потеря лучей лидара</td><td>$U(0,0.15)$</td></tr>
+        <tr><td>«Призраки»</td><td>в 30% эпизодов, 1–5 шт.</td></tr>
+        <tr><td>Шум $v$, $\omega$</td><td>$\mathcal N(0,0.05^2)$, $\mathcal N(0,0.02^2)$ на каждом шаге</td></tr>
+        <tr><td>Поза старта</td><td>$\pm0.3$ м вбок, $\pm0.2$ рад</td></tr>
+        <tr><td>Мир</td><td>robocross / процедурный 50/50</td></tr>
+        <tr><td>Препятствий нет</td><td>15% эпизодов</td></tr>
+      </table>
+    </div>
+    <div class="w40">
+      <div class="box"><p><b>Идея</b> (Tobin et al., 2017): если политика работает на всём <b>семействе</b> симуляторов, реальный мир с высокой вероятностью окажется «ещё одним членом семейства». Сеть не может опереться на точное значение параметра, которого не наблюдает.</p></div>
+      <div class="note"><p><b class="t">Простыми словами.</b> Тренируемся на разных «машинах» и «датчиках», чтобы настоящие (или машина в Webots) не оказались сюрпризом.</p></div>
+    </div>
+  </div>
+  <div class="foot"><span>auto-vesta · RL controller</span><span>29</span></div>
+</section>
+
+<!-- 30 -->
+<section class="slide">
+  <div class="sec">6 · Учебный план</div>
+  <h1>Учебный план (curriculum learning)</h1>
+  <div class="cols">
+    <div class="w40">
+      <p class="small">Уровень сложности $\ell\in[0,1]$:</p>
+      $$N_{\max}=\operatorname{round}(3+12\ell),\qquad p_{on}=0.1+0.25\ell,$$
+      <p class="small">где $N_{\max}$ — макс. число препятствий, $p_{on}$ — доля «прямо на пути». Правило подъёма:</p>
+      $$\ell\leftarrow\ell+0.1,\ \text{если}\ \overline{\text{success}}_{100}\ge0.6\ \text{и прошло}\ \ge3\cdot10^5\ \text{шагов}.$$
+      <p class="tiny">Уровень пишется в <code>curriculum.json</code> и восстанавливается при <code>--resume</code>; передаётся в процессы-симуляторы через <code>env_method</code>.</p>
+      <div class="note"><p><b class="t">Простыми словами.</b> Как в школе: сначала простые задачи, сложнее — только когда текущие решаются в 60% случаев.</p></div>
+    </div>
+    <div class="w60">
+      <img src="img/fig_history.png" style="width:100%">
+      <p class="tiny muted center">После включения плана (5.8 млн) успех вырос 0.38 → 0.7 и держался ~0.5 при подъёме сложности до максимума к 10.2 млн шагов.</p>
+    </div>
+  </div>
+  <div class="foot"><span>auto-vesta · RL controller</span><span>30</span></div>
+</section>
+
+<!-- 31 -->
+<section class="slide">
+  <div class="sec">6 · Инфраструктура</div>
+  <h1>Параллельное обучение и ресурсы</h1>
+  <div class="cols">
+    <div class="w60">
+      <ul class="small">
+        <li><b>SubprocVecEnv</b>: каждая среда — отдельный процесс (обход GIL), шаги идут параллельно, наблюдения собираются в батч для сети на GPU.</li>
+        <li><b>Проблема</b> первой версии: 30 процессов × BLAS/OpenMP «по потоку на ядро» ≈ 1000 потоков на 32 ядра + ~10 ГБ ОЗУ → компьютер переставал отвечать.</li>
+        <li><b>Решение</b>: <code>--n-envs</code> (по умолчанию ≤ 8), <code>OMP/MKL/OPENBLAS_NUM_THREADS=1</code> в воркерах, <code>torch.set_num_threads(4)</code>, приоритет <code>nice 10</code>, сторож памяти <code>--max-ram-gb</code> (суммарный PSS дерева процессов из <code>/proc</code>; при превышении — сохранить модель и остановиться).</li>
+        <li>Итог: ~2.4–5 ГБ ОЗУ, ~850 шагов/с, ПК остаётся отзывчивым. Скорость даже выросла (455 → 560 шагов/с) из-за отсутствия переподписки потоков.</li>
+        <li>Чекпоинты каждые ~1 млн шагов; метрики — в TensorBoard, включая <code>curriculum/level</code> и <code>actions/throttle_clipped</code> (контроль насыщения).</li>
+      </ul>
+    </div>
+    <div class="w40">
+      <div class="box"><p><b>PSS vs RSS.</b> RSS считает разделяемые библиотеки (libtorch) в каждом процессе; PSS делит их между процессами — это реальная занятая память (~200 МБ на воркер).</p></div>
+      <div class="note"><p><b class="t">Простыми словами.</b> Запускаем 8 «тренажёров» одновременно, но вежливо: каждый на одном ядре и с пониженным приоритетом.</p></div>
+    </div>
+  </div>
+  <div class="foot"><span>auto-vesta · RL controller</span><span>31</span></div>
+</section>
+
+<!-- 32 -->
+<section class="slide">
+  <div class="sec">7 · Внедрение</div>
+  <h1>Плагин Nav2: <code>vesta_neural_controller::NeuralController</code></h1>
+  <div class="cols">
+    <div class="w60">
+      <p class="small">Реализует интерфейс <code>nav2_core::Controller</code> (Humble): <code>configure / activate / deactivate / cleanup / setPlan / computeVelocityCommands / setSpeedLimit</code>. Загружается <code>controller_server</code> через pluginlib.</p>
+      <h2>computeVelocityCommands(pose, velocity)</h2>
+      <ol class="small">
+        <li>Блокировка мьютекса костмапы; перевод глобального пути в фрейм костмапы по TF.</li>
+        <li><b>RPP</b>: вызывается вложенный плагин (загружен через <code>pluginlib::ClassLoader</code>, параметры <code>FollowPath.fallback.*</code>) → $(v,\delta)_{RPP}$, $\delta=\arctan(\omega L/v)$.</li>
+        <li><b>NN</b>: <code>buildVec</code> + <code>buildPatch</code> (сырые <code>Costmap2D::getCharMap()</code>) → ONNX Runtime → $(a_v,a_\delta)$ → $v=v_{lim}(s)\frac{a_v+1}{2}$.</li>
+        <li>Обе команды — через ограничение скорости изменения и лимит Nav2 (<code>setSpeedLimit</code>).</li>
+        <li>Прогон обеих на 2 с, выбор (следующий слайд), публикация <code>neural_controller/source</code> и маркеров траекторий.</li>
+      </ol>
+    </div>
+    <div class="w40">
+      <div class="box"><p><b>Надёжность.</b> Нет модели / нет onnxruntime / ошибка инференса → плагин работает только на RPP (с той же проверкой прогоном). Сборка без onnxruntime возможна (stub).</p></div>
+      <div class="note"><p><b class="t">Простыми словами.</b> Плагин — это «картридж», который Nav2 вставляет вместо стандартного контроллера. Снаружи для Nav2 ничего не меняется.</p></div>
+    </div>
+  </div>
+  <div class="foot"><span>auto-vesta · RL controller</span><span>32</span></div>
+</section>
+
+<!-- 33 -->
+<section class="slide">
+  <div class="sec">7 · Безопасность</div>
+  <h1>Арбитр: прогон траекторий и выбор команды</h1>
+  <div class="cols">
+    <div class="w60">
+      <p class="small">Для команды $u=(v,\delta)$ интегрируется модель (велосипед + инерционные звенья, номинальные параметры) на $T=2$ с с шагом 0.1 с от текущей позы, скорости и последнего руля. На каждом шаге — стоимость контура корпуса <code>FootprintCollisionChecker</code>:</p>
+      $$\text{collides}(u)=\exists k:\ c_{fp}(x_k)\ge254,\qquad \text{score}(u)=\big(s(x_T)-s_0\big)-w_c\frac{1}{N}\sum_k\frac{c_{fp}(x_k)}{254}.$$
+      <p class="small"><b>Правило выбора</b> ($m=0.5$ м — допуск в пользу сети):</p>
+      $$u^*=\begin{cases}u_{NN},&\text{безопасна и }\ \text{score}_{NN}\ge\text{score}_{RPP}-m\\ u_{RPP},&\text{иначе, если безопасна}\\ \text{STOP }(v=0),&\text{иначе}\end{cases}$$
+    </div>
+    <div class="w40">
+      <div class="note"><p><b class="t">Простыми словами.</b> Перед тем как «нажать педали», плагин в уме проигрывает 2 секунды для решения сети и для решения классического алгоритма. Если сеть ведёт в стену — берём классику, если и она — тормозим.</p></div>
+      <div class="box"><p>Доля <code>NN</code> в <code>/neural_controller/source</code> — прямой аналог метрики Яндекса «нейросеть управляет 80% пути».</p></div>
+    </div>
+  </div>
+  <div class="foot"><span>auto-vesta · RL controller</span><span>33</span></div>
+</section>
+
+<!-- 34 -->
+<section class="slide">
+  <div class="sec">7 · Корректность</div>
+  <h1>Согласованность Python ↔ C++ ↔ ONNX</h1>
+  <div class="cols">
+    <div class="w60">
+      <ul class="small">
+        <li>Если вход сети в плагине хоть немного отличается от обучения — поведение непредсказуемо. Поэтому <code>obs.py</code> — <b>эталон</b>, <code>observation.cpp</code> — построчный перенос с теми же порядками операций (одинаковые IEEE-округления).</li>
+        <li>Тонкости: питоновский <code>%</code> (знак делителя) в $\operatorname{wrap}$; <code>searchsorted(side='right')</code> ↔ <code>upper_bound</code>; деление float32 для патча; $\lfloor\cdot\rfloor$ для индекса клетки.</li>
+        <li><b>Фикстуры</b>: <code>make_obs_fixture</code> пишет 9 случайных случаев (костмапы с 255/254, пути с отрезком нулевой длины, одноточечный путь, ненулевой стартовый индекс) с входами в полной точности (<code>%.17g</code>).</li>
+        <li><b>gtest</b> сверяет: патч — побитово (0 расхождений из 4096), вектор — $10^{-6}$, индекс трекера — точно, $v_{lim}$ — $10^{-9}$.</li>
+        <li><b>Экспорт ONNX</b>: детерминированный актёр (с $\tanh$), проверка $\max|a_{onnx}-a_{torch}|\approx2\cdot10^{-7}$ и сверка с <code>model.predict(deterministic=True)</code>.</li>
+      </ul>
+    </div>
+    <div class="w40">
+      <div class="box"><p><b>Пример найденной проблемы:</b> при сверке лимита скорости расхождение ~$10^{-7}$ возникло не из-за кода, а из-за того, что координаты пути в фикстуре записывались с 9 значащими цифрами. После перехода на 17 — совпадение $<10^{-9}$.</p></div>
+      <div class="note"><p><b class="t">Простыми словами.</b> Один и тот же «расчёт входа» написан дважды (Python и C++), и автотест проверяет, что они дают одинаковые числа.</p></div>
+    </div>
+  </div>
+  <div class="foot"><span>auto-vesta · RL controller</span><span>34</span></div>
+</section>
+
+<!-- 35 -->
+<section class="slide">
+  <div class="sec">7 · Проверка</div>
+  <h1>Интеграционный тест плагина без Webots</h1>
+  <p class="small">Настоящий <code>nav2.launch.py</code> (map_server, planner_server, controller_server с плагином) + фейковая машина (велосипедная модель, публикует <code>/odom</code> и TF) + фейковый лидар, видящий коробку 1×2 м на пути. Цель <code>FollowPath</code>: прямая 40 м.</p>
+  <table>
+    <tr><th>Сценарий</th><th>Результат</th><th>Источник команд</th><th>Вывод</th></tr>
+    <tr><td>A. Нет модели, нет препятствия</td><td style="color:var(--ok)">Цель достигнута (SUCCEEDED)</td><td>RPP 100%</td><td>Вложенный RPP работает</td></tr>
+    <tr><td>B. Нет модели, коробка на пути</td><td>Остановка за 2.4 м до коробки</td><td>RPP → STOP</td><td>Арбитр предотвращает столкновение</td></tr>
+    <tr><td>C. Почти необученная сеть, коробка</td><td>Остановка за 0.4 м</td><td>NN → STOP</td><td>Даже «плохая» сеть не врезается</td></tr>
+    <tr><td>D. Сеть, нет препятствия</td><td style="color:var(--ok)">Цель достигнута</td><td>NN 100%</td><td>Инференс ONNX в C++ работает</td></tr>
+  </table>
+  <div class="note"><p><b class="t">Простыми словами.</b> Проверили «картридж» в настоящем Nav2 с игрушечной машиной: без сети он ездит на классике, с плохой сетью — тормозит перед препятствием, с нормальной — едет сам.</p></div>
+  <div class="foot"><span>auto-vesta · RL controller</span><span>35</span></div>
+</section>
+
+<!-- 36 -->
+<section class="slide">
+  <div class="sec">8 · Эксперименты</div>
+  <h1>История обучения</h1>
+  <img src="img/fig_history.png" style="height:385px">
+  <table class="tiny">
+    <tr><th>Шаги, млн</th><th>Изменение</th><th>Эффект</th></tr>
+    <tr><td>0 – 1.27</td><td>robocross, ≤ 6 коробок, BC-разминка</td><td>успех до ~0.8</td></tr>
+    <tr><td>1.27 / 2.25</td><td>до 15 препятствий / процедурные трассы 50%</td><td>задача резко сложнее: ~0.5 → ~0.38</td></tr>
+    <tr><td>4.12</td><td>штраф за превышение лимита, энтропия</td><td>без видимого эффекта (см. насыщение)</td></tr>
+    <tr><td>5.81 / 8.79 / 17.93</td><td>учебный план / tanh на среднем / газ как доля лимита</td><td>0.38 → 0.7, далее ~0.5 при максимальной сложности</td></tr>
+  </table>
+  <div class="foot"><span>auto-vesta · RL controller</span><span>36</span></div>
+</section>
+
+<!-- 37 -->
+<section class="slide">
+  <div class="sec">8 · Эксперименты</div>
+  <h1>Оценка чекпоинтов на фиксированных эпизодах</h1>
+  <div class="cols">
+    <div class="w60">
+      <img src="img/fig_eval.png" style="width:100%">
+      <p class="tiny muted">Детерминированная политика, полная сложность (до 15 препятствий), одни и те же 30 эпизодов robocross и 30 процедурных (seed 123). Доверительный интервал ±9 п.п. (биномиальный, $n=30$).</p>
+    </div>
+    <div class="w40">
+      <table class="small">
+        <tr><th>Чекпоинт</th><th>Скорость в поворотах (лимит)</th></tr>
+        <tr><td>5.1 млн</td><td>4.80 (3.72) м/с</td></tr>
+        <tr><td>7.8 млн</td><td>4.80 (3.60)</td></tr>
+        <tr><td>10.8 млн (tanh)</td><td><b>3.11 (3.64)</b></td></tr>
+        <tr><td>16.8 млн</td><td>4.90 (3.60)</td></tr>
+      </table>
+      <ul class="small">
+        <li>robocross: лучший результат 77% (16.8 млн).</li>
+        <li>Процедурные трассы — слабое место: 20–37%, чаще всего — столкновения с препятствиями на пути.</li>
+        <li>Торможение в поворотах «выучивалось» лишь временно → решено архитектурно (газ = доля лимита, 17.9 млн).</li>
+      </ul>
+    </div>
+  </div>
+  <div class="foot"><span>auto-vesta · RL controller</span><span>37</span></div>
+</section>
+
+<!-- 38 -->
+<section class="slide">
+  <div class="sec">8 · Анализ</div>
+  <h1>Ключевая находка: насыщение действия «газ»</h1>
+  <div class="cols">
+    <div class="w60">
+      <img src="img/fig_saturation.png" style="width:100%">
+      <p class="small">Среднее линейного выхода ушло к $\mu_v\approx4.6$ при $\sigma\approx0.7$. Среда обрезает действие: $\tilde a=\operatorname{clip}(a,-1,1)$. Доля проб ниже предела $\Phi\big((1-\mu)/\sigma\big)\approx\Phi(-5.1)\approx10^{-7}$: <b>все</b> пробы дают полный газ, переход не зависит от $a_v$, преимущество не несёт информации о скорости → градиент по скорости ≈ 0. Энтропийный бонус при этом бесплатно раздувал $\sigma_v$ (0.55 → 0.72).</p>
+    </div>
+    <div class="w40">
+      <div class="box"><p><b>Шаг 1: $\mu=\tanh(z)$.</b> Среднее ограничено, пробы снова по обе стороны предела (доля обрезанных — 0.5). Но сеть «разогнала» $z$ до 6.1: $\partial\mu/\partial z=1-\tanh^2z\approx2.5\cdot10^{-5}$ — второе насыщение.</p></div>
+      <div class="box"><p><b>Шаг 2: газ = доля $v_{lim}$.</b> Теперь $a_v=1$ означает «на лимите», и насыщение безвредно: превысить безопасную скорость нельзя по построению.</p></div>
+      <div class="note"><p><b class="t">Простыми словами.</b> Сеть «вдавила педаль в пол» настолько, что даже случайные пробы не могли показать, что медленнее бывает лучше. Решение — сделать «пол» безопасной скоростью.</p></div>
+    </div>
+  </div>
+  <div class="foot"><span>auto-vesta · RL controller</span><span>38</span></div>
+</section>
+
+<!-- 39 -->
+<section class="slide">
+  <div class="sec">8 · Анализ</div>
+  <h1>Поведение политики (просмотрщик)</h1>
+  <div class="cols">
+    <div><img src="img/view5_map.png" style="width:100%"><p class="tiny muted center">robocross, 16.8 млн: объезд группы препятствий справа и возврат к пути.</p></div>
+    <div><img src="img/view5_proc.png" style="width:100%"><p class="tiny muted center">Процедурная кольцевая трасса: вылет через разрыв барьера на 5 м/с — типичная ошибка до введения газа как доли лимита.</p></div>
+  </div>
+  <div class="note"><p><b class="t">Как пользоваться.</b> <code>ros2 run vesta_rl viewer --run runs/sim</code> — отдельный процесс со своей копией симулятора берёт последний чекпоинт и показывает езду (пробел — пауза, n — следующий эпизод, +/− — скорость). Флаг <code>--snapshot</code> сохраняет кадр в PNG.</p></div>
+  <div class="foot"><span>auto-vesta · RL controller</span><span>39</span></div>
+</section>
+
+<!-- 40 -->
+<section class="slide">
+  <div class="sec">8 · Инженерия</div>
+  <h1>Найденные и исправленные проблемы</h1>
+  <table class="small">
+    <tr><th style="width:30%">Симптом</th><th>Причина</th><th style="width:30%">Исправление</th></tr>
+    <tr><td>Машина поворачивает при движении назад</td><td>$\operatorname{atan2}(-\omega L, v)$ при $v<0$ даёт $\approx\pm\pi$ → полный выворот</td><td>$\arctan(-\omega L/v)$</td></tr>
+    <tr><td>RViz не показывает <code>/map</code></td><td>map_server публикует один раз с QoS transient_local, подписчик volatile</td><td>Durability = Transient Local</td></tr>
+    <tr><td>ПК зависает при обучении</td><td>30 процессов × потоки BLAS, ~10 ГБ</td><td>лимиты потоков, nice, сторож RAM</td></tr>
+    <tr><td>colcon падает после pip</td><td>новый setuptools + старый <code>packaging</code> Ubuntu 22.04</td><td><code>setuptools==58.2.0</code></td></tr>
+    <tr><td>Аварии эксперта на процедурных трассах</td><td>петли пути; барьер в 2 м на внешней стороне шпильки; препятствие за финишем</td><td>критерий самосближения, барьеры ≥ 3 м, клиренс +5 м за финиш</td></tr>
+    <tr><td>Симулятор замедлился</td><td>пересчёт EDT почти на каждом шаге</td><td>OpenCV вместо scipy (×5)</td></tr>
+    <tr><td>Нет торможения в поворотах</td><td>насыщение действия (слайд 38)</td><td>tanh → газ как доля лимита</td></tr>
+    <tr><td>Расхождение C++/Python $10^{-7}$</td><td>9 значащих цифр в фикстуре</td><td>%.17g</td></tr>
+  </table>
+  <div class="foot"><span>auto-vesta · RL controller</span><span>40</span></div>
+</section>
+
+<!-- 41 -->
+<section class="slide">
+  <div class="sec">9 · Ограничения</div>
+  <h1>Ограничения и дальнейшие шаги</h1>
+  <div class="cols">
+    <div>
+      <h2>Ограничения</h2>
+      <ul class="small">
+        <li><b>Sim-to-real разрыв</b>: 2D-модель не знает заносов, рельефа, 3D-формы препятствий; калибровка по Webots ещё не выполнена.</li>
+        <li><b>Процедурные трассы</b> с тесными шпильками и препятствиями на пути решаются в 20–37% случаев.</li>
+        <li><b>Плато</b> success ≈ 0.5 на максимальной сложности ~7 млн шагов.</li>
+        <li>base_link в драйвере совпадает с антенной GPS (≈0.4 м впереди задней оси) — небольшая систематическая ошибка.</li>
+        <li>Дообучение в Webots идёт в реальном времени (медленно); <code>/odom</code> и телепорт там пока не проверены.</li>
+      </ul>
+    </div>
+    <div>
+      <h2>Дальше</h2>
+      <ol class="small">
+        <li>Оценить эффект «газ = доля лимита» (началось с 17.9 млн).</li>
+        <li><code>calibrate.py</code> в Webots → центр рандомизации и параметры прогона арбитра.</li>
+        <li>Дообучение и прогон 20 маршрутов в Webots; метрика — доля NN и число остановок.</li>
+        <li>Финиш с остановкой (сейчас подъезд ~5 м/с, т.к. эпизод заканчивается в 1.5 м).</li>
+        <li>Архитектура: трансформер по токенам «патч/точки пути», как у Яндекса; рекуррентность для памяти о скрытом.</li>
+        <li>Компенсация рычага GPS → base_link на задней оси.</li>
+      </ol>
+    </div>
+  </div>
+  <div class="foot"><span>auto-vesta · RL controller</span><span>41</span></div>
+</section>
+
+<!-- 42 -->
+<section class="slide">
+  <div class="sec">Практика</div>
+  <h1>Как это запустить</h1>
+  <div class="cols">
+    <div>
+<pre># симулятор и навигация
+ros2 launch webots_ros2_suv robot.launch.py
+ros2 launch webots_ros2_suv nav2.launch.py
+
+# запись карты (pointcloud→scan, slam_toolbox, map_saver)
+ros2 launch webots_ros2_suv mapping.launch.py
+
+# библиотека путей
+ros2 run vesta_rl make_paths --map &lt;map.yaml&gt; --out paths.npz
+
+# обучение в 2D (GPU, ограничение ОЗУ)
+ros2 run vesta_rl train --map &lt;map.yaml&gt; --paths paths.npz \
+  --out runs/sim --device cuda --max-ram-gb 12</pre>
+    </div>
+    <div>
+<pre># продолжить с сохранения
+ros2 run vesta_rl train ... --resume runs/sim/model.zip
+
+# смотреть, как едет текущая модель
+ros2 run vesta_rl viewer --run runs/sim
+tensorboard --logdir runs/sim/tb
+
+# экспорт и запуск в Nav2
+ros2 run vesta_rl export_onnx --model runs/sim/model.zip \
+  --out src/vesta_neural_controller/models/policy.onnx
+colcon build --packages-select vesta_neural_controller
+ros2 launch webots_ros2_suv nav2.launch.py
+
+# доля управления нейросетью
+ros2 topic echo /neural_controller/source</pre>
+    </div>
+  </div>
+  <div class="foot"><span>auto-vesta · RL controller</span><span>42</span></div>
+</section>
+
+<!-- 43 -->
+<section class="slide">
+  <div class="sec">Глоссарий</div>
+  <h1>Термины: обучение с подкреплением</h1>
+  <div class="grid2 small">
+    <p><b>Агент / политика $\pi$</b> — правило выбора действия по наблюдению; у нас — нейросеть.</p>
+    <p><b>Среда</b> — то, с чем агент взаимодействует (симулятор), возвращает наблюдение и награду.</p>
+    <p><b>Эпизод</b> — одна попытка от старта до завершения.</p>
+    <p><b>Награда $r$</b> — число-оценка шага; цель — максимизировать их дисконтированную сумму.</p>
+    <p><b>Ценность $V(s)$</b> — ожидаемая будущая награда из состояния $s$.</p>
+    <p><b>Преимущество $A$</b> — насколько действие лучше «среднего» в этом состоянии.</p>
+    <p><b>Актёр / критик</b> — части сети: выбирает действие / оценивает ценность.</p>
+    <p><b>PPO</b> — алгоритм обучения политики с ограничением величины обновления.</p>
+    <p><b>GAE</b> — способ оценить преимущество, смешивая короткие и длинные прогнозы.</p>
+    <p><b>Энтропия</b> — мера «случайности» политики; бонус за неё поощряет исследование.</p>
+    <p><b>BC (клонирование поведения)</b> — обучение копированием действий эксперта.</p>
+    <p><b>Учебный план</b> — постепенное усложнение задач по мере успеха.</p>
+    <p><b>Доменная рандомизация</b> — случайные параметры симулятора ради устойчивости.</p>
+    <p><b>Sim-to-real</b> — перенос из симуляции в реальность (или в более точный симулятор).</p>
+    <p><b>Насыщение</b> — выход за предел, где изменение входа почти не меняет результат.</p>
+    <p><b>Чекпоинт</b> — сохранённое состояние сети на определённом шаге.</p>
+  </div>
+  <div class="foot"><span>auto-vesta · RL controller</span><span>43</span></div>
+</section>
+
+<!-- 44 -->
+<section class="slide">
+  <div class="sec">Глоссарий</div>
+  <h1>Термины: робототехника и ROS</h1>
+  <div class="grid2 small">
+    <p><b>ROS 2 узел / топик</b> — программа / именованный канал сообщений между ними.</p>
+    <p><b>TF</b> — дерево преобразований между системами координат (map, odom, base_link…).</p>
+    <p><b>Одометрия</b> — оценка собственного движения (здесь — по GPS и IMU).</p>
+    <p><b>SLAM</b> — одновременное построение карты и локализация (slam_toolbox).</p>
+    <p><b>Сетка занятости / костмапа</b> — карта клеток со «стоимостью» проезда.</p>
+    <p><b>Inflation</b> — «ореол» стоимости вокруг препятствий с учётом размеров машины.</p>
+    <p><b>Глобальный планировщик</b> — строит путь по всей карте (SmacPlannerHybrid).</p>
+    <p><b>Контроллер (локальный)</b> — по пути и окружению выдаёт скорость и руль.</p>
+    <p><b>Pure Pursuit / RPP</b> — классический контроллер: «целься в точку впереди на пути».</p>
+    <p><b>Footprint</b> — контур корпуса машины для проверки столкновений.</p>
+    <p><b>Ackermann / велосипедная модель</b> — кинематика машины с поворотными передними колёсами.</p>
+    <p><b>cmd_vel / Twist</b> — сообщение «линейная и угловая скорость».</p>
+    <p><b>Лидар</b> — лазерный дальномер, дающий облако точек вокруг.</p>
+    <p><b>QoS (transient local)</b> — политика доставки: «последнее сообщение сохраняется для новых подписчиков».</p>
+    <p><b>Плагин / pluginlib</b> — механизм подгрузки реализаций интерфейса по имени.</p>
+    <p><b>ONNX</b> — открытый формат нейросетей для запуска вне Python.</p>
+  </div>
+  <div class="foot"><span>auto-vesta · RL controller</span><span>44</span></div>
+</section>
+
+<!-- 45 -->
+<section class="slide title">
+  <h1 style="margin-top:150px">Итог</h1>
+  <p style="font-size:20px;line-height:1.6;max-width:1050px">
+    Построен полный цикл: <b>симулятор → обучение PPO → экспорт ONNX → плагин Nav2 с арбитром</b> по схеме ровера Яндекса.
+    Сеть обучена на ~18 млн шагов с процедурными трассами, случайными препятствиями, рандомизацией и учебным планом;
+    на трассе robocross доезжает до 77% эпизодов при максимальной сложности, безопасность обеспечивается арбитром независимо от качества сети.
+    Главный урок — <b>архитектурные ограничения (лимит скорости в действии) надёжнее, чем штрафы в награде</b>.
+  </p>
+</section>
+
+</body>
+</html>

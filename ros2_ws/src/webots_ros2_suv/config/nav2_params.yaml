@@ -36,6 +36,7 @@ controller_server:
   ros__parameters:
     use_sim_time: True
     controller_frequency: 10.0
+    odom_topic: /odom
     min_x_velocity_threshold: 0.001
     min_y_velocity_threshold: 0.5
     min_theta_velocity_threshold: 0.001
@@ -50,28 +51,43 @@ controller_server:
     general_goal_checker:
       plugin: "nav2_controller::SimpleGoalChecker"
       stateful: True
-      xy_goal_tolerance: 1.0
-      yaw_goal_tolerance: 0.5
+      xy_goal_tolerance: 1.5      # same as GOAL_TOL in vesta_rl reward.py
+      yaw_goal_tolerance: 6.29    # any heading: an Ackermann car can't fix its yaw at the goal
     FollowPath:
-      plugin: "nav2_regulated_pure_pursuit_controller::RegulatedPurePursuitController"
-      desired_linear_vel: 3.0
-      lookahead_dist: 4.0
-      min_lookahead_dist: 3.0
-      max_lookahead_dist: 6.0
-      lookahead_time: 1.5
-      use_velocity_scaled_lookahead_dist: true
-      transform_tolerance: 0.2
-      min_approach_linear_velocity: 0.5
-      approach_velocity_scaling_dist: 2.0
-      use_collision_detection: true
-      max_allowed_time_to_collision_up_to_carrot: 1.5
-      use_regulated_linear_velocity_scaling: true
-      use_cost_regulated_linear_velocity_scaling: false
-      regulated_linear_scaling_min_radius: 4.0
-      regulated_linear_scaling_min_speed: 0.5
-      use_rotate_to_heading: false  # car can't turn in place
-      allow_reversing: false
-      max_robot_pose_search_dist: 10.0
+      # RL policy + RPP fallback, arbitrated by rollouts (vesta_neural_controller)
+      plugin: "vesta_neural_controller::NeuralController"
+      model_path: ""            # overridden by the `model` launch arg (nav2.launch.py)
+      use_nn: true              # false = drive with the fallback only (still rollout-checked)
+      max_speed: 5.0            # must equal vesta_rl config.MAX_SPEED the policy was trained with
+      rollout_time: 2.0
+      rollout_dt: 0.1
+      nn_margin: 0.5            # NN wins unless its rollout score is this much worse than RPP's
+      cost_weight: 1.0
+      # rollout vehicle model; use `ros2 run vesta_rl calibrate` output
+      tau_v: 0.6
+      accel_max: 2.5
+      tau_delta: 0.1
+      steer_rate: 1.0
+      fallback_plugin: "nav2_regulated_pure_pursuit_controller::RegulatedPurePursuitController"
+      fallback:
+        desired_linear_vel: 3.0
+        lookahead_dist: 4.0
+        min_lookahead_dist: 3.0
+        max_lookahead_dist: 6.0
+        lookahead_time: 1.5
+        use_velocity_scaled_lookahead_dist: true
+        transform_tolerance: 0.2
+        min_approach_linear_velocity: 0.5
+        approach_velocity_scaling_dist: 2.0
+        use_collision_detection: false  # the arbiter's rollout is the one collision check
+        max_allowed_time_to_collision_up_to_carrot: 1.5
+        use_regulated_linear_velocity_scaling: true
+        use_cost_regulated_linear_velocity_scaling: false
+        regulated_linear_scaling_min_radius: 4.0
+        regulated_linear_scaling_min_speed: 0.5
+        use_rotate_to_heading: false  # car can't turn in place
+        allow_reversing: false
+        max_robot_pose_search_dist: 10.0
 
 global_costmap:
   global_costmap:
@@ -137,7 +153,7 @@ local_costmap:
           data_type: "PointCloud2"
           marking: True
           clearing: True
-          min_obstacle_height: 0.0
+          min_obstacle_height: 0.1
           max_obstacle_height: 1.6
           obstacle_max_range: 15.0
           obstacle_min_range: 0.0

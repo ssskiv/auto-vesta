@@ -28,7 +28,13 @@ def generate_launch_description():
     package_dir = get_package_share_directory(PACKAGE_NAME)
     world = LaunchConfiguration('world')
 
-    webots = WebotsLauncher(world=PathJoinSubstitution([package_dir, 'worlds', world]), ros2_supervisor=True, stream=True)
+    webots = WebotsLauncher(
+        world=PathJoinSubstitution([package_dir, 'worlds', world]),
+        mode=LaunchConfiguration('mode'),
+        gui=LaunchConfiguration('gui'),
+        ros2_supervisor=True,
+        stream=True,
+    )
     robot_description_path = os.path.join(package_dir, pathlib.Path(os.path.join(package_dir, 'resource', 'vesta.urdf')))
     vehicle_driver = WebotsController(
         robot_name='vesta',
@@ -54,6 +60,16 @@ def generate_launch_description():
             'world',
             default_value='robocross.wbt',
             description='Robocross simulation world'
+        ),
+        DeclareLaunchArgument(
+            'mode',
+            default_value='realtime',
+            description='Webots run mode: realtime or fast (RL training)'
+        ),
+        DeclareLaunchArgument(
+            'gui',
+            default_value='true',
+            description='false runs Webots without rendering (RL training)'
         ),
         webots,
         webots._supervisor,
