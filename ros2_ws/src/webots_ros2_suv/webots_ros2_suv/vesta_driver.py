@@ -2,7 +2,8 @@ import math
 import time
 
 import rclpy
-from geometry_msgs.msg import Quaternion, TransformStamped, Twist
+from geometry_msgs.msg import PoseStamped, Quaternion, TransformStamped, Twist
+from nav_msgs.msg import Odometry
 from rclpy.parameter import Parameter
 from sensor_msgs.msg import Imu, JointState, PointCloud2
 from sensor_msgs_py import point_cloud2
@@ -34,6 +35,10 @@ def _clamp(value, low, high):
     return max(low, min(high, value))
 
 
+def _yaw(q):
+    return math.atan2(2.0 * (q.w * q.z + q.x * q.y), 1.0 - 2.0 * (q.y * q.y + q.z * q.z))
+
+
 class VestaDriver:
     def init(self, webots_node, properties):
         self.__driver = webots_node.robot
@@ -55,7 +60,9 @@ class VestaDriver:
         self.__cruising_speed_kmh = 0.0
         self.__last_cmd_time = time.monotonic()
         self.__orientation = Quaternion(x=0.0, y=0.0, z=0.0, w=1.0)
+        self.__yaw_rate = 0.0
         self.__gps_origin = None
+        self.__teleport_request = None
 
 
         qos = qos_profile_sensor_data
@@ -85,12 +92,16 @@ class VestaDriver:
         self.__node.create_subscription(Twist, '/cmd_vel', self.__on_cmd_vel, qos)
         self.__node.create_subscription(Imu, '/vesta/imu/data', self.__on_imu, qos)
         self.__node.create_subscription(PointCloud2, '/vesta/lidar/point_cloud', self.__on_point_cloud, qos)
+        # RL resets: move the car to a pose given in the odom frame (the robot
+        # node has supervisor TRUE and Driver is a Supervisor subclass).
+        self.__node.create_subscription(PoseStamped, '/vesta/teleport', self.__on_teleport, 1)
         
         self.__tf_broadcaster = TransformBroadcaster(self.__node)
         self.__imu_publisher = self.__node.create_publisher(Imu, '/imu/data', qos)
         self.__lidar_publisher = self.__node.create_publisher(PointCloud2, '/lidar', qos)
         self.__radar_publisher = self.__node.create_publisher(PointCloud2, '/radar', qos)
         self.__joint_state_pub = self.__node.create_publisher(JointState, '/joint_states', qos)
+        self.__odom_pub = self.__node.create_publisher(Odometry, '/odom', qos)
 
 
     def __on_imu(self, msg):
@@ -99,6 +110,7 @@ class VestaDriver:
             p.header.stamp = self.__node.get_clock().now().to_msg()
             self.__imu_publisher.publish(p)
             self.__orientation = msg.orientation
+            self.__yaw_rate = msg.angular_velocity.z
         except  Exception as err:
             self.__node._logger.error(''.join(traceback.TracebackException.from_exception(err).format()))
             
@@ -114,8 +126,15 @@ class VestaDriver:
             self.__steer = _clamp(math.atan(-msg.angular.z * WHEELBASE / linear_x), -MAX_STEER, MAX_STEER)
         self.__last_cmd_time = time.monotonic()
 
+    def __on_teleport(self, msg):
+        self.__teleport_request = msg.pose
+
     def step(self):
         rclpy.spin_once(self.__node, timeout_sec=0)
+
+        if self.__teleport_request is not None:
+            self.__teleport(self.__teleport_request)
+            self.__teleport_request = None
 
         if time.monotonic() - self.__last_cmd_time > COMMAND_TIMEOUT:
             self.__driver.setThrottle(0.0)
@@ -134,7 +153,57 @@ class VestaDriver:
         self.__driver.setSteeringAngle(self.__steer)
         self.__radar_publisher.publish(self.__radar_point_cloud())
         self.__joint_state_pub.publish(self.__joint_states())
-        self.__tf_broadcaster.sendTransform(self.__base_link_transform())
+        base_link = self.__base_link_transform()
+        self.__tf_broadcaster.sendTransform(base_link)
+        self.__odom_pub.publish(self.__odometry(base_link))
+
+    def __odometry(self, base_link):
+        """/odom with the same pose as the odom->base_link TF.
+
+        Forward speed is the GPS speed vector projected on the heading (signed,
+        so reversing gives v < 0); yaw rate comes from the IMU gyro.
+        """
+        msg = Odometry()
+        msg.header = base_link.header
+        msg.child_frame_id = BASE_FRAME
+        msg.pose.pose.position.x = base_link.transform.translation.x
+        msg.pose.pose.position.y = base_link.transform.translation.y
+        msg.pose.pose.position.z = base_link.transform.translation.z
+        msg.pose.pose.orientation = base_link.transform.rotation
+
+        speed = self.__gps.getSpeedVector()
+        if not any(math.isnan(v) for v in speed):
+            yaw = _yaw(self.__orientation)
+            msg.twist.twist.linear.x = speed[0] * math.cos(yaw) + speed[1] * math.sin(yaw)
+        msg.twist.twist.angular.z = self.__yaw_rate
+        return msg
+
+    def __teleport(self, pose):
+        """Put base_link (= the GPS antenna, see __base_link_transform) at an odom pose."""
+        if self.__gps_origin is None:
+            return
+        root = self.__driver.getSelf()
+        root_pos = root.getPosition()
+        gps = self.__gps.getValues()
+        r = root.getOrientation()
+        yaw_now = math.atan2(r[3], r[0])
+        # GPS offset from the robot root, in the robot's own frame
+        dx, dy = gps[0] - root_pos[0], gps[1] - root_pos[1]
+        off_x = math.cos(yaw_now) * dx + math.sin(yaw_now) * dy
+        off_y = -math.sin(yaw_now) * dx + math.cos(yaw_now) * dy
+
+        yaw = _yaw(pose.orientation)
+        gps_x = self.__gps_origin[0] + pose.position.x
+        gps_y = self.__gps_origin[1] + pose.position.y
+        x = gps_x - (math.cos(yaw) * off_x - math.sin(yaw) * off_y)
+        y = gps_y - (math.sin(yaw) * off_x + math.cos(yaw) * off_y)
+
+        root.getField('translation').setSFVec3f([x, y, root_pos[2] + 0.05])
+        root.getField('rotation').setSFRotation([0.0, 0.0, 1.0, yaw])
+        root.resetPhysics()
+        self.__cruising_speed_kmh = 0.0
+        self.__steer = 0.0
+        self.__driver.setCruisingSpeed(0.0)
 
     def __base_link_transform(self):
         """odom->base_link from the GPS position and Xsens IMU orientation.

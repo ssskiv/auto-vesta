@@ -1,0 +1,815 @@
+{
+ "n_maps": 100,
+ "layouts": 200,
+ "max_obstacles": 15,
+ "seed": 0,
+ "map_yaml": "src/webots_ros2_suv/maps/robocross.yaml",
+ "paths": "src/vesta_rl/data/paths.npz",
+ "planner": {
+  "turn_radius": 5.0,
+  "margin": 1.0,
+  "corridor": 4.5
+ },
+ "stats": [
+  {
+   "i": 0,
+   "kind": "robocross",
+   "length": 187.28590744635767,
+   "maps_tried": 1,
+   "layouts_tried": 253,
+   "mean_obstacles": 6.665
+  },
+  {
+   "i": 1,
+   "kind": "robocross",
+   "length": 55.917830618928335,
+   "maps_tried": 1,
+   "layouts_tried": 417,
+   "mean_obstacles": 4.87
+  },
+  {
+   "i": 2,
+   "kind": "robocross",
+   "length": 65.21731781809329,
+   "maps_tried": 1,
+   "layouts_tried": 364,
+   "mean_obstacles": 5.565
+  },
+  {
+   "i": 3,
+   "kind": "robocross",
+   "length": 111.81602898623862,
+   "maps_tried": 1,
+   "layouts_tried": 313,
+   "mean_obstacles": 6.685
+  },
+  {
+   "i": 4,
+   "kind": "robocross",
+   "length": 129.60007524579467,
+   "maps_tried": 1,
+   "layouts_tried": 313,
+   "mean_obstacles": 7.08
+  },
+  {
+   "i": 5,
+   "kind": "robocross",
+   "length": 93.40776085804845,
+   "maps_tried": 1,
+   "layouts_tried": 308,
+   "mean_obstacles": 6.38
+  },
+  {
+   "i": 6,
+   "kind": "robocross",
+   "length": 88.16146504156487,
+   "maps_tried": 1,
+   "layouts_tried": 304,
+   "mean_obstacles": 6.695
+  },
+  {
+   "i": 7,
+   "kind": "robocross",
+   "length": 92.47444501055818,
+   "maps_tried": 1,
+   "layouts_tried": 314,
+   "mean_obstacles": 6.675
+  },
+  {
+   "i": 8,
+   "kind": "robocross",
+   "length": 101.8921181632877,
+   "maps_tried": 1,
+   "layouts_tried": 325,
+   "mean_obstacles": 6.14
+  },
+  {
+   "i": 9,
+   "kind": "robocross",
+   "length": 68.66091837183913,
+   "maps_tried": 1,
+   "layouts_tried": 478,
+   "mean_obstacles": 4.88
+  },
+  {
+   "i": 10,
+   "kind": "robocross",
+   "length": 83.49745787051262,
+   "maps_tried": 1,
+   "layouts_tried": 293,
+   "mean_obstacles": 6.035
+  },
+  {
+   "i": 11,
+   "kind": "robocross",
+   "length": 52.40399432594005,
+   "maps_tried": 1,
+   "layouts_tried": 434,
+   "mean_obstacles": 5.3
+  },
+  {
+   "i": 12,
+   "kind": "robocross",
+   "length": 41.860721446243595,
+   "maps_tried": 1,
+   "layouts_tried": 469,
+   "mean_obstacles": 4.675
+  },
+  {
+   "i": 13,
+   "kind": "robocross",
+   "length": 141.61839272796212,
+   "maps_tried": 1,
+   "layouts_tried": 202,
+   "mean_obstacles": 8.07
+  },
+  {
+   "i": 14,
+   "kind": "robocross",
+   "length": 40.66020315387785,
+   "maps_tried": 1,
+   "layouts_tried": 504,
+   "mean_obstacles": 4.755
+  },
+  {
+   "i": 15,
+   "kind": "robocross",
+   "length": 41.860721446243595,
+   "maps_tried": 1,
+   "layouts_tried": 465,
+   "mean_obstacles": 4.885
+  },
+  {
+   "i": 16,
+   "kind": "robocross",
+   "length": 132.57935695971787,
+   "maps_tried": 1,
+   "layouts_tried": 260,
+   "mean_obstacles": 6.63
+  },
+  {
+   "i": 17,
+   "kind": "robocross",
+   "length": 44.19531074162355,
+   "maps_tried": 1,
+   "layouts_tried": 554,
+   "mean_obstacles": 4.2
+  },
+  {
+   "i": 18,
+   "kind": "robocross",
+   "length": 127.71161725892078,
+   "maps_tried": 1,
+   "layouts_tried": 264,
+   "mean_obstacles": 6.84
+  },
+  {
+   "i": 19,
+   "kind": "robocross",
+   "length": 71.31545648152546,
+   "maps_tried": 1,
+   "layouts_tried": 336,
+   "mean_obstacles": 5.945
+  },
+  {
+   "i": 20,
+   "kind": "robocross",
+   "length": 91.63704046196136,
+   "maps_tried": 1,
+   "layouts_tried": 330,
+   "mean_obstacles": 6.51
+  },
+  {
+   "i": 21,
+   "kind": "robocross",
+   "length": 101.85458496888528,
+   "maps_tried": 1,
+   "layouts_tried": 269,
+   "mean_obstacles": 6.375
+  },
+  {
+   "i": 22,
+   "kind": "robocross",
+   "length": 167.97460563225496,
+   "maps_tried": 1,
+   "layouts_tried": 270,
+   "mean_obstacles": 7.165
+  },
+  {
+   "i": 23,
+   "kind": "robocross",
+   "length": 64.5894928718306,
+   "maps_tried": 1,
+   "layouts_tried": 351,
+   "mean_obstacles": 5.535
+  },
+  {
+   "i": 24,
+   "kind": "robocross",
+   "length": 57.53617079042405,
+   "maps_tried": 1,
+   "layouts_tried": 407,
+   "mean_obstacles": 5.545
+  },
+  {
+   "i": 25,
+   "kind": "two_sides/dashed",
+   "length": 96.5,
+   "maps_tried": 1,
+   "layouts_tried": 1899,
+   "mean_obstacles": 2.385
+  },
+  {
+   "i": 26,
+   "kind": "two_sides/dashed",
+   "length": 117.0,
+   "maps_tried": 1,
+   "layouts_tried": 1159,
+   "mean_obstacles": 3.525
+  },
+  {
+   "i": 27,
+   "kind": "two_sides/dashed",
+   "length": 107.5,
+   "maps_tried": 1,
+   "layouts_tried": 473,
+   "mean_obstacles": 5.205
+  },
+  {
+   "i": 28,
+   "kind": "two_sides/dashed",
+   "length": 106.00000000000001,
+   "maps_tried": 1,
+   "layouts_tried": 728,
+   "mean_obstacles": 3.98
+  },
+  {
+   "i": 29,
+   "kind": "two_sides/dashed",
+   "length": 83.0,
+   "maps_tried": 1,
+   "layouts_tried": 1904,
+   "mean_obstacles": 2.355
+  },
+  {
+   "i": 30,
+   "kind": "two_sides/dashed",
+   "length": 160.50000000000037,
+   "maps_tried": 1,
+   "layouts_tried": 345,
+   "mean_obstacles": 6.085
+  },
+  {
+   "i": 31,
+   "kind": "two_sides/dashed",
+   "length": 109.0,
+   "maps_tried": 1,
+   "layouts_tried": 619,
+   "mean_obstacles": 4.695
+  },
+  {
+   "i": 32,
+   "kind": "two_sides/dashed",
+   "length": 66.0,
+   "maps_tried": 1,
+   "layouts_tried": 768,
+   "mean_obstacles": 3.725
+  },
+  {
+   "i": 33,
+   "kind": "two_sides/dashed",
+   "length": 175.49999999999997,
+   "maps_tried": 1,
+   "layouts_tried": 1153,
+   "mean_obstacles": 3.39
+  },
+  {
+   "i": 34,
+   "kind": "two_sides/dashed",
+   "length": 97.0,
+   "maps_tried": 1,
+   "layouts_tried": 2393,
+   "mean_obstacles": 2.4
+  },
+  {
+   "i": 35,
+   "kind": "two_sides/dashed",
+   "length": 76.99999999999984,
+   "maps_tried": 1,
+   "layouts_tried": 409,
+   "mean_obstacles": 5.595
+  },
+  {
+   "i": 36,
+   "kind": "two_sides/dashed",
+   "length": 111.5,
+   "maps_tried": 2,
+   "layouts_tried": 839,
+   "mean_obstacles": 3.595
+  },
+  {
+   "i": 37,
+   "kind": "two_sides/dashed",
+   "length": 49.0,
+   "maps_tried": 1,
+   "layouts_tried": 803,
+   "mean_obstacles": 3.68
+  },
+  {
+   "i": 38,
+   "kind": "two_sides/dashed",
+   "length": 149.0,
+   "maps_tried": 1,
+   "layouts_tried": 286,
+   "mean_obstacles": 6.565
+  },
+  {
+   "i": 39,
+   "kind": "two_sides/dashed",
+   "length": 74.0,
+   "maps_tried": 1,
+   "layouts_tried": 460,
+   "mean_obstacles": 4.94
+  },
+  {
+   "i": 40,
+   "kind": "two_sides/objects",
+   "length": 104.49999999999997,
+   "maps_tried": 2,
+   "layouts_tried": 450,
+   "mean_obstacles": 5.68
+  },
+  {
+   "i": 41,
+   "kind": "two_sides/objects",
+   "length": 121.0,
+   "maps_tried": 1,
+   "layouts_tried": 767,
+   "mean_obstacles": 4.215
+  },
+  {
+   "i": 42,
+   "kind": "two_sides/objects",
+   "length": 50.0,
+   "maps_tried": 1,
+   "layouts_tried": 1034,
+   "mean_obstacles": 2.94
+  },
+  {
+   "i": 43,
+   "kind": "two_sides/objects",
+   "length": 104.00000000000001,
+   "maps_tried": 1,
+   "layouts_tried": 1184,
+   "mean_obstacles": 3.3
+  },
+  {
+   "i": 44,
+   "kind": "two_sides/objects",
+   "length": 146.0,
+   "maps_tried": 1,
+   "layouts_tried": 510,
+   "mean_obstacles": 5.135
+  },
+  {
+   "i": 45,
+   "kind": "two_sides/objects",
+   "length": 87.0,
+   "maps_tried": 2,
+   "layouts_tried": 3982,
+   "mean_obstacles": 3.17
+  },
+  {
+   "i": 46,
+   "kind": "two_sides/objects",
+   "length": 107.0,
+   "maps_tried": 1,
+   "layouts_tried": 2393,
+   "mean_obstacles": 2.49
+  },
+  {
+   "i": 47,
+   "kind": "two_sides/objects",
+   "length": 149.99999999999977,
+   "maps_tried": 1,
+   "layouts_tried": 2451,
+   "mean_obstacles": 2.24
+  },
+  {
+   "i": 48,
+   "kind": "two_sides/objects",
+   "length": 95.5,
+   "maps_tried": 1,
+   "layouts_tried": 2631,
+   "mean_obstacles": 2.14
+  },
+  {
+   "i": 49,
+   "kind": "two_sides/objects",
+   "length": 95.0,
+   "maps_tried": 1,
+   "layouts_tried": 623,
+   "mean_obstacles": 4.61
+  },
+  {
+   "i": 50,
+   "kind": "two_sides/objects",
+   "length": 146.5,
+   "maps_tried": 1,
+   "layouts_tried": 824,
+   "mean_obstacles": 4.395
+  },
+  {
+   "i": 51,
+   "kind": "two_sides/objects",
+   "length": 103.0,
+   "maps_tried": 1,
+   "layouts_tried": 1496,
+   "mean_obstacles": 3.095
+  },
+  {
+   "i": 52,
+   "kind": "two_sides/objects",
+   "length": 102.50000000000011,
+   "maps_tried": 1,
+   "layouts_tried": 1237,
+   "mean_obstacles": 3.385
+  },
+  {
+   "i": 53,
+   "kind": "two_sides/objects",
+   "length": 56.5,
+   "maps_tried": 1,
+   "layouts_tried": 985,
+   "mean_obstacles": 3.16
+  },
+  {
+   "i": 54,
+   "kind": "two_sides/objects",
+   "length": 43.0,
+   "maps_tried": 1,
+   "layouts_tried": 1826,
+   "mean_obstacles": 2.115
+  },
+  {
+   "i": 55,
+   "kind": "two_sides/mixed",
+   "length": 130.5,
+   "maps_tried": 1,
+   "layouts_tried": 801,
+   "mean_obstacles": 4.13
+  },
+  {
+   "i": 56,
+   "kind": "two_sides/mixed",
+   "length": 51.5,
+   "maps_tried": 1,
+   "layouts_tried": 754,
+   "mean_obstacles": 3.86
+  },
+  {
+   "i": 57,
+   "kind": "two_sides/mixed",
+   "length": 78.5,
+   "maps_tried": 2,
+   "layouts_tried": 4360,
+   "mean_obstacles": 3.41
+  },
+  {
+   "i": 58,
+   "kind": "two_sides/mixed",
+   "length": 49.5,
+   "maps_tried": 2,
+   "layouts_tried": 1239,
+   "mean_obstacles": 2.73
+  },
+  {
+   "i": 59,
+   "kind": "two_sides/mixed",
+   "length": 89.0,
+   "maps_tried": 1,
+   "layouts_tried": 1661,
+   "mean_obstacles": 2.53
+  },
+  {
+   "i": 60,
+   "kind": "two_sides/mixed",
+   "length": 125.0,
+   "maps_tried": 1,
+   "layouts_tried": 1229,
+   "mean_obstacles": 3.175
+  },
+  {
+   "i": 61,
+   "kind": "two_sides/mixed",
+   "length": 167.5,
+   "maps_tried": 1,
+   "layouts_tried": 342,
+   "mean_obstacles": 6.215
+  },
+  {
+   "i": 62,
+   "kind": "two_sides/mixed",
+   "length": 139.0,
+   "maps_tried": 2,
+   "layouts_tried": 440,
+   "mean_obstacles": 5.445
+  },
+  {
+   "i": 63,
+   "kind": "two_sides/mixed",
+   "length": 121.0,
+   "maps_tried": 1,
+   "layouts_tried": 363,
+   "mean_obstacles": 5.665
+  },
+  {
+   "i": 64,
+   "kind": "two_sides/mixed",
+   "length": 114.00000000000006,
+   "maps_tried": 1,
+   "layouts_tried": 1601,
+   "mean_obstacles": 2.81
+  },
+  {
+   "i": 65,
+   "kind": "two_sides/mixed",
+   "length": 55.0,
+   "maps_tried": 2,
+   "layouts_tried": 4658,
+   "mean_obstacles": 2.69
+  },
+  {
+   "i": 66,
+   "kind": "two_sides/mixed",
+   "length": 135.0,
+   "maps_tried": 2,
+   "layouts_tried": 544,
+   "mean_obstacles": 4.865
+  },
+  {
+   "i": 67,
+   "kind": "two_sides/mixed",
+   "length": 103.0,
+   "maps_tried": 1,
+   "layouts_tried": 402,
+   "mean_obstacles": 5.69
+  },
+  {
+   "i": 68,
+   "kind": "two_sides/mixed",
+   "length": 137.5,
+   "maps_tried": 1,
+   "layouts_tried": 274,
+   "mean_obstacles": 6.69
+  },
+  {
+   "i": 69,
+   "kind": "two_sides/mixed",
+   "length": 142.5,
+   "maps_tried": 1,
+   "layouts_tried": 752,
+   "mean_obstacles": 4.255
+  },
+  {
+   "i": 70,
+   "kind": "one_side",
+   "length": 92.0,
+   "maps_tried": 1,
+   "layouts_tried": 1143,
+   "mean_obstacles": 2.785
+  },
+  {
+   "i": 71,
+   "kind": "one_side",
+   "length": 98.0,
+   "maps_tried": 1,
+   "layouts_tried": 636,
+   "mean_obstacles": 4.77
+  },
+  {
+   "i": 72,
+   "kind": "one_side",
+   "length": 118.0,
+   "maps_tried": 1,
+   "layouts_tried": 597,
+   "mean_obstacles": 4.5
+  },
+  {
+   "i": 73,
+   "kind": "one_side",
+   "length": 167.0,
+   "maps_tried": 1,
+   "layouts_tried": 363,
+   "mean_obstacles": 6.02
+  },
+  {
+   "i": 74,
+   "kind": "one_side",
+   "length": 42.0,
+   "maps_tried": 1,
+   "layouts_tried": 748,
+   "mean_obstacles": 3.565
+  },
+  {
+   "i": 75,
+   "kind": "one_side",
+   "length": 45.0,
+   "maps_tried": 1,
+   "layouts_tried": 648,
+   "mean_obstacles": 3.66
+  },
+  {
+   "i": 76,
+   "kind": "one_side",
+   "length": 165.0,
+   "maps_tried": 1,
+   "layouts_tried": 384,
+   "mean_obstacles": 5.715
+  },
+  {
+   "i": 77,
+   "kind": "one_side",
+   "length": 131.5,
+   "maps_tried": 1,
+   "layouts_tried": 352,
+   "mean_obstacles": 5.835
+  },
+  {
+   "i": 78,
+   "kind": "one_side",
+   "length": 56.5,
+   "maps_tried": 1,
+   "layouts_tried": 1793,
+   "mean_obstacles": 2.545
+  },
+  {
+   "i": 79,
+   "kind": "one_side",
+   "length": 106.0,
+   "maps_tried": 1,
+   "layouts_tried": 691,
+   "mean_obstacles": 4.995
+  },
+  {
+   "i": 80,
+   "kind": "one_side",
+   "length": 48.5,
+   "maps_tried": 1,
+   "layouts_tried": 2117,
+   "mean_obstacles": 2.105
+  },
+  {
+   "i": 81,
+   "kind": "one_side",
+   "length": 164.0,
+   "maps_tried": 1,
+   "layouts_tried": 773,
+   "mean_obstacles": 4.14
+  },
+  {
+   "i": 82,
+   "kind": "one_side",
+   "length": 100.0,
+   "maps_tried": 1,
+   "layouts_tried": 620,
+   "mean_obstacles": 4.065
+  },
+  {
+   "i": 83,
+   "kind": "one_side",
+   "length": 96.0,
+   "maps_tried": 1,
+   "layouts_tried": 342,
+   "mean_obstacles": 5.68
+  },
+  {
+   "i": 84,
+   "kind": "one_side",
+   "length": 116.0,
+   "maps_tried": 1,
+   "layouts_tried": 872,
+   "mean_obstacles": 3.78
+  },
+  {
+   "i": 85,
+   "kind": "open",
+   "length": 141.0,
+   "maps_tried": 1,
+   "layouts_tried": 301,
+   "mean_obstacles": 6.775
+  },
+  {
+   "i": 86,
+   "kind": "open",
+   "length": 59.5,
+   "maps_tried": 2,
+   "layouts_tried": 324,
+   "mean_obstacles": 6.21
+  },
+  {
+   "i": 87,
+   "kind": "open",
+   "length": 144.00000000000003,
+   "maps_tried": 2,
+   "layouts_tried": 591,
+   "mean_obstacles": 4.745
+  },
+  {
+   "i": 88,
+   "kind": "open",
+   "length": 126.5,
+   "maps_tried": 1,
+   "layouts_tried": 943,
+   "mean_obstacles": 4.3
+  },
+  {
+   "i": 89,
+   "kind": "open",
+   "length": 101.0,
+   "maps_tried": 1,
+   "layouts_tried": 297,
+   "mean_obstacles": 6.615
+  },
+  {
+   "i": 90,
+   "kind": "open",
+   "length": 122.0,
+   "maps_tried": 1,
+   "layouts_tried": 1159,
+   "mean_obstacles": 3.35
+  },
+  {
+   "i": 91,
+   "kind": "open",
+   "length": 90.5,
+   "maps_tried": 2,
+   "layouts_tried": 496,
+   "mean_obstacles": 5.11
+  },
+  {
+   "i": 92,
+   "kind": "open",
+   "length": 89.0,
+   "maps_tried": 1,
+   "layouts_tried": 1214,
+   "mean_obstacles": 3.175
+  },
+  {
+   "i": 93,
+   "kind": "open",
+   "length": 74.0,
+   "maps_tried": 2,
+   "layouts_tried": 613,
+   "mean_obstacles": 4.28
+  },
+  {
+   "i": 94,
+   "kind": "open",
+   "length": 92.0,
+   "maps_tried": 1,
+   "layouts_tried": 568,
+   "mean_obstacles": 4.27
+  },
+  {
+   "i": 95,
+   "kind": "open",
+   "length": 89.0,
+   "maps_tried": 1,
+   "layouts_tried": 471,
+   "mean_obstacles": 5.17
+  },
+  {
+   "i": 96,
+   "kind": "open",
+   "length": 61.5,
+   "maps_tried": 1,
+   "layouts_tried": 1094,
+   "mean_obstacles": 3.365
+  },
+  {
+   "i": 97,
+   "kind": "open",
+   "length": 96.0,
+   "maps_tried": 1,
+   "layouts_tried": 2554,
+   "mean_obstacles": 2.03
+  },
+  {
+   "i": 98,
+   "kind": "open",
+   "length": 116.0,
+   "maps_tried": 3,
+   "layouts_tried": 297,
+   "mean_obstacles": 6.5
+  },
+  {
+   "i": 99,
+   "kind": "open",
+   "length": 166.5,
+   "maps_tried": 1,
+   "layouts_tried": 256,
+   "mean_obstacles": 6.755
+  }
+ ]
+}

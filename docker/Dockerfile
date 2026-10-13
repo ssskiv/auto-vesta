@@ -59,6 +59,20 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
      ros-humble-pointcloud-to-laserscan \
     && rm -rf /var/lib/apt/lists/*
 
+# Neural controller: ONNX Runtime C++ for the Nav2 plugin (vesta_neural_controller)
+ARG ONNXRUNTIME_VERSION=1.23.2
+RUN wget -qO- https://github.com/microsoft/onnxruntime/releases/download/v${ONNXRUNTIME_VERSION}/onnxruntime-linux-x64-${ONNXRUNTIME_VERSION}.tgz \
+        | tar xz -C /opt \
+    && mv /opt/onnxruntime-linux-x64-${ONNXRUNTIME_VERSION} /opt/onnxruntime \
+    && echo /opt/onnxruntime/lib > /etc/ld.so.conf.d/onnxruntime.conf && ldconfig
+
+# RL training (vesta_rl). numpy<2 keeps ROS Humble's Python packages working;
+# setuptools==58.2.0 because tensorboard pulls in a new setuptools that breaks
+# colcon's ament_python builds against Ubuntu 22.04's old `packaging`.
+RUN pip3 install --no-cache-dir "numpy<2" "scipy>=1.11,<1.15" torch stable-baselines3 gymnasium \
+        onnx onnxruntime tensorboard \
+    && pip3 install --no-cache-dir setuptools==58.2.0
+
 
 ENV RMW_IMPLEMENTATION=rmw_fastrtps_cpp
 ENV ROS_DOMAIN_ID=0
@@ -75,7 +89,8 @@ RUN echo 'source /opt/ros/humble/setup.bash' >> /root/.bashrc && \
     echo "PS1='${debian_chroot:+($debian_chroot)}\[\033[01;31m\]\u@\h\[\033[00m\]:\[\033[01;33m\]\w\[\033[00m\]\$ '" \
         >> /root/.bashrc && \
     echo "USERNAME=root" \
-        >> /root/.bashrc
+        >> /root/.bashrc && \
+    echo "USER=root" >> /root/.bashrc
 
 WORKDIR /ros2_ws
 

@@ -2,8 +2,9 @@
 import os
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
+from launch.conditions import IfCondition
 from launch.substitutions import LaunchConfiguration
-from ament_index_python.packages import get_package_share_directory
+from ament_index_python.packages import get_package_share_directory, PackageNotFoundError
 from launch_ros.actions import Node
 from launch_ros.descriptions import ParameterFile
 from nav2_common.launch import RewrittenYaml
@@ -19,6 +20,12 @@ def generate_launch_description():
     map_yaml = LaunchConfiguration('map')
     params_file = LaunchConfiguration('params_file')
     use_sim_time = LaunchConfiguration('use_sim_time')
+    model = LaunchConfiguration('model')
+    try:
+        default_model = os.path.join(
+            get_package_share_directory('vesta_neural_controller'), 'models', 'policy.onnx')
+    except PackageNotFoundError:
+        default_model = ''
 
     lifecycle_nodes = [
         'map_server',
@@ -32,6 +39,7 @@ def generate_launch_description():
             param_rewrites={
                 'use_sim_time': use_sim_time,
                 'yaml_filename': map_yaml,
+                'model_path': model,
             },
             convert_types=True),
         allow_substs=True)
@@ -92,6 +100,17 @@ def generate_launch_description():
         }],
     )
 
+    # RViz "2D Goal Pose" (/goal_pose) -> plan -> FollowPath. Replaces bt_navigator,
+    # whose recoveries (spin in place, back up) an Ackermann car can't do.
+    goal_follower = Node(
+        package='vesta_rl',
+        executable='goal_follower',
+        name='goal_follower',
+        output='screen',
+        condition=IfCondition(LaunchConfiguration('goal_follower')),
+        parameters=[{'use_sim_time': use_sim_time}],
+    )
+
     return LaunchDescription([
         DeclareLaunchArgument(
             'map',
@@ -104,9 +123,19 @@ def generate_launch_description():
             description='Full path to the Nav2 parameters file'
         ),
         DeclareLaunchArgument(
+            'model',
+            default_value=default_model,
+            description='ONNX policy for vesta_neural_controller (empty or missing = fallback only)'
+        ),
+        DeclareLaunchArgument(
             'use_sim_time',
             default_value=str(USE_SIM_TIME).lower(),
             description='Use simulation (Webots) clock'
+        ),
+        DeclareLaunchArgument(
+            'goal_follower',
+            default_value='true',
+            description='Drive to goals clicked in RViz ("2D Goal Pose" -> /goal_pose)'
         ),
         DeclareLaunchArgument('map_odom_x', default_value='0.0'),
         DeclareLaunchArgument('map_odom_y', default_value='0.0'),
@@ -116,4 +145,5 @@ def generate_launch_description():
         planner_server,
         controller_server,
         lifecycle_manager,
+        goal_follower,
     ])

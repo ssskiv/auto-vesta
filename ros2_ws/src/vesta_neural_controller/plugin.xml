@@ -1,0 +1,5 @@
+<library path="vesta_neural_controller">
+  <class type="vesta_neural_controller::NeuralController" base_class_type="nav2_core::Controller">
+    <description>RL policy (ONNX) + classical fallback, arbitrated by footprint rollouts on the local costmap.</description>
+  </class>
+</library>
