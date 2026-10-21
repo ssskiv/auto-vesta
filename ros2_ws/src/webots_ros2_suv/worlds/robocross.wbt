@@ -36,9 +36,10 @@ WorldInfo {
   ]
 }
 Viewpoint {
-  orientation -0.17843641152971212 -0.09496934842010782 0.9793575802029917 3.8607517218709444
-  position 20.932208681385298 9.422973514905046 10.658689416063641
-  follow "vehicle"
+  orientation 0 1 0 0.35
+  position -7.5 -2.26 5
+  follow "vesta"
+  followType "Mounted Shot"
 }
 TexturedBackground {
 }
