@@ -6,7 +6,7 @@ from geometry_msgs.msg import Quaternion, TransformStamped, Twist
 from rclpy.parameter import Parameter
 from sensor_msgs.msg import Imu, JointState, PointCloud2
 from sensor_msgs_py import point_cloud2
-from std_msgs.msg import Float64, Header
+from std_msgs.msg import Float64, Header, Int32
 from tf2_ros import TransformBroadcaster
 from rclpy.qos import qos_profile_sensor_data, QoSReliabilityPolicy
 
@@ -56,6 +56,8 @@ class VestaDriver:
         self.__last_cmd_time = time.monotonic()
         self.__orientation = Quaternion(x=0.0, y=0.0, z=0.0, w=1.0)
         self.__gps_origin = None
+        self.__barrels_request = None
+        self.__barrels_countdown = 0
 
 
         qos = qos_profile_sensor_data
@@ -85,6 +87,8 @@ class VestaDriver:
         self.__node.create_subscription(Twist, '/cmd_vel', self.__on_cmd_vel, qos)
         self.__node.create_subscription(Imu, '/vesta/imu/data', self.__on_imu, qos)
         self.__node.create_subscription(PointCloud2, '/vesta/lidar/point_cloud', self.__on_point_cloud, qos)
+        # New barrel layout (RobocrossBarrels.proto) with this randomSeed (<= 0: random).
+        self.__node.create_subscription(Int32, '/vesta/barrels_seed', self.__on_barrels_seed, 1)
         
         self.__tf_broadcaster = TransformBroadcaster(self.__node)
         self.__imu_publisher = self.__node.create_publisher(Imu, '/imu/data', qos)
@@ -113,8 +117,20 @@ class VestaDriver:
             self.__steer = _clamp(math.atan2(-msg.angular.z * WHEELBASE, linear_x), -MAX_STEER, MAX_STEER)
         self.__last_cmd_time = time.monotonic()
 
+    def __on_barrels_seed(self, msg):
+        self.__barrels_request = msg.data
+
     def step(self):
         rclpy.spin_once(self.__node, timeout_sec=0)
+
+        if self.__barrels_request is not None:
+            if self.__barrels_countdown == 0:
+                self.__barrels_countdown = self.__announce_reseed(self.__barrels_request)
+            else:
+                self.__barrels_countdown -= 1
+            if self.__barrels_countdown == 0:
+                self.__reseed_barrels(self.__barrels_request)
+                self.__barrels_request = None
 
         if time.monotonic() - self.__last_cmd_time > COMMAND_TIMEOUT:
             self.__driver.setThrottle(0.0)
@@ -134,6 +150,38 @@ class VestaDriver:
         self.__radar_publisher.publish(self.__radar_point_cloud())
         self.__joint_state_pub.publish(self.__joint_states())
         self.__tf_broadcaster.sendTransform(self.__base_link_transform())
+
+    def __announce_reseed(self, seed):
+        """Tell the referee (DEF REFEREE, customData) that the barrels go away, before removing them.
+
+        The referee steps in parallel with this controller; if the barrels were removed in the same step it
+        would read the removed nodes ("node not found" warnings, junk positions). -> steps to wait.
+        """
+        referee = self.__driver.getFromDef('REFEREE')
+        if referee is None:
+            return 0
+        referee.getField('customData').setSFString(f'barrels {seed} {time.monotonic():.3f}')
+        return 3
+
+    def __reseed_barrels(self, seed):
+        """Replace DEF BARRELS by a RobocrossBarrels with another randomSeed (same other fields).
+
+        Remove + import, not setSFInt32 on the live node: Webots R2025a segfaulted when the
+        field was changed after a supervisor had read the barrels inside the PROTO; remove()
+        drops those references properly (tools/place_barrels.py). The world must declare the
+        PROTO as IMPORTABLE EXTERNPROTO.
+        """
+        node = self.__driver.getFromDef('BARRELS')
+        if node is None:
+            self.__node.get_logger().warn('no DEF BARRELS RobocrossBarrels in the world')
+            return
+        task = node.getField('task').getSFString()
+        count = node.getField('count').getSFInt32()
+        p_pair = node.getField('pPair').getSFFloat()
+        node.remove()
+        self.__driver.getRoot().getField('children').importMFNodeFromString(
+            -1, f'DEF BARRELS RobocrossBarrels {{ randomSeed {seed} task "{task}" count {count} pPair {p_pair} }}')
+        self.__node.get_logger().info(f'barrels: new layout, randomSeed {seed}')
 
     def __base_link_transform(self):
         """odom->base_link from the GPS position and Xsens IMU orientation.
