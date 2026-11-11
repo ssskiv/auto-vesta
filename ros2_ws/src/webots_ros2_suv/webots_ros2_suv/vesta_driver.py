@@ -3,6 +3,7 @@ import os
 import time
 
 import rclpy
+from builtin_interfaces.msg import Time
 from geometry_msgs.msg import PoseStamped, Quaternion, TransformStamped, Twist
 from nav_msgs.msg import Odometry
 from rclpy.parameter import Parameter
@@ -111,10 +112,16 @@ class VestaDriver:
         self.__odom_pub = self.__node.create_publisher(Odometry, '/odom', qos)
 
 
+    def __sim_stamp(self):
+        """Webots simulation time (== /clock), exact for this step, independent of how far the node's own clock lags."""
+        t = self.__driver.getTime()
+        sec = int(t)
+        return Time(sec=sec, nanosec=int((t - sec) * 1e9))
+
     def __on_imu(self, msg):
         try:
             p = msg
-            p.header.stamp = self.__node.get_clock().now().to_msg()
+            p.header.stamp = self.__sim_stamp()
             self.__imu_publisher.publish(p)
             self.__orientation = msg.orientation
             self.__yaw_rate = msg.angular_velocity.z
@@ -139,7 +146,9 @@ class VestaDriver:
         self.__barrels_request = msg.data
 
     def step(self):
-        rclpy.spin_once(self.__node, timeout_sec=0)
+        # spin_once handles ONE callback; with imu, lidar, /clock and /cmd_vel pending it lagged behind by several steps
+        for _ in range(16):
+            rclpy.spin_once(self.__node, timeout_sec=0)
 
         if self.__teleport_request is not None:
             self.__teleport(self.__teleport_request)
@@ -266,7 +275,7 @@ class VestaDriver:
         the vehicle happens to spawn in the world.
         """
         t = TransformStamped()
-        t.header.stamp = self.__node.get_clock().now().to_msg()
+        t.header.stamp = self.__sim_stamp()
         t.header.frame_id = ODOM_FRAME
         t.child_frame_id = BASE_FRAME
         t.transform.rotation = self.__orientation
@@ -281,7 +290,7 @@ class VestaDriver:
         return t
 
     def __radar_point_cloud(self):
-        header = Header(frame_id=RADAR_FRAME, stamp=self.__node.get_clock().now().to_msg())
+        header = Header(frame_id=RADAR_FRAME, stamp=self.__sim_stamp())
         points = [
             # Webots' azimuth sign is flipped from the usual math convention: per
             # WbRadar.cpp, a target on the sensor's local +y side gets a NEGATIVE
@@ -295,7 +304,7 @@ class VestaDriver:
     def __on_point_cloud(self, data):
         try:
             p = data
-            p.header.stamp = self.__node.get_clock().now().to_msg()
+            p.header.stamp = self.__sim_stamp()
             p.header.frame_id = 'lidar_link'
             self.__lidar_publisher.publish(p)
         except  Exception as err:
@@ -304,7 +313,7 @@ class VestaDriver:
     def __joint_states(self):
         steer = self.__driver.getSteeringAngle()* -1
         msg = JointState()
-        msg.header.stamp = self.__node.get_clock().now().to_msg()
+        msg.header.stamp = self.__sim_stamp()
         msg.name = list(STEER_JOINTS) + [joint_name for _, joint_name in self.__wheel_sensors]
         msg.position = [steer] * len(STEER_JOINTS) + [sensor.getValue() for sensor, _ in self.__wheel_sensors]
         return msg
