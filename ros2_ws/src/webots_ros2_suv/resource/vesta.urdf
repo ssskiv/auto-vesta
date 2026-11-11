@@ -167,12 +167,14 @@
         <origin xyz="1.55 0 1.05" rpy="0 0 0"/>
     </joint>
 
-    <!-- base_footprint: ground level under the rear axle (base_link is 0.4 m above ground in Webots). -->
+    <!-- base_footprint: ground level under the rear axle. MEASURED in Webots: after the suspension settles base_link
+         is 0.108 m above ground (ground plane fitted from stereo and VLP-16 ground returns agree within 1 cm);
+         0.4 m is only the spawn drop height of the world file. -->
     <link name="base_footprint"/>
     <joint name="base_footprint_joint" type="fixed">
         <parent link="base_link"/>
         <child link="base_footprint"/>
-        <origin xyz="0 0 -0.4" rpy="0 0 0"/>
+        <origin xyz="0 0 -0.108" rpy="0 0 0"/>
     </joint>
 
     <!-- Stereo pair (Webots only so far): baseline 0.20 m, same mount as camera_link. *_link are body axes
