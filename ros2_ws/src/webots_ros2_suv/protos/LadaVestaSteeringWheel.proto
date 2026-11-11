@@ -7,7 +7,7 @@
 # LadaVesta.proto consistent with the rest of the family (a LadaVesta*
 # proto per slot) and gives a single place to plug in custom geometry later.
 
-EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2022b/projects/vehicles/protos/abstract/CarSteeringWheel.proto"
+EXTERNPROTO "webots/projects/vehicles/protos/abstract/CarSteeringWheel.proto"
 
 PROTO LadaVestaSteeringWheel [
 ]

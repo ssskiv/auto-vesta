@@ -5,8 +5,8 @@
 # Model of the Lada Vesta wheels using the generic VehicleWheel PROTO including physic properties and baseColorMaps.
 # Tire/rim radii correspond to a stock 185/65R15 fitment.
 
-EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2022b/projects/vehicles/protos/abstract/VehicleWheel.proto"
-EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2022b/projects/vehicles/protos/abstract/GenericTireAppearance.proto"
+EXTERNPROTO "webots/projects/vehicles/protos/abstract/VehicleWheel.proto"
+EXTERNPROTO "webots/projects/vehicles/protos/abstract/GenericTireAppearance.proto"
 
 PROTO LadaVestaWheel [
   field       SFString name           "Lada Vesta wheel"  # Is `VehicleWheel.name`.
