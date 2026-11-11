@@ -1,4 +1,5 @@
 import math
+import os
 import time
 
 import rclpy
@@ -100,6 +101,8 @@ class VestaDriver:
         # New barrel layout (RobocrossBarrels.proto) with this randomSeed (<= 0: random).
         self.__node.create_subscription(Int32, '/vesta/barrels_seed', self.__on_barrels_seed, 1)
         
+        # VESTA_PUBLISH_ODOM_TF=0 (set by a localization stack that owns odom->base_link): do not broadcast it.
+        self.__publish_odom_tf = os.environ.get('VESTA_PUBLISH_ODOM_TF', '1').lower() not in ('0', 'false', 'no')
         self.__tf_broadcaster = TransformBroadcaster(self.__node)
         self.__imu_publisher = self.__node.create_publisher(Imu, '/imu/data', qos)
         self.__lidar_publisher = self.__node.create_publisher(PointCloud2, '/lidar', qos)
@@ -168,7 +171,8 @@ class VestaDriver:
         self.__radar_publisher.publish(self.__radar_point_cloud())
         self.__joint_state_pub.publish(self.__joint_states())
         base_link = self.__base_link_transform()
-        self.__tf_broadcaster.sendTransform(base_link)
+        if self.__publish_odom_tf:
+            self.__tf_broadcaster.sendTransform(base_link)
         self.__odom_pub.publish(self.__odometry(base_link))
 
     def __odometry(self, base_link):

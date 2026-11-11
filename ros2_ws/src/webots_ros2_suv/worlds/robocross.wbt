@@ -2018,6 +2018,44 @@ DEF Vesta1 LadaVesta {
   supervisor TRUE
   sensorsSlotFront [
     Camera {
+      translation -2.21 0.1 0.42
+      rotation 0 0 1 0
+      name "stereo_left_camera"
+      width 1280
+      height 720
+      fieldOfView 1.0
+      near 0.1
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.05 0.05 0.05
+          }
+          geometry Box {
+            size 0.04 0.03 0.03
+          }
+        }
+      ]
+    }
+    Camera {
+      translation -2.21 -0.1 0.42
+      rotation 0 0 1 0
+      name "stereo_right_camera"
+      width 1280
+      height 720
+      fieldOfView 1.0
+      near 0.1
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.05 0.05 0.05
+          }
+          geometry Box {
+            size 0.04 0.03 0.03
+          }
+        }
+      ]
+    }
+    Camera {
       translation -2.21 0 0.42
       rotation 0 0 1 0
       name "rgb_camera"
