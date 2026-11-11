@@ -7,6 +7,7 @@ EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/project
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/road/protos/RoadLine.proto"
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/traffic/protos/GenericTrafficLight.proto"
 EXTERNPROTO "../protos/PlasticBarrel.proto"
+IMPORTABLE EXTERNPROTO "../protos/RobocrossBarrels.proto"
 EXTERNPROTO "../protos/LadaVesta.proto"
 EXTERNPROTO "../protos/RobocrossSign.proto"
 EXTERNPROTO "../protos/WinderStart.proto"
@@ -2005,103 +2006,7 @@ DEF Terrain RectangleArena {
     metalness 0
   }
 }
-PlasticBarrel {
-  translation 112.348 -14.3338 0.1
-  name "PlasticBarrel(3)"
-}
-PlasticBarrel {
-  translation 117.388 -5.8738 0.1
-  name "PlasticBarrel(11)"
-}
-PlasticBarrel {
-  translation 125.73 -17.6176 0.1
-  rotation 0 0 1 -0.519185307179586
-  name "PlasticBarrel(12)"
-}
-PlasticBarrel {
-  translation 126.24 -16.7324 0.1
-  rotation 0 0 1 -0.519185307179586
-  name "PlasticBarrel(13)"
-}
-PlasticBarrel {
-  translation 145.489 -23.2952 0.1
-  rotation 0 0 1 -0.519185307179586
-  name "PlasticBarrel(14)"
-}
-PlasticBarrel {
-  translation 140.931 -31.2566 0.1
-  rotation 0 0 1 -0.519185307179586
-  name "PlasticBarrel(15)"
-}
-PlasticBarrel {
-  translation 131.142 -65.667 0.31
-  rotation 0 0 -1 0.257185
-  name "PlasticBarrel(18)"
-}
-PlasticBarrel {
-  translation 148.518 -73.2894 0.1
-  rotation 0 0 -1 0.257185
-  name "PlasticBarrel(28)"
-}
-PlasticBarrel {
-  translation 148.239 -74.3536 0.1
-  rotation 0 0 -1 0.257185
-  name "PlasticBarrel(29)"
-}
-PlasticBarrel {
-  translation 129.209 -72.893 0.35
-  rotation 0 0 -1 0.257185
-  name "PlasticBarrel(19)"
-}
-PlasticBarrel {
-  translation 107.212 -67.8576 0.1
-  rotation 0 0 -1 0.257185
-  name "PlasticBarrel(20)"
-}
-PlasticBarrel {
-  translation 108.473 -63.1368 0.1
-  rotation 0 0 -1 0.257185
-  name "PlasticBarrel(21)"
-}
-PlasticBarrel {
-  translation 90.413 -54.394 0.1
-  rotation 0 0 -1 0.257185
-  name "PlasticBarrel(22)"
-}
-PlasticBarrel {
-  translation 90.1689 -55.3227 0.1
-  rotation 0 0 -1 0.257185
-  name "PlasticBarrel(23)"
-}
-PlasticBarrel {
-  translation 67.1609 -52.5025 0.23
-  rotation 0 0 -1 0.257185
-  name "PlasticBarrel(24)"
-}
-PlasticBarrel {
-  translation 67.433 -51.4679 0.27
-  rotation 0 0 -1 0.257185
-  name "PlasticBarrel(25)"
-}
-PlasticBarrel {
-  translation 50.1656 -38.1285 0.1
-  rotation 0 0 -1 0.257185
-  name "PlasticBarrel(26)"
-}
-PlasticBarrel {
-  translation 47.6758 -47.5966 0.1
-  rotation 0 0 -1 0.257185
-  name "PlasticBarrel(27)"
-}
-PlasticBarrel {
-  translation 31.1816 -37.3764 0.28
-  rotation 0 0 -1 0.257185
-  name "PlasticBarrel(30)"
-}
-PlasticBarrel {
-  translation 31.4361 -36.4097 0.26
-  rotation 0 0 -1 0.257185
-  name "PlasticBarrel(31)"
+DEF BARRELS RobocrossBarrels {
 }
 DEF Vesta1 LadaVesta {
   translation 2.43536 -2.26087 0.4
@@ -2235,50 +2140,6 @@ DEF Vesta1 LadaVesta {
   ]
 }
 
-PlasticBarrel {
-  translation 21.1635 -6.10833 0.1
-  name "PlasticBarrel(2)"
-}
-PlasticBarrel {
-  translation 35.8732 -1.36218 0.1
-  name "PlasticBarrel(1)"
-}
-PlasticBarrel {
-  translation 55.3437 -0.387974 0.1
-  name "PlasticBarrel(6)"
-}
-PlasticBarrel {
-  translation 98.53 -2.27209 0.1
-  name "PlasticBarrel(8)"
-}
-PlasticBarrel {
-  translation 98.552 -3.14603 0.1
-  name "PlasticBarrel(10)"
-}
-PlasticBarrel {
-  translation 75.7109 5.10587 0.1
-  name "PlasticBarrel(9)"
-}
-PlasticBarrel {
-  translation 75.7109 -2.68413 0.1
-  name "PlasticBarrel(16)"
-}
-PlasticBarrel {
-  translation 75.7109 -10.5641 0.1
-  name "PlasticBarrel(17)"
-}
-PlasticBarrel {
-  translation 55.5218 -8.42203 0.1
-  name "PlasticBarrel(7)"
-}
-PlasticBarrel {
-  translation 35.887 -0.370103 0.1
-  name "PlasticBarrel(5)"
-}
-PlasticBarrel {
-  translation 20.9783 -7.36268 0.1
-  name "PlasticBarrel(4)"
-}
 Forest {
   translation 78.43 -26.32 -0.11
   shape [
@@ -2466,4 +2327,9 @@ SolidBox {
     metalness 0
   }
   castShadows FALSE
+}
+DEF REFEREE Robot {
+  name "referee"
+  controller "<extern>"
+  supervisor TRUE
 }

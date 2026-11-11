@@ -1,22 +1,15 @@
-# Карты
+# Map
 
-`nav2.launch.py` по умолчанию грузит `maps/robocross.yaml` (переопределяется
-аргументом `map:=/abs/path.yaml`).
+`robocross.pgm` + `robocross.yaml`: occupancy grid of the track, 0.2 m per cell, origin (-31.4, -113) m.
 
-## Как записать карту
+Frame: the map was recorded starting from the spawn point of `worlds/robocross.wbt`, so the map origin is the
+car's first GPS fix (`odom` origin) up to the spawn offset: world = map + (2.2, -1.6) m (see `WORLD_FROM_MAP` in
+`vesta_autoware/scenario.py` and `webots_ros2_suv/referee.py`).
 
-Карту надо записывать, стартуя из той же точки спавна в `robocross.wbt`: тогда
-начало карты совпадает с началом `odom` (первый GPS-фикс), и `map -> odom` —
-единичный статический TF. Если точка спавна другая — задайте смещение
-аргументами `map_odom_x/y/yaw` у `nav2.launch.py`.
+Used by:
+- `ros2 run vesta_autoware make_maps` - turns it into the Autoware point cloud map and lanelet map;
+- `ros2 run vesta_autoware make_lap` - plans the lap route away from the fence;
+- the bridge (`map_yaml`) - lidar returns on occupied cells are the fence, not objects;
+- the referee - splits the track into the Main and the Additional zone.
 
-```bash
-ros2 launch webots_ros2_suv robot.launch.py
-ros2 launch webots_ros2_suv mapping.launch.py   # pointcloud_to_laserscan + slam_toolbox
-# проехать трассу (teleop), затем:
-ros2 service call /map_saver/save_map nav2_msgs/srv/SaveMap \
-    "{map_topic: map, map_url: $PWD/src/webots_ros2_suv/maps/robocross, image_format: pgm,
-      map_mode: trinary, free_thresh: 0.25, occupied_thresh: 0.65}"
-```
-
-После сохранения пересоберите пакет (`colcon build`), чтобы карта попала в share/.
+Rebuild the package (`colcon build`) after changing the map so it lands in `share/`.

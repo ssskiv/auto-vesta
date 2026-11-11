@@ -11,7 +11,6 @@ from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
 from webots_ros2_driver.webots_launcher import WebotsLauncher
 from webots_ros2_driver.webots_controller import WebotsController
-from nav2_common.launch import RewrittenYaml
 from launch.actions import DeclareLaunchArgument, GroupAction, SetEnvironmentVariable
 from launch.conditions import IfCondition
 from launch.substitutions import LaunchConfiguration, PythonExpression
@@ -19,6 +18,8 @@ from launch_ros.actions import LoadComposableNodes, SetParameter
 from launch_ros.descriptions import ComposableNode, ParameterFile
 #from launch.conditions import IfCondition#, UnlessCondition
 
+
+from webots_ros2_suv import referee as referee_script
 
 PACKAGE_NAME = 'webots_ros2_suv'
 USE_SIM_TIME = True
@@ -42,6 +43,13 @@ def generate_launch_description():
             {'robot_description': robot_description_path}
         ],
         respawn=True
+    )
+
+    # Automatic referee (РобоКросс.Трасса-2026 scoring), extern controller of the Robot "referee"
+    referee = launch.actions.ExecuteProcess(
+        cmd=[os.path.join(os.environ.get('WEBOTS_HOME', '/usr/local/webots'), 'webots-controller'),
+             '--robot-name=referee', referee_script.__file__],
+        output='screen', respawn=True,
     )
 
     with open(robot_description_path, 'r') as infp:
@@ -75,6 +83,7 @@ def generate_launch_description():
         webots._supervisor,
         vehicle_driver,
         state_publisher_node,
+        referee,
         launch.actions.RegisterEventHandler(
             event_handler=launch.event_handlers.OnProcessExit(
                 target_action=webots,
