@@ -95,20 +95,7 @@
         <axis xyz="0 1 0"/>
     </joint>
 
-    <!-- lidar VLP-16: 103.3mm diameter x 71.7mm cylinder, 1.87m above ground
-         (1.47m above base_link, since base_link sits 0.4m above ground). -->
-    <link name="lidar_link">
-        <visual>
-            <geometry>
-                <cylinder radius="0.0517" length="0.0717"/>
-            </geometry>
-        </visual>
-    </link>
-    <joint name="lidar_joint" type="fixed">
-        <parent link="base_link"/>
-        <child link="lidar_link"/>
-        <origin xyz="0.7 0 1.57" rpy="0 0 0"/>
-    </joint>
+    <!-- No lidar: the VLP-16 was removed from the simulation (camera-only perception test). -->
 
     <!-- Continental radar-21 radar: ~32x90x70mm box, 1.05m above ground (0.65m
          above base_link), 1m forward of base_link, on the vehicle centerline. -->

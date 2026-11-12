@@ -2099,32 +2099,6 @@ DEF Vesta1 LadaVesta {
     }
   ]
   sensorsSlotTop [
-    Lidar {
-      translation -1.29 0 -0.07
-      rotation 0 0 1 0
-      name "lidar"
-      type "rotating"
-      horizontalResolution 1800
-      fieldOfView 6.283185307
-      verticalFieldOfView 0.5236
-      numberOfLayers 16
-      near 0.05
-      minRange 0.3
-      maxRange 100
-      children [
-        Shape {
-          appearance PBRAppearance {
-            baseColor 0.03 0.03 0.03
-            metalness 0.6
-            roughness 0.3
-          }
-          geometry Cylinder {
-            height 0.0717
-            radius 0.0517
-          }
-        }
-      ]
-    }
     GPS {
       translation -1.6 0 -0.27
       rotation 0 0 1 0

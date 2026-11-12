@@ -77,9 +77,11 @@ class VestaDriver:
         self.__radar.enable(timestep)
         self.__gps = self.__driver.getDevice('gps')
         self.__gps.enable(timestep)
+        # The lidar is optional: absent from the world (camera-only test) -> no /lidar topic.
         self.__lidar = self.__driver.getDevice('lidar')
-        self.__lidar.enable(timestep)
-        self.__lidar.enablePointCloud()
+        if self.__lidar is not None:
+            self.__lidar.enable(timestep)
+            self.__lidar.enablePointCloud()
 
         for imu_device_name in ('imu', 'imu_gyro', 'imu_accelerometer'):
             self.__driver.getDevice(imu_device_name).enable(timestep)
@@ -95,7 +97,8 @@ class VestaDriver:
             'vesta_driver', parameter_overrides=[Parameter('use_sim_time', Parameter.Type.BOOL, True)])
         self.__node.create_subscription(Twist, '/cmd_vel', self.__on_cmd_vel, qos)
         self.__node.create_subscription(Imu, '/vesta/imu/data', self.__on_imu, qos)
-        self.__node.create_subscription(PointCloud2, '/vesta/lidar/point_cloud', self.__on_point_cloud, qos)
+        if self.__lidar is not None:
+            self.__node.create_subscription(PointCloud2, '/vesta/lidar/point_cloud', self.__on_point_cloud, qos)
         # RL resets: move the car to a pose given in the odom frame (the robot
         # node has supervisor TRUE and Driver is a Supervisor subclass).
         self.__node.create_subscription(PoseStamped, '/vesta/teleport', self.__on_teleport, 1)
@@ -112,7 +115,7 @@ class VestaDriver:
             self.__tl_pub = self.__node.create_publisher(String, '/standin/traffic_light_state', 5)
         self.__tf_broadcaster = TransformBroadcaster(self.__node)
         self.__imu_publisher = self.__node.create_publisher(Imu, '/imu/data', qos)
-        self.__lidar_publisher = self.__node.create_publisher(PointCloud2, '/lidar', qos)
+        self.__lidar_publisher = self.__node.create_publisher(PointCloud2, '/lidar', qos) if self.__lidar is not None else None
         self.__radar_publisher = self.__node.create_publisher(PointCloud2, '/radar', qos)
         self.__joint_state_pub = self.__node.create_publisher(JointState, '/joint_states', qos)
         self.__odom_pub = self.__node.create_publisher(Odometry, '/odom', qos)
