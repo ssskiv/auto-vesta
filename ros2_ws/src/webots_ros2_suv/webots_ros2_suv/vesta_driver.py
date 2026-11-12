@@ -104,6 +104,12 @@ class VestaDriver:
         
         # VESTA_PUBLISH_ODOM_TF=0 (set by a localization stack that owns odom->base_link): do not broadcast it.
         self.__publish_odom_tf = os.environ.get('VESTA_PUBLISH_ODOM_TF', '1').lower() not in ('0', 'false', 'no')
+        # STAND-IN (not perception): VESTA_STANDIN_TL=1 publishes the world's traffic-light state on /standin/traffic_light_state
+        self.__standin_tl = os.environ.get('VESTA_STANDIN_TL', '0') == '1'
+        self.__tl_node, self.__tl_count = None, 0
+        if self.__standin_tl:
+            from std_msgs.msg import String
+            self.__tl_pub = self.__node.create_publisher(String, '/standin/traffic_light_state', 5)
         self.__tf_broadcaster = TransformBroadcaster(self.__node)
         self.__imu_publisher = self.__node.create_publisher(Imu, '/imu/data', qos)
         self.__lidar_publisher = self.__node.create_publisher(PointCloud2, '/lidar', qos)
@@ -111,6 +117,29 @@ class VestaDriver:
         self.__joint_state_pub = self.__node.create_publisher(JointState, '/joint_states', qos)
         self.__odom_pub = self.__node.create_publisher(Odometry, '/odom', qos)
 
+
+    def __publish_standin_tl(self):
+        self.__tl_count += 1
+        if self.__tl_count % 4:
+            return
+        if self.__tl_node is None:
+            stack = [self.__driver.getRoot().getField('children')]
+            while stack and self.__tl_node is None:
+                field = stack.pop()
+                for i in range(field.getCount()):
+                    node = field.getMFNode(i)
+                    if node is None:
+                        continue
+                    if node.getTypeName() == 'GenericTrafficLight':
+                        self.__tl_node = node
+                        break
+                    sub = node.getField('children')
+                    if sub is not None:
+                        stack.append(sub)
+            if self.__tl_node is None:
+                return
+        from std_msgs.msg import String
+        self.__tl_pub.publish(String(data=self.__tl_node.getField('state').getSFString().upper()))
 
     def __sim_stamp(self):
         """Webots simulation time (== /clock), exact for this step, independent of how far the node's own clock lags."""
@@ -177,6 +206,8 @@ class VestaDriver:
             self.__driver.setBrakeIntensity(self.__brake)
 
         self.__driver.setSteeringAngle(self.__steer)
+        if self.__standin_tl:
+            self.__publish_standin_tl()
         self.__radar_publisher.publish(self.__radar_point_cloud())
         self.__joint_state_pub.publish(self.__joint_states())
         base_link = self.__base_link_transform()
