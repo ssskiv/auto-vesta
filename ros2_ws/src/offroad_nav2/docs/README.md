@@ -18,8 +18,8 @@ NAME=nav_sim ros2_ws/src/offroad_nav2/docker/run.sh 'ros2 launch offroad_nav2 we
 
 Needs: an X display, the NVIDIA container toolkit, and checkpoint copies in
 `/home/skiv/autoware_data/ml_models_snapshot/` (`last_freespaceseg.pth`, `last_freespacecontour.pth`,
-`last_objectseg.pth`; the live `ml_models/` directory is never written). The simulator side is the same branch (`nav2ai`) (worktree
-`/home/skiv/Programming/auto-vesta-ai` is mounted at `/vesta`).
+`last_objectseg.pth`; the live `ml_models/` directory is never written). The simulator side is the same branch (`nav2ai`) (
+`/home/skiv/Programming/auto-vesta` is mounted at `/vesta`).
 
 Launch arguments of `webots_nav.launch.py`:
 

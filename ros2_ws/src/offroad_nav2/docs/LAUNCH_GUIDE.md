@@ -10,15 +10,15 @@ from the stereo camera and the three networks.
 | Docker with the NVIDIA container toolkit | `docker run --rm --gpus all ubuntu nvidia-smi` |
 | An X display on the host (Webots camera rendering needs OpenGL, even with `gui:=false`) | `echo $DISPLAY` (`:0`) |
 | Base image `vesta-sim:latest` (the auto-vesta image) | `docker images vesta-sim` |
-| auto-vesta branch `nav2ai` checked out as a worktree at `/home/skiv/Programming/auto-vesta-ai` (this package lives in it: `ros2_ws/src/offroad_nav2/`) | `git -C /home/skiv/Programming/auto-vesta worktree list` |
+| auto-vesta repo at `/home/skiv/Programming/auto-vesta` on branch `nav2ai` (this package lives in it: `ros2_ws/src/offroad_nav2/`) | `git -C /home/skiv/Programming/auto-vesta branch --show-current` |
 | The `autoware.off-road` repo (only its `Models/` directory is used, mounted read-only as `/offroad`) | `ls /home/skiv/Programming/autoware.off-road/Models` |
 | Checkpoint copies in `/home/skiv/autoware_data/ml_models_snapshot/` (`last_freespaceseg.pth`, `last_freespacecontour.pth`, `last_objectseg.pth`) | `ls /home/skiv/autoware_data/ml_models_snapshot` |
 
-If the worktree is missing: `cd /home/skiv/Programming/auto-vesta && git worktree add ../auto-vesta-ai nav2ai`.
+If you are on another branch: `cd /home/skiv/Programming/auto-vesta && git checkout nav2ai` (your earlier uncommitted sim work is saved on the branch `sim-wip`).
 To refresh the ObjectSeg snapshot while training runs, copy the file; never point the demo at the live `ml_models/` folder:
 `cp /home/skiv/autoware_data/ml_models/ObjectSeg/last_objectseg.pth /home/skiv/autoware_data/ml_models_snapshot/`.
 
-All commands below are run from `/home/skiv/Programming/auto-vesta-ai` (the `nav2ai` worktree). The paths inside the scripts are absolute, so the
+All commands below are run from `/home/skiv/Programming/auto-vesta` (the auto-vesta checkout on branch `nav2ai`). The paths inside the scripts are absolute, so the
 repositories must stay where they are.
 
 ## 2. Build (once, and after changing code)

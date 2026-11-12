@@ -1,6 +1,6 @@
 # Final report: perception-to-Nav2 rebuild for the Lada Vesta (Webots)
 
-Branch `ai` of autoware.off-road; auto-vesta changes on branch `ai` (worktree `/home/skiv/Programming/auto-vesta-ai`).
+Branch `ai` of autoware.off-road; auto-vesta changes on branch `ai` (worktree `/home/skiv/Programming/auto-vesta`).
 Environment: Humble Docker image `vesta-nav:latest` (decision 7.3 answered by the user), Nav2 1.1.20 (`cmd_vel` is Twist).
 Controller: Regulated Pure Pursuit by default, MPPI selectable. The `ai` branch's neural controller is not used.
 Nav2 tuning is intentionally unfinished (the user will complete it); see "Open issues".
@@ -146,7 +146,7 @@ interface (7.6, abstract stub only); measured real vehicle numbers and the plann
 default); non-drivable cost policy lethal vs soft (7.10); checkpoints, domain gap and road approval (7.11); real venue datum lat/lon
 (placeholder 54.3282, 48.3866); maintainer and license fields of all `package.xml`/`setup.py`.
 
-## Files changed outside autoware.off-road (auto-vesta, branch `ai`, worktree `/home/skiv/Programming/auto-vesta-ai`)
+## Files changed outside autoware.off-road (auto-vesta, branch `ai`, worktree `/home/skiv/Programming/auto-vesta`)
 
 - `ros2_ws/src/webots_ros2_suv/resource/vesta.urdf`: stereo links and optical frames, `base_footprint` (z -0.108), two stereo camera devices (`/stereo_raw/{left,right}`), GPS x 0.4.
 - `ros2_ws/src/webots_ros2_suv/worlds/robocross.wbt`: two stereo cameras in the front slot (plus the user's offline-vendoring path rewrites copied from the `sim` working tree).

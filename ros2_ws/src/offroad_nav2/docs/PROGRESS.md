@@ -5,7 +5,7 @@ The user asked to stop tuning Nav2 (it will be completed later): next work = pla
 then a real detector/traffic-light model (P10). The table below is the older mid-run snapshot.
 
 Last updated: 2026-11-12. Branch `ai` of autoware.off-road; auto-vesta changes live on branch `ai`, worktree
-`/home/skiv/Programming/auto-vesta-ai` (the user's `sim` working tree is untouched). Controller: MPPI (RPP as fallback).
+`/home/skiv/Programming/auto-vesta` (the user's `sim` working tree is untouched). Controller: MPPI (RPP as fallback).
 The `ai` branch's neural controller plugin is NOT used (user instruction).
 
 ## How to run (Docker, image vesta-nav:latest, built from ros2_ws/src/offroad_nav2/docker/Dockerfile.nav)
