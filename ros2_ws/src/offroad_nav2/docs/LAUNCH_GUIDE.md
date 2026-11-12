@@ -21,18 +21,31 @@ To refresh the ObjectSeg snapshot while training runs, copy the file; never poin
 All commands below are run from `/home/skiv/Programming/auto-vesta` (the auto-vesta checkout on branch `nav2ai`). The paths inside the scripts are absolute, so the
 repositories must stay where they are.
 
-## 2. Build (once, and after changing code)
+## 2. Build
+
+There is one Docker image (`vesta-sim:latest`: Webots, ROS 2 Humble, Nav2, PyTorch/CUDA, stereo). `make` builds it only when it is
+missing or older than the Nav2 + perception layers (it checks the label `vesta.nav`); the first build takes 15-25 minutes.
 
 ```bash
-# 1. image with PyTorch/CUDA, stereo_image_proc, Nav2 packages (about 10 min the first time)
-docker build -f ros2_ws/src/offroad_nav2/docker/Dockerfile.nav -t vesta-nav:latest ros2_ws/src/offroad_nav2/docker
-
-# 2. colcon build of the Webots package and offroad_nav2 (uses --symlink-install, build dir ~/.cache/vesta-nav)
-ros2_ws/src/offroad_nav2/docker/build.sh
+make image      # build the image if needed (without starting anything)
 ```
 
-Python edits take effect after a restart of the launch; run `build.sh` again only after adding a package, an entry point, a launch
-file, or a message.
+### Interactive: `make up` (recommended)
+
+```bash
+make up         # build the image if needed, start the container vesta_sim in the background,
+                # run colcon build, source install/setup.bash and open bash
+ros2 launch offroad_nav2 webots_nav.launch.py        # inside the container
+```
+
+The container keeps running when you leave bash. Every `make up` re-runs the (incremental) `colcon build` and sources the workspace, and
+`make exec` / `make attach` opens another shell without building. The checkpoints (`~/autoware_data/ml_models_snapshot`, `VESTA_MODELS=`)
+and `Models/` of autoware.off-road (`~/Programming/autoware.off-road`, `OFFROAD_REPO=`) are mounted read-only as `/models` and `/offroad`.
+
+### Scripted: the helpers under `ros2_ws/src/offroad_nav2/docker/`
+
+`make demo` (or `docker/restart.sh`) builds into a separate cache (`~/.cache/vesta-nav`), starts the whole demo in the container
+`nav_sim` and waits until Nav2 is active; `build.sh` only builds.
 
 ## 3. Launch the whole demo
 

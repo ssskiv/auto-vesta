@@ -7,7 +7,7 @@ SHELL        := /bin/bash
 .SHELLFLAGS  := -c
 .ONESHELL:
 .DEFAULT_GOAL := help
-.PHONY: help shell start up headless rebuild stop attach exec demo demo-stop gpu check
+.PHONY: help shell start up image headless rebuild stop attach exec demo demo-stop gpu check
 
 # RU: GPU=nvidia|amd|intel|cpu задаёт видеокарту вручную, иначе автоопределение.
 # EN: GPU=nvidia|amd|intel|cpu forces the GPU, otherwise it is auto-detected.
@@ -88,6 +88,19 @@ fi
 COMPOSE="$$DC -f docker/docker-compose.yml -f $$OVERLAY"
 endef
 
+# RU: Образ собирается, если его нет или он старше стека Nav2 + восприятие (нет метки vesta.nav).
+# EN: The image is built when it is missing or predates the Nav2 + perception stack (no vesta.nav label).
+define ENSURE_IMAGE
+if ! docker image inspect vesta-sim:latest >/dev/null 2>&1 || \
+   [ "$$(docker image inspect -f '{{index .Config.Labels "vesta.nav"}}' vesta-sim:latest 2>/dev/null)" != 1 ]; then
+    say ""
+    say "RU: Сборка образа (нет образа или в нём нет стека Nav2 + восприятие). Первый раз 15-25 минут, дальше запуск за секунды."
+    say "EN: Building the image (missing, or without the Nav2 + perception stack). 15-25 minutes the first time, instant afterwards."
+    say ""
+    $$COMPOSE build || exit 1
+fi
+endef
+
 # -------------------------------------------------------------------------
 # RU: Подготовка к запуску: дисплей, каталоги сборки, образ (только если его нет), осиротевшие контейнеры.
 # EN: Launch preparation: display, build dirs, image (only if missing), orphaned containers.
@@ -111,13 +124,20 @@ fi
 
 mkdir -p .build/build .build/install .build/log
 
-if ! docker image inspect vesta-sim:latest >/dev/null 2>&1; then
-    say ""
-    say "RU: Первая сборка образа. Это 15-25 минут, дальше запуск за секунды."
-    say "EN: First image build. Takes 15-25 minutes; later starts are instant."
-    say ""
-    $$COMPOSE build || exit 1
-fi
+# RU: Нейросети: чекпойнты (/models) и каталог Models/ из autoware.off-road (/offroad). Если каталога нет, монтируем пустой.
+# EN: Networks: checkpoints (/models) and the Models/ directory of autoware.off-road (/offroad). If a directory is missing, mount an empty one.
+export VESTA_MODELS="$${VESTA_MODELS:-$$HOME/autoware_data/ml_models_snapshot}"
+export OFFROAD_REPO="$${OFFROAD_REPO:-$$HOME/Programming/autoware.off-road}"
+for v in VESTA_MODELS OFFROAD_REPO; do
+    if [ ! -d "$${!v}" ]; then
+        say "RU: нет каталога $$v=$${!v}, восприятие работать не будет (задайте $$v=...)"
+        say "EN: directory $$v=$${!v} is missing, perception will not work (set $$v=...)"
+        mkdir -p ".build/missing_$$v"
+        declare -gx "$$v=$(CURDIR)/.build/missing_$$v"
+    fi
+done
+
+$(ENSURE_IMAGE)
 
 # RU: Осиротевшие контейнеры от прерванных запусков держат порт 8080 и не дают подняться новому.
 # EN: Orphaned containers from interrupted runs hold port 8080 and block the next start.
@@ -184,24 +204,30 @@ up:
 	    exit 1
 	fi
 	$(PREPARE)
-	if [ -z "$$(docker ps -q -f name=^vesta_sim$$)" ]; then
-	    $$COMPOSE up -d sim || exit 1
-	else
-	    say "RU: Контейнер vesta_sim уже запущен | EN: container vesta_sim is already running"
-	fi
-	# RU: Точка входа собирает воркспейс при первом старте: ждём, пока появится install.
-	# EN: The entrypoint builds the workspace on first start: wait until install appears.
+	# RU: up -d идемпотентен: ничего не делает, если контейнер актуален, и пересоздаёт его, если изменился образ или конфигурация.
+	# EN: up -d is idempotent: it does nothing if the container is current and recreates it if the image or configuration changed.
+	$$COMPOSE up -d sim || exit 1
+	# RU: Точка входа может собирать воркспейс при старте контейнера: ждём её, чтобы два colcon не мешали друг другу.
+	# EN: The entrypoint may build the workspace at container start: wait for it so two colcon runs do not collide.
 	n=0
-	until docker exec vesta_sim test -f /ros2_ws/install/setup.bash 2>/dev/null; do
-	    [ $$n -eq 0 ] && say "RU: Жду сборку воркспейса (первый запуск, пара минут) | EN: waiting for the workspace build (first start, a couple of minutes)"
+	until docker exec vesta_sim true 2>/dev/null && ! docker exec vesta_sim pgrep -f "[c]olcon build" >/dev/null 2>&1; do
+	    [ $$n -eq 0 ] && say "RU: Жду сборку воркспейса при старте контейнера | EN: waiting for the workspace build at container start"
 	    n=$$((n+1))
-	    if [ $$n -gt 240 ]; then say "RU: Сборка не завершилась, см. docker logs vesta_sim | EN: the build did not finish, see docker logs vesta_sim"; exit 1; fi
+	    if [ $$n -gt 360 ]; then say "RU: Сборка не завершилась, см. docker logs vesta_sim | EN: the build did not finish, see docker logs vesta_sim"; exit 1; fi
 	    sleep 5
 	done
+	# RU: Каждый вход: colcon build (инкрементальный, symlink-install) и source install/setup.bash.
+	# EN: On every entry: colcon build (incremental, symlink-install) and source install/setup.bash.
+	BUILD='source /opt/ros/humble/setup.bash; cd /ros2_ws; echo "[make up] colcon build --symlink-install"; colcon build --symlink-install 2>&1 | tail -n 6; source /ros2_ws/install/setup.bash'
 	if [ -n "$${CMD:-}" ]; then
-	    exec docker exec -i vesta_sim bash -lc "$$CMD"
+	    exec docker exec -i vesta_sim bash -lc "$$BUILD; $$CMD"
 	fi
-	exec docker exec -it vesta_sim bash -l
+	exec docker exec -it vesta_sim bash -lc "$$BUILD; exec bash"
+
+# RU: Собрать образ, если нужно (без запуска контейнера). EN: Build the image if needed (no container is started).
+image:
+	@$(PREAMBLE)
+	$(ENSURE_IMAGE)
 
 shell start:
 	@$(PREAMBLE)
@@ -243,7 +269,7 @@ attach exec:
 # -------------------------------------------------------------------------
 # RU: Демо Nav2 + восприятие | EN: Nav2 + perception demo
 # -------------------------------------------------------------------------
-demo:
+demo: image
 	@ros2_ws/src/offroad_nav2/docker/restart.sh $(ARGS)
 
 demo-stop:

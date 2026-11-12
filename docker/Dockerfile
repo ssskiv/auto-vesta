@@ -55,24 +55,19 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         ros-humble-nav2-rviz-plugins \
     && rm -rf /var/lib/apt/lists/*
 
+# Nav2 + perception stack (ros2_ws/src/offroad_nav2): stereo depth, vision_msgs, collision monitor, PyTorch/CUDA.
 RUN apt-get update && apt-get install -y --no-install-recommends \
-     ros-humble-pointcloud-to-laserscan \
+        ros-humble-stereo-image-proc ros-humble-image-proc ros-humble-vision-msgs \
+        ros-humble-nav2-collision-monitor ros-humble-nav2-velocity-smoother ros-humble-nav2-behavior-tree \
+        ros-humble-xacro ros-humble-urdfdom ros-humble-cv-bridge python3-pytest \
     && rm -rf /var/lib/apt/lists/*
-
-# Neural controller: ONNX Runtime C++ for the Nav2 plugin (vesta_neural_controller)
-ARG ONNXRUNTIME_VERSION=1.23.2
-RUN wget -qO- https://github.com/microsoft/onnxruntime/releases/download/v${ONNXRUNTIME_VERSION}/onnxruntime-linux-x64-${ONNXRUNTIME_VERSION}.tgz \
-        | tar xz -C /opt \
-    && mv /opt/onnxruntime-linux-x64-${ONNXRUNTIME_VERSION} /opt/onnxruntime \
-    && echo /opt/onnxruntime/lib > /etc/ld.so.conf.d/onnxruntime.conf && ldconfig
-
-# RL training (vesta_rl). numpy<2 keeps ROS Humble's Python packages working;
-# setuptools==58.2.0 because tensorboard pulls in a new setuptools that breaks
-# colcon's ament_python builds against Ubuntu 22.04's old `packaging`.
-RUN pip3 install --no-cache-dir "numpy<2" "scipy>=1.11,<1.15" torch stable-baselines3 gymnasium \
-        onnx onnxruntime tensorboard \
-    && pip3 install --no-cache-dir setuptools==58.2.0
-
+# Humble's cv_bridge is built against numpy 1.x, so numpy<2. The cu128 index is needed for Blackwell GPUs (sm_120).
+RUN pip3 install --no-cache-dir "numpy<2" torch torchvision --index-url https://download.pytorch.org/whl/cu128 \
+        --extra-index-url https://pypi.org/simple
+# torch's dependencies pull a setuptools that breaks colcon's ament_python builds on Ubuntu 22.04: restore the distro version.
+RUN pip3 install --no-cache-dir "setuptools==59.6.0"
+# Marker used by `make` to rebuild images that predate the Nav2 + perception layers.
+LABEL vesta.nav="1"
 
 ENV RMW_IMPLEMENTATION=rmw_fastrtps_cpp
 ENV ROS_DOMAIN_ID=0

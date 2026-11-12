@@ -32,6 +32,10 @@ services:
       # RU: rviz открывается с ros2_ws/src/rviz/default.rviz.
       # EN: rviz starts with ros2_ws/src/rviz/default.rviz.
       - ../ros2_ws/src/rviz:/root/.rviz2:rw
+      # RU: Нейросети: снимки чекпойнтов и каталог Models/ репозитория autoware.off-road (только чтение). Пути задаёт Makefile.
+      # EN: Networks: checkpoint snapshots and the Models/ directory of the autoware.off-road repo (read-only). Paths set by the Makefile.
+      - ${VESTA_MODELS:-${HOME}/autoware_data/ml_models_snapshot}:/models:ro
+      - ${OFFROAD_REPO:-${HOME}/Programming/autoware.off-road}:/offroad:ro
       # RU: Артефакты сборки живут на хосте: пересборка не нужна при
       #     каждом запуске контейнера.
       # EN: Build artifacts live on the host, so the workspace is not

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Run a command in vesta-nav with GPU + X, both repos mounted. Usage: run.sh <cmd...>
+# Run a command in vesta-sim with GPU + X, both repos mounted. Usage: run.sh <cmd...>
 # /vesta = auto-vesta repo root (webots_ros2_suv + offroad_nav2), /offroad = autoware.off-road (only its Models/ directory is used), /models = checkpoint snapshots (ro),
 # /ws = persistent colcon build/install/log (host ~/.cache/vesta-nav). Source /ws/install/setup.bash after build.sh.
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -17,4 +17,4 @@ docker run --rm --gpus all --ipc=host --net=host --shm-size=2g \
   -e NVIDIA_DRIVER_CAPABILITIES=all -e __GLX_VENDOR_LIBRARY_NAME=nvidia \
   -e ROS_DOMAIN_ID="${ROS_DOMAIN_ID:-0}" -e RMW_IMPLEMENTATION=rmw_fastrtps_cpp \
   -e PYTHONUNBUFFERED=1 ${DOCKER_EXTRA:-} \
-  ${NAME:+--name $NAME} vesta-nav:latest bash -lc "source /opt/ros/humble/setup.bash; [ -f /ws/install/setup.bash ] && source /ws/install/setup.bash; $*"
+  ${NAME:+--name $NAME} vesta-sim:latest bash -lc "source /opt/ros/humble/setup.bash; [ -f /ws/install/setup.bash ] && source /ws/install/setup.bash; $*"

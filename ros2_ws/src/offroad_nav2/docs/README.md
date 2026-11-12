@@ -11,7 +11,8 @@ How to launch step by step: `LAUNCH_GUIDE.md`.
 ## Run (Docker, ROS 2 Humble)
 
 ```bash
-docker build -f ros2_ws/src/offroad_nav2/docker/Dockerfile.nav -t vesta-nav:latest ros2_ws/src/offroad_nav2/docker   # needs vesta-sim:latest
+make image                                          # the Docker image (built only if missing or outdated)
+make up                                             # container + colcon build + bash; then: ros2 launch offroad_nav2 webots_nav.launch.py
 ros2_ws/src/offroad_nav2/docker/build.sh                     # colcon build into ~/.cache/vesta-nav
 NAME=nav_sim ros2_ws/src/offroad_nav2/docker/run.sh 'ros2 launch offroad_nav2 webots_nav.launch.py'
 ```
