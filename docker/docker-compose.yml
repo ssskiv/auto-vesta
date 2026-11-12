@@ -28,7 +28,10 @@ services:
       - PULSE_SERVER=${PULSE_SERVER:-}
 
     volumes:
-      - ../src:/ros2_ws/src:rw
+      - ../ros2_ws/src:/ros2_ws/src:rw
+      # RU: rviz открывается с ros2_ws/src/rviz/default.rviz.
+      # EN: rviz starts with ros2_ws/src/rviz/default.rviz.
+      - ../ros2_ws/src/rviz:/root/.rviz2:rw
       # RU: Артефакты сборки живут на хосте: пересборка не нужна при
       #     каждом запуске контейнера.
       # EN: Build artifacts live on the host, so the workspace is not

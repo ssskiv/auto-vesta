@@ -7,7 +7,7 @@ SHELL        := /bin/bash
 .SHELLFLAGS  := -c
 .ONESHELL:
 .DEFAULT_GOAL := help
-.PHONY: help shell start headless rebuild stop attach demo demo-stop gpu check
+.PHONY: help shell start up headless rebuild stop attach demo demo-stop gpu check
 
 # RU: GPU=nvidia|amd|intel|cpu задаёт видеокарту вручную, иначе автоопределение.
 # EN: GPU=nvidia|amd|intel|cpu forces the GPU, otherwise it is auto-detected.
@@ -89,23 +89,69 @@ COMPOSE="$$DC -f docker/docker-compose.yml -f $$OVERLAY"
 endef
 
 # -------------------------------------------------------------------------
+# RU: Подготовка к запуску: дисплей, каталоги сборки, образ (только если его нет), осиротевшие контейнеры.
+# EN: Launch preparation: display, build dirs, image (only if missing), orphaned containers.
+# -------------------------------------------------------------------------
+define PREPARE
+HEADLESS="$${HEADLESS:-0}"
+if [ "$$HEADLESS" = 1 ]; then
+    say "RU: Режим без графики | EN: headless mode"
+elif [ -z "$${DISPLAY:-}" ]; then
+    say "RU: DISPLAY не задан, перехожу в режим без графики."
+    say "EN: DISPLAY is unset, falling back to headless."
+    HEADLESS=1
+elif command -v xhost >/dev/null 2>&1; then
+    # RU: xhost открывает доступ к X-серверу для локальных контейнеров, иначе окно Webots не откроется.
+    # EN: xhost grants X server access to local containers, otherwise the Webots window cannot open.
+    xhost +local:docker >/dev/null 2>&1 || xhost +local:root >/dev/null 2>&1 || true
+else
+    say "RU: Нет xhost, окно может не открыться: apt install x11-xserver-utils"
+    say "EN: xhost missing, the window may not open: apt install x11-xserver-utils"
+fi
+
+mkdir -p .build/build .build/install .build/log
+
+if ! docker image inspect vesta-sim:latest >/dev/null 2>&1; then
+    say ""
+    say "RU: Первая сборка образа. Это 15-25 минут, дальше запуск за секунды."
+    say "EN: First image build. Takes 15-25 minutes; later starts are instant."
+    say ""
+    $$COMPOSE build || exit 1
+fi
+
+# RU: Осиротевшие контейнеры от прерванных запусков держат порт 8080 и не дают подняться новому.
+# EN: Orphaned containers from interrupted runs hold port 8080 and block the next start.
+docker rm -f $$(docker ps -aq --filter "name=docker-sim-run") 2>/dev/null || true
+
+echo
+echo "  ========================================================"
+echo "   Simulation"
+echo "  ========================================================"
+echo "   GPU:      $$GPU"
+echo "   Display:  $$([ "$$HEADLESS" = 1 ] && echo headless || echo "$${DISPLAY}")"
+echo "  ========================================================"
+echo
+endef
+
+# -------------------------------------------------------------------------
 help:
 	@cat <<'EOF'
 	  Auto Vesta: симуляция Lada Vesta в Webots (+ восприятие и Nav2) | Webots simulation (+ perception and Nav2)
 
-	  make                запустить контейнер (оболочка внутри) | start the container (shell inside)   [= make shell]
-	  make shell          то же самое | same
-	  make headless       без графики | no window                                [= make shell HEADLESS=1]
-	  make rebuild        пересобрать образ с нуля и очистить .build | rebuild the image from scratch, clear .build
-	  make stop           остановить контейнеры | stop the containers
+	  make                показать эту справку | show this help
+	  make up             собрать образ (если нужно), поднять контейнер в фоне и зайти в bash | build (if needed), start in background, open bash
+	  make shell          одноразовый контейнер с bash (удаляется при выходе) | throw-away container with bash (removed on exit)
+	  make headless       то же без графики | same without a window                [= make shell HEADLESS=1]
 	  make attach         зайти в уже запущенный контейнер | open another shell in the running container
+	  make stop           остановить контейнеры | stop the containers
+	  make rebuild        пересобрать образ с нуля и очистить .build | rebuild the image from scratch, clear .build
 	  make demo           собрать и запустить Nav2 + восприятие (offroad_nav2), ждать готовности | build and start Nav2 + perception
 	  make demo-stop      остановить демо | stop the demo
 	  make gpu            показать определённую видеокарту | show the detected GPU
 	  make check          проверить Docker и compose | check Docker and compose
 
 	  Параметры | options:
-	    GPU=nvidia|amd|intel|cpu   задать видеокарту вручную | force the GPU          (make shell GPU=amd)
+	    GPU=nvidia|amd|intel|cpu   задать видеокарту вручную | force the GPU          (make up GPU=amd)
 	    HEADLESS=1                 без графики | no window
 	    CMD="команда"              выполнить команду в контейнере и выйти | run a command in the container and exit
 	    ARGS="..."                 аргументы launch для make demo | launch arguments for make demo  (ARGS="gui:=true barrels_seed:=3")
@@ -125,53 +171,49 @@ gpu:
 # -------------------------------------------------------------------------
 # RU: Запуск | EN: Launch
 # -------------------------------------------------------------------------
+# RU: up = собрать образ (если нужно), поднять контейнер vesta_sim в фоне, дождаться сборки воркспейса, зайти в bash.
+#     Контейнер продолжает работать после выхода из bash: повторный `make up` просто заходит в него, `make stop` его останавливает.
+# EN: up = build the image (if needed), start container vesta_sim in the background, wait for the workspace build, open bash.
+#     The container keeps running after you leave bash: another `make up` just re-enters it, `make stop` stops it.
+up:
+	@$(PREAMBLE)
+	if [ -n "$$(docker ps -q -f name=^webots_vesta$$)" ]; then
+	    say "RU: Уже запущен одноразовый контейнер webots_vesta (make shell): make attach или make stop"
+	    say "EN: a throw-away container webots_vesta (make shell) is already running: make attach or make stop"
+	    exit 1
+	fi
+	$(PREPARE)
+	if [ -z "$$(docker ps -q -f name=^vesta_sim$$)" ]; then
+	    $$COMPOSE up -d sim || exit 1
+	else
+	    say "RU: Контейнер vesta_sim уже запущен | EN: container vesta_sim is already running"
+	fi
+	# RU: Точка входа собирает воркспейс при первом старте: ждём, пока появится install.
+	# EN: The entrypoint builds the workspace on first start: wait until install appears.
+	n=0
+	until docker exec vesta_sim test -f /ros2_ws/install/setup.bash 2>/dev/null; do
+	    [ $$n -eq 0 ] && say "RU: Жду сборку воркспейса (первый запуск, пара минут) | EN: waiting for the workspace build (first start, a couple of minutes)"
+	    n=$$((n+1))
+	    if [ $$n -gt 240 ]; then say "RU: Сборка не завершилась, см. docker logs vesta_sim | EN: the build did not finish, see docker logs vesta_sim"; exit 1; fi
+	    sleep 5
+	done
+	if [ -n "$${CMD:-}" ]; then
+	    exec docker exec -i vesta_sim bash -lc "$$CMD"
+	fi
+	exec docker exec -it vesta_sim bash -l
+
 shell start:
 	@$(PREAMBLE)
-	HEADLESS="$${HEADLESS:-0}"
-	# RU: Доступ к дисплею | EN: Display access
-	if [ "$$HEADLESS" = 1 ]; then
-	    say "RU: Режим без графики | EN: headless mode"
-	elif [ -z "$${DISPLAY:-}" ]; then
-	    say "RU: DISPLAY не задан, перехожу в режим без графики."
-	    say "EN: DISPLAY is unset, falling back to headless."
-	    HEADLESS=1
-	elif command -v xhost >/dev/null 2>&1; then
-	    # RU: xhost открывает доступ к X-серверу для локальных контейнеров, иначе окно Webots не откроется.
-	    # EN: xhost grants X server access to local containers, otherwise the Webots window cannot open.
-	    xhost +local:docker >/dev/null 2>&1 || xhost +local:root >/dev/null 2>&1 || true
-	else
-	    say "RU: Нет xhost, окно может не открыться: apt install x11-xserver-utils"
-	    say "EN: xhost missing, the window may not open: apt install x11-xserver-utils"
+	if [ -n "$$(docker ps -q -f name=^vesta_sim$$)" ]; then
+	    say "RU: Уже запущен контейнер vesta_sim (make up), порт 8080 занят: make attach или make stop"
+	    say "EN: container vesta_sim (make up) is already running and holds port 8080: make attach or make stop"
+	    exit 1
 	fi
-
-	mkdir -p .build/build .build/install .build/log
-
-	if ! docker image inspect vesta-sim:latest >/dev/null 2>&1; then
-	    say ""
-	    say "RU: Первая сборка образа. Это 15-25 минут, дальше запуск за секунды."
-	    say "EN: First image build. Takes 15-25 minutes; later starts are instant."
-	    say ""
-	    $$COMPOSE build || exit 1
-	fi
-
-	# RU: Осиротевшие контейнеры от прерванных запусков держат порт 8080 и не дают подняться новому.
-	# EN: Orphaned containers from interrupted runs hold port 8080 and block the next start.
-	docker rm -f $$(docker ps -aq --filter "name=docker-sim-run") 2>/dev/null || true
-
-	echo
-	echo "  ========================================================"
-	echo "   Simulation"
-	echo "  ========================================================"
-	echo "   GPU:      $$GPU"
-	echo "   Display:  $$([ "$$HEADLESS" = 1 ] && echo headless || echo "$${DISPLAY}")"
-	echo "  ========================================================"
-	echo
-
-	VOLS=(-v "$(CURDIR)/ros2_ws/src:/ros2_ws/src" -v "$(CURDIR)/ros2_ws/src/rviz:/root/.rviz2/")
+	$(PREPARE)
 	if [ -n "$${CMD:-}" ]; then
-	    exec $$COMPOSE run -T "$${VOLS[@]}" --rm --service-ports sim bash -lc "$$CMD"
+	    exec $$COMPOSE run -T --rm --service-ports sim bash -lc "$$CMD"
 	fi
-	exec $$COMPOSE run --name webots_vesta "$${VOLS[@]}" --rm --service-ports sim bash
+	exec $$COMPOSE run --name webots_vesta --rm --service-ports sim bash
 
 headless:
 	@$(MAKE) --no-print-directory shell HEADLESS=1
@@ -186,7 +228,7 @@ rebuild:
 	    docker run --rm -v "$(CURDIR)/.build:/b" vesta-sim:latest bash -c 'rm -rf /b/build /b/install /b/log' 2>/dev/null || rm -rf .build
 	fi
 	mkdir -p .build/build .build/install .build/log
-	say "RU: Готово. Запуск: make | EN: Done. Start with: make"
+	say "RU: Готово. Запуск: make up | EN: Done. Start with: make up"
 
 stop:
 	@$(PREAMBLE)
@@ -194,7 +236,8 @@ stop:
 	$$COMPOSE down --remove-orphans   # RU: заодно убирает контейнеры удалённых сервисов (CARLA, Autoware) | EN: also removes containers of removed services (CARLA, Autoware)
 
 attach:
-	@docker exec -it webots_vesta bash || { echo "  RU: контейнер webots_vesta не запущен (make) | EN: container webots_vesta is not running (make)"; exit 1; }
+	@c=$$(docker ps --format '{{.Names}}' | grep -E '^(vesta_sim|webots_vesta)$$' | head -1)
+	if [ -n "$$c" ]; then exec docker exec -it $$c bash -l; else echo "  RU: контейнер не запущен (make up) | EN: no container is running (make up)"; exit 1; fi
 
 # -------------------------------------------------------------------------
 # RU: Демо Nav2 + восприятие | EN: Nav2 + perception demo
@@ -203,4 +246,4 @@ demo:
 	@ros2_ws/src/offroad_nav2/docker/restart.sh $(ARGS)
 
 demo-stop:
-	@docker rm -f nav_sim >/dev/null 2>&1 && echo "  nav_sim stopped" || echo "  nav_sim is not running"
+	@if [ -n "$$(docker ps -aq -f name=^nav_sim$$)" ]; then docker stop nav_sim >/dev/null; docker rm nav_sim >/dev/null; echo "  nav_sim stopped"; else echo "  nav_sim is not running"; fi
