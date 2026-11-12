@@ -7,7 +7,7 @@ SHELL        := /bin/bash
 .SHELLFLAGS  := -c
 .ONESHELL:
 .DEFAULT_GOAL := help
-.PHONY: help shell start up headless rebuild stop attach demo demo-stop gpu check
+.PHONY: help shell start up headless rebuild stop attach exec demo demo-stop gpu check
 
 # RU: GPU=nvidia|amd|intel|cpu задаёт видеокарту вручную, иначе автоопределение.
 # EN: GPU=nvidia|amd|intel|cpu forces the GPU, otherwise it is auto-detected.
@@ -142,7 +142,8 @@ help:
 	  make up             собрать образ (если нужно), поднять контейнер в фоне и зайти в bash | build (if needed), start in background, open bash
 	  make shell          одноразовый контейнер с bash (удаляется при выходе) | throw-away container with bash (removed on exit)
 	  make headless       то же без графики | same without a window                [= make shell HEADLESS=1]
-	  make attach         зайти в уже запущенный контейнер | open another shell in the running container
+	  make attach         зайти в уже запущенный контейнер | open another shell in the running container   [= make exec]
+	  make exec           то же, что make attach | same as make attach
 	  make stop           остановить контейнеры | stop the containers
 	  make rebuild        пересобрать образ с нуля и очистить .build | rebuild the image from scratch, clear .build
 	  make demo           собрать и запустить Nav2 + восприятие (offroad_nav2), ждать готовности | build and start Nav2 + perception
@@ -235,7 +236,7 @@ stop:
 	say "RU: Останавливаю | EN: stopping"
 	$$COMPOSE down --remove-orphans   # RU: заодно убирает контейнеры удалённых сервисов (CARLA, Autoware) | EN: also removes containers of removed services (CARLA, Autoware)
 
-attach:
+attach exec:
 	@c=$$(docker ps --format '{{.Names}}' | grep -E '^(vesta_sim|webots_vesta)$$' | head -1)
 	if [ -n "$$c" ]; then exec docker exec -it $$c bash -l; else echo "  RU: контейнер не запущен (make up) | EN: no container is running (make up)"; exit 1; fi
 

@@ -34,7 +34,7 @@ ros2 launch webots_ros2_suv robot.launch.py
 | `make headless` | то же без графики, только API |
 | `make rebuild` | пересобрать образ с нуля и очистить `.build` |
 | `make stop` | остановить контейнеры |
-| `make attach` | зайти в уже запущенный контейнер |
+| `make attach` / `make exec` | зайти в уже запущенный контейнер (ещё одна оболочка) |
 | `make demo` / `make demo-stop` | запустить / остановить демо Nav2 + восприятие (`ARGS="gui:=true barrels_seed:=3"`) |
 | `make gpu`, `make check` | показать определённую видеокарту; проверить Docker |
 
