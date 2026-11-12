@@ -7,21 +7,15 @@
 ## Требования
 
 - Docker + Docker Compose (с правами текущего пользователя, см. `docker info`)
-- Linux: X11 и `xhost` (пакет `x11-xserver-utils`) для вывода окна Webots.
-  Windows: WSL2 с WSLg (графика идёт через встроенный Wayland/X11 сокет).
+- Linux: X11 и `xhost` (пакет `x11-xserver-utils`) для вывода окна Webots, `make`.
 - Опционально GPU: NVIDIA (с `nvidia-container-toolkit`), AMD/Intel (Mesa,
   `/dev/dri`) — иначе используется программный рендер на CPU.
 
 ## Быстрый старт
 
-**Linux / macOS:**
 ```bash
-./scripts/start.sh            # собрать (первый раз) и зайти в контейнер
-```
-
-**Windows:** дважды кликнуть `scripts/start.bat`, либо из PowerShell:
-```powershell
-scripts\start.ps1
+make                          # справка
+make shell                    # собрать (первый раз) и зайти в контейнер
 ```
 
 Внутри контейнера воркспейс собирается автоматически при первом запуске
@@ -30,15 +24,21 @@ scripts\start.ps1
 ros2 launch webots_ros2_suv robot.launch.py
 ```
 
-### Флаги `start.sh`
+### Команды `make`
 
-| Флаг | Описание |
+| Команда | Описание |
 |---|---|
-| `--headless` | без графики, только API (быстрее) |
-| `--shell` | оболочка внутри контейнера (по умолчанию) |
-| `--rebuild` | пересобрать образ с нуля |
-| `--stop` | остановить контейнер |
-| `--gpu <nvidia\|amd\|intel\|cpu>` | задать видеокарту вручную (иначе автоопределение) |
+| `make` | показать справку |
+| `make shell` | оболочка внутри контейнера (первый раз собирает образ) |
+| `make headless` | то же без графики, только API |
+| `make rebuild` | пересобрать образ с нуля и очистить `.build` |
+| `make stop` | остановить контейнеры |
+| `make attach` | зайти в уже запущенный контейнер |
+| `make demo` / `make demo-stop` | запустить / остановить демо Nav2 + восприятие (`ARGS="gui:=true barrels_seed:=3"`) |
+| `make gpu`, `make check` | показать определённую видеокарту; проверить Docker |
+
+Параметры: `GPU=nvidia\|amd\|intel\|cpu` — задать видеокарту вручную (`make shell GPU=amd`), `HEADLESS=1` — без графики,
+`CMD="команда"` — выполнить команду в контейнере и выйти.
 
 ## Что внутри
 
@@ -47,7 +47,7 @@ ros2 launch webots_ros2_suv robot.launch.py
   launch-файл `launch/robot.launch.py`.
 - `models/vesta` — 3D-модель кузова (Blender/OBJ/Collada) и текстуры.
 - `docker/` — `Dockerfile` (ROS humble + Webots) и compose-оверлеи по GPU.
-- `scripts/` — `start.sh` / `start.ps1` / `start.bat`, точка входа для запуска.
+- `Makefile` — точка входа для запуска (`make`).
 - `oscc`, `ros2_ws/src/ros2cco` — git-подмодули (сторонние зависимости).
   Загружаются командой:
   ```bash
@@ -61,7 +61,6 @@ ros2 launch webots_ros2_suv robot.launch.py
   throttle/brake команды (режим torque).
 - Публикует: `/imu/data`, `/lidar`, `/radar`, `/joint_states`,
   TF `odom -> base_link`.
-- Протестировано телеуправление на Windows с DualShock-геймпадом.
 
 ## Ветка `nav2ai`: восприятие + Nav2
 
@@ -69,7 +68,7 @@ ros2 launch webots_ros2_suv robot.launch.py
 Лидара в симуляции нет, препятствия берутся только из камеры. Запуск и всё остальное: `ros2_ws/src/offroad_nav2/docs/LAUNCH_GUIDE.md`.
 
 ```bash
-ros2_ws/src/offroad_nav2/docker/restart.sh          # сборка, запуск и ожидание готовности Nav2
+make demo                                           # сборка, запуск и ожидание готовности Nav2
 ```
 
 В этой ветке оставлено только нужное для этого стека: Webots (`webots_ros2_suv`, судья, бочки), `offroad_nav2`, подмодули `oscc` и
@@ -79,7 +78,7 @@ ros2_ws/src/offroad_nav2/docker/restart.sh          # сборка, запуск
 
 У топиков камер (`/stereo_raw/*`) время берется не из симуляции, а из реального мира. Если нужна будет синхронизация, надо будет сделать прослойку, которая будет менять время на время симуляции.  
 
-На винде не тестировано. Если будут проблемы - создавайте pull requests, а лучше - поставьте ubuntu и установите докер(`rootless`) ;)  
+Поддерживается только Linux. Если будут проблемы - создавайте pull requests.
 
 По любым вопросам к автору репозитория, в профиле контакты есть.
 
