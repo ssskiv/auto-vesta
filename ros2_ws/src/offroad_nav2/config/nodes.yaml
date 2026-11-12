@@ -1,0 +1,94 @@
+# Parameters of the offroad_nav2 runtime nodes (C++). Every parameter of every node is listed with its value; the C++ defaults are
+# only a fallback. Loaded by the launch files (launch/*.launch.py); the launch arguments `tl_source` override
+# traffic_light_node.source and stop_wall.enabled.
+#
+# Other parameter files: nav2_params.yaml (Nav2), ekf.yaml / navsat.yaml (localization), stereo.yaml (stereo matcher),
+# vehicle.yaml (vehicle and camera numbers, documentation / calibration source).
+# use_sim_time is true for every node: the simulator is the clock.
+
+# ---- stereo chain ---------------------------------------------------------------------------------------------------------------
+stamp_relay:
+  ros__parameters:
+    use_sim_time: true
+    baseline: 0.20              # m, stereo baseline (Webots stereo pair; vehicle.yaml: stereo.baseline)
+    in_ns: /stereo_raw          # raw Webots topics: <in_ns>/{left,right}/<in_image_suffix> and camera_info
+    in_image_suffix: image_color
+    crop_top: 340               # rows [crop_top, crop_bottom) go to the stereo matcher (no sky, no hood); must match disparity_to_depth.crop_top
+    crop_bottom: 624
+    pair_tolerance_ms: 8.0      # left/right images closer than this belong to one pair
+    max_rate_hz: 10.0           # the matcher (SGBM) cannot keep up with more; a higher rate only adds latency
+
+disparity_to_depth:
+  ros__parameters:
+    use_sim_time: true
+    min_depth: 1.0              # m
+    max_depth: 60.0             # m
+    crop_top: 340               # first image row of the cropped disparity image (= stamp_relay.crop_top)
+    full_height: 720            # height of the published full-frame depth image
+
+# ---- perception -----------------------------------------------------------------------------------------------------------------
+perception_node:
+  ros__parameters:
+    use_sim_time: true
+    onnx_dir: /models/onnx      # seg.onnx, contour.onnx, objseg.onnx (make onnx)
+    models_enabled: true
+    parallel_nets: false        # the GPU is the limit: three threads gave no speed-up
+    image_topic: /stereo/left/image_rect
+    preprocess_mode: resize     # TODO(user) decision 7.8: resize (matches training) or crop
+    crop_top: 40                # used when preprocess_mode is crop
+    crop_bottom: 40
+    stride: 4                   # model-pixel grid step of the dense clouds
+    max_depth: 20.0             # m, trust stereo depth only to about 20 m (error grows with z^2)
+    contour_marks_nondrivable: true
+    ego_box: [-1.08, 4.18, -1.065, 1.065]   # xmin xmax ymin ymax in base_footprint: the car itself (footprint +0.2 m, +0.5 m ahead)
+    footprint_frame: base_footprint
+    odom_frame: odom
+    temporal_filter: true       # publish a mark only if its 0.2 m cell was hit in 2 of the last 3 frames
+    tf_timeout_s: 0.05
+    vis_every_n: 1              # /perception/seg_vis every n-th frame
+
+traffic_light_node:
+  ros__parameters:
+    use_sim_time: true
+    source: none                # none | standin (world truth, NOT a perception result); overridden by the launch argument tl_source
+
+stop_wall:
+  ros__parameters:
+    use_sim_time: true
+    enabled: false              # overridden by the launch argument tl_source (enabled when it is not none)
+    line_xy: [9.20, 1.46]       # RoboCross stop line: world (11.40, -0.14) = map (9.20, 1.46); map = world - (2.2, -1.6)
+    line_yaw: 0.0               # direction of travel through the line
+    width: 12.0                 # m, wall width across the track
+    active_distance: 25.0       # m, the wall exists only when the car is closer than this
+    wall_offset: 4.0            # m, wall placed this far BEFORE the line (braking distance + bumper clearance)
+
+# ---- localization helpers -------------------------------------------------------------------------------------------------------
+sim_sensor_adapter:
+  ros__parameters:
+    use_sim_time: true
+    datum_lat: 54.3282          # TODO(user) real venue; must equal navsat.yaml datum
+    datum_lon: 48.3866
+    map_origin_in_world: [2.2, -1.6]   # world = map + (2.2, -1.6) (maps/robocross.yaml)
+    gps_sigma_xy: 0.3           # m
+
+wheel_odometry:
+  ros__parameters:
+    use_sim_time: true
+    wheel_radius: 0.315         # m (vehicle.yaml)
+    sign: 1.0                   # sign convention of the wheel angle (+1: forward positive)
+    sigma_v: 0.1                # m/s
+
+# ---- vehicle interface ----------------------------------------------------------------------------------------------------------
+zero_clamp_relay:
+  ros__parameters:
+    use_sim_time: true
+    in_topic: /cmd_vel_nav
+    out_topic: /cmd_vel
+    watchdog_s: 0.3             # no command for this long -> zero command
+
+cmd_to_ackermann:               # real-car path only (not started in the simulation)
+  ros__parameters:
+    use_sim_time: false
+    wheelbase: 2.648            # m (vehicle.yaml)
+    max_steer: 0.6              # rad
+    max_steer_rate: 0.5         # rad/s, TODO(user): measure on the real car

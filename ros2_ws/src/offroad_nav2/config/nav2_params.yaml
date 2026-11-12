@@ -1,0 +1,264 @@
+# Nav2 (Humble 1.1.x) parameters of the Vesta stack. Edit here; there is no generator any more.
+#
+# Forward-only everywhere (checked by test/test_forward_only.py): Smac Hybrid-A* DUBIN, Regulated Pure Pursuit with
+# allow_reversing false, velocity_smoother min_velocity x = 0, BT without BackUp/Spin, collision_monitor, and the zero-clamp relay
+# (config/nodes.yaml). Obstacles come from the perception clouds only (no lidar). Costmap heights are in the costmap frame:
+# the ground sits at z = -base_link_height = -0.108 m (EKF 2D mode keeps base_link at z = 0).
+#
+# Substituted at launch (launch/navigation.launch.py): map_server.yaml_filename and the two bt_navigator behaviour-tree files
+# (names only here; the full paths come from the package share directory).
+#
+# TODO(user): planner minimum turning radius (GridBased.minimum_turning_radius, 4.0 here; guide 4.5 / 5.2; kinematic minimum 3.87 m);
+# TODO(user): semantic layer = lethal vs soft cost for non-drivable ground (decision 7.10); real footprint / vehicle numbers.
+# Footprint: rear axle at the origin, x -0.88..3.68, y +-0.865 (config/vehicle.yaml); footprint_padding 0.2 m (0.12 gave barrel touches,
+# 0.3 pinned the car against a barrel).
+planner_server:
+  ros__parameters:
+    use_sim_time: true
+    expected_planner_frequency: 2.0
+    planner_plugins: [GridBased]
+    GridBased:
+      plugin: nav2_smac_planner/SmacPlannerHybrid
+      downsample_costmap: true
+      downsampling_factor: 2
+      tolerance: 3.0
+      allow_unknown: true
+      max_iterations: 2000000
+      max_on_approach_iterations: 1000
+      max_planning_time: 5.0
+      motion_model_for_search: DUBIN
+      angle_quantization_bins: 48
+      analytic_expansion_ratio: 3.5
+      analytic_expansion_max_length: 3.0
+      minimum_turning_radius: 4.0
+      reverse_penalty: 2.0
+      change_penalty: 0.0
+      non_straight_penalty: 1.2
+      cost_penalty: 2.0
+      retrospective_penalty: 0.015
+      lookup_table_size: 20.0
+      cache_obstacle_heuristic: false
+      smooth_path: true
+      smoother: {max_iterations: 1000, w_smooth: 0.3, w_data: 0.2, tolerance: 1.0e-10, do_refinement: true, refinement_num: 2}
+controller_server:
+  ros__parameters:
+    use_sim_time: true
+    controller_frequency: 10.0
+    min_x_velocity_threshold: 0.001
+    min_y_velocity_threshold: 0.5
+    min_theta_velocity_threshold: 0.001
+    failure_tolerance: 0.3
+    progress_checker_plugin: progress_checker
+    goal_checker_plugins: [general_goal_checker]
+    controller_plugins: [FollowPath]
+    progress_checker: {plugin: 'nav2_controller::SimpleProgressChecker', required_movement_radius: 0.5, movement_time_allowance: 45.0}
+    general_goal_checker: {stateful: true, plugin: 'nav2_controller::SimpleGoalChecker', xy_goal_tolerance: 1.5, yaw_goal_tolerance: 3.14}
+    FollowPath: {plugin: 'nav2_regulated_pure_pursuit_controller::RegulatedPurePursuitController', desired_linear_vel: 3.0, lookahead_dist: 3.0,
+      min_lookahead_dist: 2.0, max_lookahead_dist: 5.0, lookahead_time: 1.0, rotate_to_heading_angular_vel: 0.0, transform_tolerance: 0.1, use_velocity_scaled_lookahead_dist: true,
+      min_approach_linear_velocity: 1.0, approach_velocity_scaling_dist: 4.0, use_collision_detection: true, max_allowed_time_to_collision_up_to_carrot: 1.0,
+      use_regulated_linear_velocity_scaling: true, use_cost_regulated_linear_velocity_scaling: true, regulated_linear_scaling_min_radius: 6.0,
+      regulated_linear_scaling_min_speed: 1.5, use_rotate_to_heading: false, allow_reversing: false, max_angular_accel: 3.2, cost_scaling_dist: 1.0,
+      cost_scaling_gain: 1.0, inflation_cost_scaling_factor: 4.0}
+local_costmap:
+  local_costmap:
+    ros__parameters:
+      update_frequency: 10.0
+      publish_frequency: 5.0
+      global_frame: odom
+      robot_base_frame: base_link
+      footprint: '[[3.68, 0.865], [3.68, -0.865], [-0.88, -0.865], [-0.88, 0.865]]'
+      footprint_padding: 0.2
+      resolution: 0.1
+      transform_tolerance: 0.3
+      always_send_full_costmap: true
+      use_sim_time: true
+      rolling_window: true
+      width: 40
+      height: 40
+      plugins: [vru_layer, vru_inflation, vehicle_layer, vehicle_inflation, geometric_layer, semantic_layer, inflation_layer]
+      geometric_layer:
+        plugin: nav2_costmap_2d::ObstacleLayer
+        enabled: true
+        observation_sources: geometric clear
+        geometric: {topic: /perception/points/geometric, data_type: PointCloud2, marking: true, clearing: false, sensor_frame: '', observation_persistence: 0.0,
+          expected_update_rate: 0.0, inf_is_valid: false, obstacle_max_range: 20.0, obstacle_min_range: 0.0, raytrace_max_range: 22.0, raytrace_min_range: 0.0,
+          min_obstacle_height: -0.508, max_obstacle_height: 3.0}
+        clear: {topic: /perception/points/clear, data_type: PointCloud2, marking: false, clearing: true, sensor_frame: '', observation_persistence: 0.0,
+          expected_update_rate: 0.0, inf_is_valid: false, obstacle_max_range: 20.0, obstacle_min_range: 0.0, raytrace_max_range: 22.0, raytrace_min_range: 0.0,
+          min_obstacle_height: -0.508, max_obstacle_height: 3.0}
+      vru_layer:
+        plugin: nav2_costmap_2d::ObstacleLayer
+        enabled: true
+        observation_sources: vru clear
+        vru: {topic: /perception/points/vru, data_type: PointCloud2, marking: true, clearing: false, sensor_frame: '', observation_persistence: 0.0,
+          expected_update_rate: 0.0, inf_is_valid: false, obstacle_max_range: 20.0, obstacle_min_range: 0.0, raytrace_max_range: 22.0, raytrace_min_range: 0.0,
+          min_obstacle_height: -0.508, max_obstacle_height: 3.0}
+        clear: {topic: /perception/points/clear, data_type: PointCloud2, marking: false, clearing: true, sensor_frame: '', observation_persistence: 0.0,
+          expected_update_rate: 0.0, inf_is_valid: false, obstacle_max_range: 20.0, obstacle_min_range: 0.0, raytrace_max_range: 22.0, raytrace_min_range: 0.0,
+          min_obstacle_height: -0.508, max_obstacle_height: 3.0}
+      vehicle_layer:
+        plugin: nav2_costmap_2d::ObstacleLayer
+        enabled: true
+        observation_sources: vehicle clear
+        vehicle: {topic: /perception/points/vehicle, data_type: PointCloud2, marking: true, clearing: false, sensor_frame: '', observation_persistence: 0.0,
+          expected_update_rate: 0.0, inf_is_valid: false, obstacle_max_range: 20.0, obstacle_min_range: 0.0, raytrace_max_range: 22.0, raytrace_min_range: 0.0,
+          min_obstacle_height: -0.508, max_obstacle_height: 3.0}
+        clear: {topic: /perception/points/clear, data_type: PointCloud2, marking: false, clearing: true, sensor_frame: '', observation_persistence: 0.0,
+          expected_update_rate: 0.0, inf_is_valid: false, obstacle_max_range: 20.0, obstacle_min_range: 0.0, raytrace_max_range: 22.0, raytrace_min_range: 0.0,
+          min_obstacle_height: -0.508, max_obstacle_height: 3.0}
+      semantic_layer:
+        plugin: nav2_costmap_2d::ObstacleLayer
+        enabled: true
+        observation_sources: nondrivable natural manmade clear
+        nondrivable: {topic: /perception/points/nondrivable, data_type: PointCloud2, marking: true, clearing: false, sensor_frame: '', observation_persistence: 0.0,
+          expected_update_rate: 0.0, inf_is_valid: false, obstacle_max_range: 20.0, obstacle_min_range: 0.0, raytrace_max_range: 22.0, raytrace_min_range: 0.0,
+          min_obstacle_height: -0.508, max_obstacle_height: 3.0}
+        natural: {topic: /perception/points/natural, data_type: PointCloud2, marking: true, clearing: false, sensor_frame: '', observation_persistence: 0.0,
+          expected_update_rate: 0.0, inf_is_valid: false, obstacle_max_range: 20.0, obstacle_min_range: 0.0, raytrace_max_range: 22.0, raytrace_min_range: 0.0,
+          min_obstacle_height: -0.508, max_obstacle_height: 3.0}
+        manmade: {topic: /perception/points/manmade, data_type: PointCloud2, marking: true, clearing: false, sensor_frame: '', observation_persistence: 0.0,
+          expected_update_rate: 0.0, inf_is_valid: false, obstacle_max_range: 20.0, obstacle_min_range: 0.0, raytrace_max_range: 22.0, raytrace_min_range: 0.0,
+          min_obstacle_height: -0.508, max_obstacle_height: 3.0}
+        clear: {topic: /perception/points/clear, data_type: PointCloud2, marking: false, clearing: true, sensor_frame: '', observation_persistence: 0.0,
+          expected_update_rate: 0.0, inf_is_valid: false, obstacle_max_range: 20.0, obstacle_min_range: 0.0, raytrace_max_range: 22.0, raytrace_min_range: 0.0,
+          min_obstacle_height: -0.508, max_obstacle_height: 3.0}
+      vru_inflation: {plugin: 'nav2_costmap_2d::InflationLayer', cost_scaling_factor: 1.5, inflation_radius: 3.0}
+      vehicle_inflation: {plugin: 'nav2_costmap_2d::InflationLayer', cost_scaling_factor: 2.0, inflation_radius: 2.0}
+      inflation_layer: {plugin: 'nav2_costmap_2d::InflationLayer', cost_scaling_factor: 4.0, inflation_radius: 2.4}
+global_costmap:
+  global_costmap:
+    ros__parameters:
+      update_frequency: 2.0
+      publish_frequency: 1.0
+      global_frame: map
+      robot_base_frame: base_link
+      footprint: '[[3.68, 0.865], [3.68, -0.865], [-0.88, -0.865], [-0.88, 0.865]]'
+      footprint_padding: 0.2
+      resolution: 0.2
+      transform_tolerance: 0.3
+      always_send_full_costmap: true
+      use_sim_time: true
+      rolling_window: false
+      track_unknown_space: true
+      plugins: [static_layer, vru_layer, vehicle_layer, geometric_layer, inflation_layer]
+      geometric_layer:
+        plugin: nav2_costmap_2d::ObstacleLayer
+        enabled: true
+        observation_sources: geometric clear
+        geometric: {topic: /perception/points/geometric, data_type: PointCloud2, marking: true, clearing: false, sensor_frame: '', observation_persistence: 0.0,
+          expected_update_rate: 0.0, inf_is_valid: false, obstacle_max_range: 20.0, obstacle_min_range: 0.0, raytrace_max_range: 22.0, raytrace_min_range: 0.0,
+          min_obstacle_height: -0.508, max_obstacle_height: 3.0}
+        clear: {topic: /perception/points/clear, data_type: PointCloud2, marking: false, clearing: true, sensor_frame: '', observation_persistence: 0.0,
+          expected_update_rate: 0.0, inf_is_valid: false, obstacle_max_range: 20.0, obstacle_min_range: 0.0, raytrace_max_range: 22.0, raytrace_min_range: 0.0,
+          min_obstacle_height: -0.508, max_obstacle_height: 3.0}
+      vru_layer:
+        plugin: nav2_costmap_2d::ObstacleLayer
+        enabled: true
+        observation_sources: vru clear
+        vru: {topic: /perception/points/vru, data_type: PointCloud2, marking: true, clearing: false, sensor_frame: '', observation_persistence: 0.0,
+          expected_update_rate: 0.0, inf_is_valid: false, obstacle_max_range: 20.0, obstacle_min_range: 0.0, raytrace_max_range: 22.0, raytrace_min_range: 0.0,
+          min_obstacle_height: -0.508, max_obstacle_height: 3.0}
+        clear: {topic: /perception/points/clear, data_type: PointCloud2, marking: false, clearing: true, sensor_frame: '', observation_persistence: 0.0,
+          expected_update_rate: 0.0, inf_is_valid: false, obstacle_max_range: 20.0, obstacle_min_range: 0.0, raytrace_max_range: 22.0, raytrace_min_range: 0.0,
+          min_obstacle_height: -0.508, max_obstacle_height: 3.0}
+      vehicle_layer:
+        plugin: nav2_costmap_2d::ObstacleLayer
+        enabled: true
+        observation_sources: vehicle clear
+        vehicle: {topic: /perception/points/vehicle, data_type: PointCloud2, marking: true, clearing: false, sensor_frame: '', observation_persistence: 0.0,
+          expected_update_rate: 0.0, inf_is_valid: false, obstacle_max_range: 20.0, obstacle_min_range: 0.0, raytrace_max_range: 22.0, raytrace_min_range: 0.0,
+          min_obstacle_height: -0.508, max_obstacle_height: 3.0}
+        clear: {topic: /perception/points/clear, data_type: PointCloud2, marking: false, clearing: true, sensor_frame: '', observation_persistence: 0.0,
+          expected_update_rate: 0.0, inf_is_valid: false, obstacle_max_range: 20.0, obstacle_min_range: 0.0, raytrace_max_range: 22.0, raytrace_min_range: 0.0,
+          min_obstacle_height: -0.508, max_obstacle_height: 3.0}
+      static_layer: {plugin: 'nav2_costmap_2d::StaticLayer', map_subscribe_transient_local: true}
+      inflation_layer: {plugin: 'nav2_costmap_2d::InflationLayer', cost_scaling_factor: 4.0, inflation_radius: 2.4}
+map_server:
+  ros__parameters: {use_sim_time: true, yaml_filename: robocross.yaml}
+behavior_server:
+  ros__parameters:
+    use_sim_time: true
+    costmap_topic: local_costmap/costmap_raw
+    footprint_topic: local_costmap/published_footprint
+    cycle_frequency: 10.0
+    behavior_plugins: [wait]
+    wait: {plugin: nav2_behaviors/Wait}
+    global_frame: odom
+    robot_base_frame: base_link
+    transform_tolerance: 0.1
+    simulate_ahead_time: 2.0
+bt_navigator:
+  ros__parameters:
+    use_sim_time: true
+    global_frame: map
+    robot_base_frame: base_link
+    odom_topic: /odometry/local
+    bt_loop_duration: 10
+    default_server_timeout: 20
+    plugin_lib_names: [nav2_compute_path_to_pose_action_bt_node, nav2_compute_path_through_poses_action_bt_node, nav2_follow_path_action_bt_node,
+      nav2_wait_action_bt_node, nav2_clear_costmap_service_bt_node, nav2_is_stuck_condition_bt_node, nav2_goal_reached_condition_bt_node, nav2_goal_updated_condition_bt_node,
+      nav2_globally_updated_goal_condition_bt_node, nav2_is_path_valid_condition_bt_node, nav2_initial_pose_received_condition_bt_node, nav2_rate_controller_bt_node,
+      nav2_distance_controller_bt_node, nav2_speed_controller_bt_node, nav2_truncate_path_action_bt_node, nav2_truncate_path_local_action_bt_node,
+      nav2_goal_updater_node_bt_node, nav2_recovery_node_bt_node, nav2_pipeline_sequence_bt_node, nav2_round_robin_node_bt_node, nav2_transform_available_condition_bt_node,
+      nav2_time_expired_condition_bt_node, nav2_distance_traveled_condition_bt_node]
+    default_nav_to_pose_bt_xml: nav_forward_only.xml
+    default_nav_through_poses_bt_xml: nav_through_poses_forward_only.xml
+waypoint_follower:
+  ros__parameters:
+    use_sim_time: true
+    loop_rate: 20
+    stop_on_failure: false
+    waypoint_task_executor_plugin: wait_at_waypoint
+    wait_at_waypoint: {plugin: 'nav2_waypoint_follower::WaitAtWaypoint', enabled: true, waypoint_pause_duration: 0}
+velocity_smoother:
+  ros__parameters:
+    use_sim_time: true
+    smoothing_frequency: 20.0
+    scale_velocities: false
+    feedback: OPEN_LOOP
+    max_velocity: [4.5, 0.0, 1.0]
+    min_velocity: [0.0, 0.0, -1.0]
+    max_accel: [1.5, 0.0, 2.0]
+    max_decel: [-3.0, 0.0, -2.0]
+    odom_topic: /odometry/local
+    odom_duration: 0.1
+    deadband_velocity: [0.0, 0.0, 0.0]
+    velocity_timeout: 1.0
+collision_monitor:
+  ros__parameters:
+    use_sim_time: true
+    base_frame_id: base_link
+    odom_frame_id: odom
+    cmd_vel_in_topic: cmd_vel_smoothed
+    cmd_vel_out_topic: cmd_vel_nav
+    transform_tolerance: 0.3
+    source_timeout: 2.0
+    base_shift_correction: true
+    stop_pub_timeout: 2.0
+    polygons: [StopZone, SlowZone]
+    StopZone:
+      type: polygon
+      points: [4.7, 0.85, 4.7, -0.85, 3.75, -0.85, 3.75, 0.85]
+      action_type: stop
+      min_points: 4
+      visualize: true
+      polygon_pub_topic: stop_polygon
+      enabled: true
+    SlowZone:
+      type: polygon
+      points: [7.5, 1.1, 7.5, -1.1, 3.75, -1.1, 3.75, 1.1]
+      action_type: slowdown
+      min_points: 4
+      slowdown_ratio: 0.5
+      visualize: true
+      polygon_pub_topic: slow_polygon
+      enabled: true
+    observation_sources: [stop_wall, perception_geo]
+    stop_wall: {type: pointcloud, topic: /perception/stop_wall, min_height: -1.0, max_height: 3.0}
+    perception_geo: {type: pointcloud, topic: /perception/points/geometric, min_height: -0.05, max_height: 2.0}
+lifecycle_manager_navigation:
+  ros__parameters:
+    use_sim_time: true
+    autostart: true
+    bond_timeout: 8.0
+    node_names: [map_server, planner_server, controller_server, behavior_server, bt_navigator, waypoint_follower, velocity_smoother, collision_monitor]

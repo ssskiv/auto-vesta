@@ -159,7 +159,7 @@ docker rm -f nav_sim
 
 | What | Path |
 |---|---|
-| Launch files `launch/`, Nav2 parameters `offroad_bringup/nav2_params.py`, stereo/EKF configs `config/`, behaviour trees `behavior_trees/` | `ros2_ws/src/offroad_nav2/` |
+| Launch files `launch/`, all parameters in YAML under `config/` (`nodes.yaml` for the C++ nodes, `nav2_params.yaml`, `ekf.yaml`, `navsat.yaml`, `stereo.yaml`, `vehicle.yaml`), behaviour trees `behavior_trees/` | `ros2_ws/src/offroad_nav2/` |
 | Perception, engine, geometry | `ros2_ws/src/offroad_nav2/` |
 | Vehicle numbers | `ros2_ws/src/offroad_nav2/config/vehicle.yaml` |
 | Zero-clamp relay, DBW stub | `ros2_ws/src/offroad_nav2/` |

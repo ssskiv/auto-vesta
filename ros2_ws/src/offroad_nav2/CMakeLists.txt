@@ -85,7 +85,7 @@ foreach(src ${NODE_SRCS})
   list(APPEND CPP_NODE_NAMES ${name})
 endforeach()
 
-# ---- Python parts that remain: bringup tools (nav_goal, gps_route, lap_*), launch helpers, nav2_params.py ----------------------
+# ---- Python parts that remain: bringup tools (nav_goal, gps_route, lap_*), launch helpers ---------------------------------
 ament_python_install_package(offroad_bringup)
 file(GLOB SCRIPTS ${CMAKE_CURRENT_SOURCE_DIR}/scripts/*)
 install(PROGRAMS ${SCRIPTS} DESTINATION lib/${PROJECT_NAME})

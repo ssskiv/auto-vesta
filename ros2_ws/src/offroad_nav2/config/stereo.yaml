@@ -2,6 +2,7 @@
 # disparity_range 96 -> nearest measurable depth = 1171.5*0.2/96 = 2.4 m from the camera (closer: lidar).
 stereo_disparity:
   ros__parameters:
+    use_sim_time: true
     approximate_sync: false
     stereo_algorithm: 1          # 0 BM (-4..-6% depth bias), 1 SGBM (-2.7%, measured vs lidar)
     prefilter_size: 9

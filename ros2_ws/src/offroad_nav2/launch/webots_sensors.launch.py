@@ -11,24 +11,24 @@ from launch_ros.descriptions import ComposableNode
 
 
 def generate_launch_description():
-    cfg = os.path.join(share('offroad_nav2'), 'config', 'stereo.yaml')
+    cfgdir = os.path.join(share('offroad_nav2'), 'config')
+    cfg, nodes = os.path.join(cfgdir, 'stereo.yaml'), os.path.join(cfgdir, 'nodes.yaml')   # all parameters live in these files
     sim = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(os.path.join(share('webots_ros2_suv'), 'launch', 'robot.launch.py')),
         launch_arguments={'gui': LaunchConfiguration('gui'), 'mode': LaunchConfiguration('mode')}.items(),
         condition=IfCondition(LaunchConfiguration('start_sim')))
-    relay = Node(package='offroad_nav2', executable='stamp_relay', name='stamp_relay',
-                 parameters=[{'use_sim_time': True}], output='screen')
+    relay = Node(package='offroad_nav2', executable='stamp_relay', name='stamp_relay', parameters=[nodes], output='screen')
     disparity = ComposableNodeContainer(
         name='stereo_container', namespace='', package='rclcpp_components', executable='component_container',
         composable_node_descriptions=[ComposableNode(
             package='stereo_image_proc', plugin='stereo_image_proc::DisparityNode', name='stereo_disparity',
-            parameters=[cfg, {'use_sim_time': True}],
+            parameters=[cfg],
             remappings=[('left/image_rect', '/stereo_crop/left/image_rect'), ('left/camera_info', '/stereo_crop/left/camera_info'),
                         ('right/image_rect', '/stereo_crop/right/image_rect'),
                         ('right/camera_info', '/stereo_crop/right/camera_info'), ('disparity', '/stereo/disparity')])],
         output='screen')
-    depth = Node(package='offroad_nav2', executable='disparity_to_depth', name='disparity_to_depth',
-                 parameters=[{'use_sim_time': True}], output='screen')
+    depth = Node(package='offroad_nav2', executable='disparity_to_depth', name='disparity_to_depth', parameters=[nodes],
+                 output='screen')
     return LaunchDescription([
         DeclareLaunchArgument('gui', default_value='false'),
         DeclareLaunchArgument('mode', default_value='realtime'),

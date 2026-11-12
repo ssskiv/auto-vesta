@@ -1,14 +1,20 @@
-"""Static guarantees that the generated Nav2 configuration can never command reverse motion."""
+"""Static guarantees that the Nav2 configuration (config/*.yaml) can never command reverse motion, and that parameter files agree."""
 import os
 import re
-import sys
 
 import pytest
+import yaml
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from offroad_bringup.nav2_params import build  # noqa: E402
+PKG = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BT = os.path.join(PKG, 'behavior_trees')
 
-BT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'behavior_trees')
+
+def build(bt_dir=None, map_yaml=None):
+    return yaml.safe_load(open(os.path.join(PKG, 'config', 'nav2_params.yaml')))
+
+
+def nodes():
+    return yaml.safe_load(open(os.path.join(PKG, 'config', 'nodes.yaml')))
 
 
 def test_params_forward_only():
@@ -46,3 +52,27 @@ def test_camera_layers_all_have_clearing_source():
                 srcs = c[name]['observation_sources'].split()
                 assert any(c[name][s]['clearing'] for s in srcs), name
     assert 'semantic_layer' not in p['global_costmap']['global_costmap']['ros__parameters']['plugins']
+
+
+def test_nodes_yaml_consistent():
+    n = nodes()
+    # every node uses simulator time; the stereo crop of the relay and of the depth converter must agree
+    for name, v in n.items():
+        if name != 'cmd_to_ackermann':   # real-car path only
+            assert v['ros__parameters']['use_sim_time'] is True, name
+    assert n['stamp_relay']['ros__parameters']['crop_top'] == n['disparity_to_depth']['ros__parameters']['crop_top']
+    # the relay in the command chain: input is the collision monitor output, output is the simulator command
+    z = n['zero_clamp_relay']['ros__parameters']
+    nav = build()
+    assert z['in_topic'].lstrip('/') == nav['collision_monitor']['ros__parameters']['cmd_vel_out_topic']
+    # the navsat datum of the sim adapter and of navsat_transform must be the same point
+    d = yaml.safe_load(open(os.path.join(PKG, 'config', 'navsat.yaml')))['navsat_transform']['ros__parameters']['datum']
+    a = n['sim_sensor_adapter']['ros__parameters']
+    assert abs(d[0] - a['datum_lat']) < 1e-9 and abs(d[1] - a['datum_lon']) < 1e-9
+
+
+def test_substituted_paths_are_names_only():
+    nav = build()['bt_navigator']['ros__parameters']
+    assert nav['default_nav_to_pose_bt_xml'] == 'nav_forward_only.xml'
+    assert os.path.exists(os.path.join(BT, nav['default_nav_to_pose_bt_xml']))
+    assert os.path.exists(os.path.join(BT, nav['default_nav_through_poses_bt_xml']))

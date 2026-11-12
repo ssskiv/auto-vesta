@@ -15,10 +15,21 @@ from rclpy.node import Node
 from robot_localization.srv import FromLL
 
 R_EARTH = 6378137.0
-DATUM = (54.3282, 48.3866)   # = sim_sensor_adapter / navsat.yaml datum. TODO(user): real venue
+
+
+
+def _datum():
+    """datum of the simulation = config/nodes.yaml sim_sensor_adapter (kept equal to navsat.yaml by a test). TODO(user): real venue"""
+    import os
+
+    import yaml
+    from ament_index_python.packages import get_package_share_directory as share
+    p = yaml.safe_load(open(os.path.join(share('offroad_nav2'), 'config', 'nodes.yaml')))['sim_sensor_adapter']['ros__parameters']
+    return p['datum_lat'], p['datum_lon']
 
 
 def map_to_ll(x, y):
+    DATUM = _datum()
     return (DATUM[0] + math.degrees(y / R_EARTH), DATUM[1] + math.degrees(x / (R_EARTH * math.cos(math.radians(DATUM[0])))))
 
 
