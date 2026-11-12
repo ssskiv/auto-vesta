@@ -1,0 +1,7 @@
+# Overlay on auto-vesta's docker-compose.yml + compose.nvidia.yml. Mounts this repo and the checkpoints.
+services:
+  sim:
+    image: vesta-nav:latest
+    volumes:
+      - /home/skiv/Programming/autoware.off-road:/offroad:ro   # only Models/ is used
+      - /home/skiv/autoware_data/ml_models_snapshot:/models:ro   # snapshot copies only; never the live training dir

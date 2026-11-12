@@ -1,0 +1,19 @@
+# stereo_image_proc DisparityNode. Webots stereo: 1280x720, hfov 1.0 rad (fx 1171.5), baseline 0.20 m.
+# disparity_range 96 -> nearest measurable depth = 1171.5*0.2/96 = 2.4 m from the camera (closer: lidar).
+stereo_disparity:
+  ros__parameters:
+    approximate_sync: false
+    stereo_algorithm: 1          # 0 BM (-4..-6% depth bias), 1 SGBM (-2.7%, measured vs lidar)
+    prefilter_size: 9
+    prefilter_cap: 31
+    correlation_window_size: 5
+    min_disparity: 0
+    disparity_range: 96
+    texture_threshold: 10
+    speckle_size: 100
+    speckle_range: 4
+    disp12_max_diff: 1
+    uniqueness_ratio: 10.0
+    P1: 200.0
+    P2: 800.0
+    full_dp: false

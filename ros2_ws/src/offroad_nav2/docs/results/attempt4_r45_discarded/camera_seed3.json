@@ -1,0 +1,71 @@
+{
+ "wall_s": 383,
+ "goals": [
+  "0: (20.0,0.8) shifted 0.0 m: ok",
+  "1: (39.9,0.1) shifted 2.0 m: aborted",
+  "2: (55.9,0.7) shifted 0.1 m: ok",
+  "3: (73.9,0.3) shifted 0.1 m: ok",
+  "4: (91.9,-1.1) shifted 0.1 m: ok",
+  "5: (109.1,-6.5) shifted 0.1 m: ok",
+  "6: (124.5,-16.3) shifted 0.1 m: ok",
+  "7: (139.5,-26.5) shifted 0.1 m: ok",
+  "8: (154.7,-36.3) shifted 0.1 m: ok",
+  "9: (169.7,-46.5) shifted 0.1 m: ok",
+  "10: (183.7,-57.9) shifted 0.1 m: ok",
+  "11: (188.5,-75.3) shifted 0.1 m: ok",
+  "12: (176.1,-88.5) shifted 0.1 m: aborted",
+  "13: (158.7,-83.5) shifted 0.1 m: aborted",
+  "14: (141.9,-76.7) shifted 0.1 m: aborted",
+  "15: (125.3,-69.3) shifted 0.1 m: aborted",
+  "16: (108.5,-62.7) shifted 0.1 m: aborted",
+  "17: (92.3,-54.7) shifted 0.1 m: aborted",
+  "18: (74.9,-49.9) shifted 0.1 m: aborted",
+  "19: (57.3,-45.7) shifted 0.1 m: aborted",
+  "20: (39.5,-42.5) shifted 0.1 m: aborted",
+  "21: (21.9,-38.1) shifted 0.1 m: aborted",
+  "22: (5.1,-31.5) shifted 0.1 m: aborted",
+  "23: (-0.7,-14.3) shifted 0.1 m: aborted",
+  "24: (1.9,-0.5) shifted 0.1 m: aborted"
+ ],
+ "goals_failed": 14,
+ "cmd_vel_msgs": 7547,
+ "max_linear_x": 4.0,
+ "negative_linear_x_msgs": 0,
+ "referee": {
+  "rules": "РобоКросс.Трасса-2026, 09.04.2026, sections 15, 18",
+  "time": 117.36,
+  "finished": null,
+  "premium": 1300,
+  "k": 1.0,
+  "penalty": 0,
+  "total": 1300,
+  "events": [
+   {
+    "t": 63.98,
+    "points": 200,
+    "text": "проезд мимо преграды 19 в 1.41 м без касания"
+   },
+   {
+    "t": 76.2,
+    "points": 200,
+    "text": "проезд мимо преграды 17 в 0.81 м без касания"
+   },
+   {
+    "t": 89.9,
+    "points": 200,
+    "text": "проезд мимо преграды 9 в 1.44 м без касания"
+   },
+   {
+    "t": 94.13,
+    "points": 500,
+    "text": "Старт-финиш -> Основная зона -> Промежуточная зона"
+   },
+   {
+    "t": 117.36,
+    "points": 200,
+    "text": "проезд мимо преграды 35 в 1.61 м без касания"
+   }
+  ]
+ },
+ "lap_done": true
+}

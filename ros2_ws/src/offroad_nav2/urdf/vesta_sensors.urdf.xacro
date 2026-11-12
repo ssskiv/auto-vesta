@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<!-- Sensor frames for the real car / CARLA (Webots has its own vesta.urdf with the same frame names).
+     base_link = rear axle centre. *_optical_frame: z forward, x right, y down. TODO(user): real mounts. -->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="vesta">
+  <xacro:property name="baseline" value="0.20"/>
+  <link name="base_link"/>
+  <link name="base_footprint"/>
+  <joint name="base_footprint_joint" type="fixed"><parent link="base_link"/><child link="base_footprint"/><origin xyz="0 0 -0.108"/></joint>
+  <xacro:macro name="cam" params="side y">
+    <link name="stereo_${side}_link"/>
+    <joint name="stereo_${side}_joint" type="fixed"><parent link="base_link"/><child link="stereo_${side}_link"/><origin xyz="1.55 ${y} 1.05"/></joint>
+    <link name="stereo_${side}_optical_frame"/>
+    <joint name="stereo_${side}_optical_joint" type="fixed"><parent link="stereo_${side}_link"/><child link="stereo_${side}_optical_frame"/><origin rpy="-1.5707963267948966 0 -1.5707963267948966"/></joint>
+  </xacro:macro>
+  <xacro:cam side="left" y="${baseline/2}"/>
+  <xacro:cam side="right" y="${-baseline/2}"/>
+</robot>

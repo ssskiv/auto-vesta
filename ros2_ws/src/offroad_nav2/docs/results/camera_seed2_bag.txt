@@ -1,0 +1,1 @@
+bag /tmp/bag_2: /cmd_vel msgs 5471, linear.x min 0.000 max 3.000 m/s (10.8 km/h), negative: 0

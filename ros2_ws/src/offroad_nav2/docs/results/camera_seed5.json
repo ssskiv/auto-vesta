@@ -1,0 +1,76 @@
+{
+ "wall_s": 388,
+ "goals": [
+  "0: (19.9,0.7) shifted 0.1 m: ok",
+  "1: (37.9,0.7) shifted 0.1 m: ok",
+  "2: (56.7,1.3) shifted 0.9 m: ok",
+  "3: (73.9,0.3) shifted 0.1 m: ok",
+  "4: (91.9,-1.1) shifted 0.1 m: ok",
+  "5: (109.1,-6.5) shifted 0.1 m: ok",
+  "6: (124.5,-16.3) shifted 0.1 m: ok",
+  "7: (139.5,-26.5) shifted 0.1 m: ok",
+  "8: (154.7,-36.3) shifted 0.1 m: ok",
+  "9: (169.7,-46.5) shifted 0.1 m: ok",
+  "10: (183.7,-57.9) shifted 0.1 m: ok",
+  "11: (188.5,-75.3) shifted 0.1 m: ok",
+  "12: (176.1,-88.5) shifted 0.1 m: ok",
+  "13: (158.7,-83.5) shifted 0.1 m: aborted",
+  "14: (141.9,-76.7) shifted 0.1 m: aborted",
+  "15: (125.3,-69.3) shifted 0.1 m: aborted",
+  "16: (108.5,-62.7) shifted 0.1 m: aborted",
+  "17: (92.3,-54.7) shifted 0.1 m: aborted",
+  "18: (74.9,-49.9) shifted 0.1 m: aborted",
+  "19: (57.3,-45.7) shifted 0.1 m: aborted",
+  "20: (39.5,-42.5) shifted 0.1 m: aborted",
+  "21: (21.9,-38.1) shifted 0.1 m: aborted",
+  "22: (5.1,-31.5) shifted 0.1 m: aborted",
+  "23: (-0.7,-14.3) shifted 0.1 m: aborted",
+  "24: (1.9,-0.5) shifted 0.1 m: aborted"
+ ],
+ "goals_failed": 12,
+ "cmd_vel_msgs": 7435,
+ "max_linear_x": 3.0,
+ "negative_linear_x_msgs": 0,
+ "referee": {
+  "rules": "РобоКросс.Трасса-2026, 09.04.2026, sections 15, 18",
+  "time": 66.34,
+  "finished": null,
+  "premium": 1500,
+  "k": 1.0,
+  "penalty": 0,
+  "total": 1500,
+  "events": [
+   {
+    "t": 19.54,
+    "points": 200,
+    "text": "проезд мимо преграды 13 в 1.36 м без касания"
+   },
+   {
+    "t": 23.35,
+    "points": 200,
+    "text": "проезд мимо преграды 21 в 1.25 м без касания"
+   },
+   {
+    "t": 25.87,
+    "points": 200,
+    "text": "проезд мимо преграды 7 в 1.48 м без касания"
+   },
+   {
+    "t": 52.97,
+    "points": 200,
+    "text": "проезд мимо преграды 10 в 1.62 м без касания"
+   },
+   {
+    "t": 64.13,
+    "points": 200,
+    "text": "проезд мимо преграды 12 в 1.31 м без касания"
+   },
+   {
+    "t": 66.34,
+    "points": 500,
+    "text": "Старт-финиш -> Основная зона -> Промежуточная зона"
+   }
+  ]
+ },
+ "lap_done": true
+}

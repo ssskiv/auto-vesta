@@ -1,0 +1,21 @@
+# Vehicle numbers. SIM values (Webots Lada Vesta); the real car must be measured. TODO(user) decision 7.7
+wheelbase: 2.648
+track: 1.512
+wheel_radius: 0.315
+max_steer: 0.6
+planner_min_turning_radius: 4.0        # TODO(user): 4.5 vs 5.2 per guide; 4.0 used in sim runs (kinematic min 3.87)
+footprint: [[3.68, 0.865], [3.68, -0.865], [-0.88, -0.865], [-0.88, 0.865]]   # base_link = rear axle centre
+base_link_height: 0.108                # MEASURED in Webots after settling (ground plane from stereo+lidar); 0.4 is the spawn drop height
+max_speed_mps: 4.5                     # RoboCross limit 5.0 m/s (18 km/h)
+# Left stereo camera in base_link (x fwd, y left, z up) and pitch down; right is at -baseline in y.
+stereo:
+  baseline: 0.20
+  left_xyz: [1.55, 0.10, 1.05]
+  pitch_down: 0.0
+  width: 1280
+  height: 720
+  hfov: 1.0
+  # model input handling. TODO(user) decision 7.8: 'resize' matches training (A.Resize 640x320); 'crop' keeps aspect
+  preprocess_mode: resize
+  crop_top: 40
+  crop_bottom: 40
