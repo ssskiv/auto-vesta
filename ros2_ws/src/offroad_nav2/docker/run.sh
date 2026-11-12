@@ -5,10 +5,12 @@
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 VESTA="$(cd "$HERE/../../../.." && pwd)"   # auto-vesta repo root (this file: ros2_ws/src/offroad_nav2/docker/)
 OFFROAD="${OFFROAD:-/home/skiv/Programming/autoware.off-road}"   # only its Models/ is used
+# ros2_ws/src/rviz is mounted as ~/.rviz2, so `rviz2` starts with ros2_ws/src/rviz/default.rviz
 xhost +local: >/dev/null 2>&1
 docker run --rm --gpus all --ipc=host --net=host --shm-size=2g \
   -v "$OFFROAD":/offroad:ro \
   -v "$VESTA":/vesta \
+  -v "$VESTA/ros2_ws/src/rviz":/root/.rviz2 \
   -v /home/skiv/autoware_data/ml_models_snapshot:/models:ro \
   -v "$HOME/.cache/vesta-nav":/ws \
   -v /tmp/.X11-unix:/tmp/.X11-unix -e DISPLAY="${DISPLAY:-:0}" -e QT_X11_NO_MITSHM=1 \

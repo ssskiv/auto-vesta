@@ -1,6 +1,6 @@
 """Webots-only: re-stamp camera images with SIM time and make them stereo-ready.
 
-Webots /camera/* use wall-clock stamps (README, "Известные ограничения"), so TF lookups at the image stamp fail.
+Webots camera plugins (/stereo_raw/*) use wall-clock stamps (README, "Известные ограничения"), so TF lookups at the image stamp fail.
 This node subscribes to the raw Webots stereo topics, stamps each left/right pair with the sim time at which the
 first image of the pair arrived (/clock, +-1 sim step), and republishes
   /stereo/{left,right}/image_rect   (same pixels; Webots cameras have no distortion, so raw == rectified)
@@ -24,7 +24,6 @@ class StampRelay(Node):
         self.baseline = self.declare_parameter('baseline', 0.20).value
         self.in_ns = self.declare_parameter('in_ns', '/stereo_raw').value
         self.suffix = self.declare_parameter('in_image_suffix', 'image_color').value
-        self.mono = self.declare_parameter('mono_topic', '/camera/image_raw/image_color').value
         self.crop = (int(self.declare_parameter('crop_top', 340).value), int(self.declare_parameter('crop_bottom', 624).value))
         self.pair_tol_ns = int(self.declare_parameter('pair_tolerance_ms', 8.0).value * 1e6)
         self.min_period = 1.0 / self.declare_parameter('max_rate_hz', 10.0).value  # SGBM would otherwise queue (latency)
@@ -46,8 +45,6 @@ class StampRelay(Node):
         self.cpub = {side: (self.create_publisher(Image, f'/stereo_crop/{side}/image_rect', out),
                             self.create_publisher(CameraInfo, f'/stereo_crop/{side}/camera_info', out))
                      for side in ('left', 'right')}
-        self.mono_pub = self.create_publisher(Image, '/camera/image_rect', out)
-        self.create_subscription(Image, self.mono, self.on_mono, inq)
         self.get_logger().info(f'restamping with sim time (use_sim_time={self.get_parameter("use_sim_time").value})')
 
     def sim_stamp(self, orig):
@@ -74,10 +71,6 @@ class StampRelay(Node):
             if abs(k - key) < self.pair_tol_ns:
                 return self.skip_keys[k]
         return False
-
-    def on_mono(self, msg):
-        msg.header.stamp = self.get_clock().now().to_msg()
-        self.mono_pub.publish(msg)
 
     def on_image(self, msg, side):
         K = self.K.get(side)

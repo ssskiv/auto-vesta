@@ -2055,27 +2055,6 @@ DEF Vesta1 LadaVesta {
         }
       ]
     }
-    Camera {
-      translation -2.21 0 0.42
-      rotation 0 0 1 0
-      name "rgb_camera"
-      width 1280
-      height 720
-      fieldOfView 1.0
-      near 0.1
-      children [
-        Shape {
-          appearance PBRAppearance {
-            baseColor 0.05 0.05 0.05
-            metalness 0.3
-            roughness 0.5
-          }
-          geometry Box {
-            size 0.04 0.03 0.03
-          }
-        }
-      ]
-    }
     Radar {
       translation -0.48 -0.06 -0.09
       rotation 0 0 1 0

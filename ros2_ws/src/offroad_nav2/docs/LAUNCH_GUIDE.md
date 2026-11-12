@@ -108,9 +108,10 @@ Each run takes about 6 minutes. Results (score, touches, reversing, goals failed
 - Topics worth echoing: `/perception/points/{geometric,nondrivable,clear,vehicle,vru,manmade,natural}`, `/perception/objects`,
   `/perception/latency_ms`, `/odometry/global`, `/local_costmap/costmap`, `/global_costmap/costmap`, `/cmd_vel`.
 - Segmentation overlay: `/perception/seg_vis` (green drivable, magenta natural, yellow man-made, red VRU, blue vehicle).
-- To see them in rviz run rviz inside the container (the X socket is mounted):
-  `docker exec -it nav_sim bash -lc 'source /opt/ros/humble/setup.bash; source /ws/install/setup.bash; rviz2'`
-  and add the topics above; fixed frame `map`.
+- rviz: `docker exec -it nav_sim bash -lc 'source /opt/ros/humble/setup.bash; source /ws/install/setup.bash; rviz2'`. It opens with the
+  default config `ros2_ws/src/rviz/default.rviz` (mounted as `~/.rviz2`, also by `scripts/start.sh`): fixed frame `map`, robot model, TF,
+  global/local costmaps, plan, odometry, the perception clouds (red = depth obstacles, blue vehicle, magenta people, yellow man-made,
+  green natural, orange non-drivable), stop/slow zones, the left camera image and the segmentation overlay. Use "2D Goal Pose" to send a goal.
 - Costmap and speed checks: `tools/costmap_check.py`, `tools/tl_test.py`, `tools/save_frames.py` under `ros2_ws/src/offroad_nav2/tools/`.
 
 ## 6. Stop
