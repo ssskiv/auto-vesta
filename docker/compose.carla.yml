@@ -1,0 +1,53 @@
+# RU: Оверлей CARLA. Подключается поверх docker-compose.yml и compose.<gpu>.yml
+#     скриптом scripts/start_carla.sh. Сервер CARLA работает только на NVIDIA.
+# EN: CARLA overlay, stacked on docker-compose.yml and compose.<gpu>.yml by
+#     scripts/start_carla.sh. The CARLA server needs an NVIDIA GPU.
+#
+# RU: Версию меняйте здесь и в Dockerfile.carla (ARG CARLA_VERSION) одновременно.
+# EN: Change the version here and in Dockerfile.carla (ARG CARLA_VERSION) together.
+services:
+  sim:
+    build:
+      context: .
+      dockerfile: Dockerfile.carla
+      args:
+        CARLA_VERSION: ${CARLA_VERSION:-0.9.15}
+    image: vesta-sim-carla:latest
+    container_name: vesta_sim_carla
+    environment:
+      - CARLA_HOST=carlasim
+      - CARLA_PORT=2000
+    depends_on:
+      - carlasim
+
+  carlasim:
+    image: carlasim/carla:${CARLA_VERSION:-0.9.15}
+    container_name: vesta_carlasim
+    user: "1000:1000"
+    environment:
+      - DISPLAY=${DISPLAY:-:0}
+      - SDL_VIDEODRIVER=${CARLA_SDL_VIDEODRIVER:-x11}
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=all
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      # RU: Упакованная карта Robocross (cooked package) из ../carla/Import.
+      # EN: The cooked Robocross map package from ../carla/Import.
+      - ../carla/Import:/home/carla/Import:ro
+    ports:
+      - "2000-2002:2000-2002"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu, graphics, display]
+    # RU: CARLA_ARGS=-RenderOffScreen ... для режима без графики. Реальное время задаёт
+    #     carla_suv (world_setup --ticker), а не сервер.
+    # EN: CARLA_ARGS=-RenderOffScreen ... for headless. Real time comes from carla_suv
+    #     (world_setup --ticker), not from the server.
+    command: >
+      bash -c "if ls /home/carla/Import/*.tar.gz >/dev/null 2>&1; then cp /home/carla/Import/*.tar.gz /home/carla/ &&
+      ./ImportAssets.sh; fi;
+      ./CarlaUE4.sh -nosound -carla-rpc-port=2000 ${CARLA_ARGS:--quality-level=Low}"
