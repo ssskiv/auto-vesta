@@ -161,3 +161,9 @@ default); non-drivable cost policy lethal vs soft (7.10); checkpoints, domain ga
 Files changed inside autoware.off-road outside the new `ROS2/` and `ros2_ws/src/offroad_nav2/docs/`: `Models/model_components/backbone.py` and
 `Models/model_components/scene_seg_network.py` (`pretrained=` argument, default keeps training unchanged). No other training or
 data code was touched; `freespace_seg_infer copy.py` was not deleted.
+
+## Later change: C++ rewrite (see docs/perf/PERF_REPORT.md)
+
+All runtime nodes were rewritten in C++ with ONNX Runtime for the networks. Same topics, parameters and executable names; the referee seeds 1 and 2
+were re-run on the C++ stack and match the Python results (seed 1: 4 failed goals, 0 penalty, unfinished; seed 2: finished, 0 penalty).
+Image-to-cloud latency went from p50 144-216 ms / p95 624-648 ms to 72 / 96 ms, perception CPU from ~80 % to ~37 % of a core, total host CPU from 20 % to 9-11 %.

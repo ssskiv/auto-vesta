@@ -29,6 +29,9 @@ services:
 
     volumes:
       - ../ros2_ws/src:/ros2_ws/src:rw
+      # RU: точка входа берётся из репозитория (правки без пересборки образа).
+      # EN: the entrypoint comes from the repo (edits need no image rebuild).
+      - ./entrypoint.sh:/entrypoint.sh:ro
       # RU: rviz открывается с ros2_ws/src/rviz/default.rviz.
       # EN: rviz starts with ros2_ws/src/rviz/default.rviz.
       - ../ros2_ws/src/rviz:/root/.rviz2:rw

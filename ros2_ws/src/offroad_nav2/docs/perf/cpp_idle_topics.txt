@@ -1,0 +1,7 @@
+/stereo/depth                          9.45 Hz
+/odometry/global                      28.70 Hz
+/perception/points/geometric           9.47 Hz
+/perception/points/clear               9.47 Hz
+/stereo/left/image_rect                9.97 Hz
+/cmd_vel                              19.15 Hz
+latency_ms {'n': 379, 'p50': 72.0, 'p95': 96.0, 'max': 96.0}

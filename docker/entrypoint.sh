@@ -5,6 +5,7 @@ source /opt/ros/humble/setup.bash
 
 # RU: Собираем, если воркспейса нет или в нём не хватает пакета из src (например, после смены ветки).
 # EN: Build when there is no workspace or a package from src is missing in it (e.g. after switching branches).
+rm -f /tmp/.entrypoint_ready   # `make up` waits for this marker (the entrypoint build must not overlap with its own colcon build)
 need_build=0
 [ -f /ros2_ws/install/setup.bash ] || need_build=1
 for pkg in webots_ros2_suv offroad_nav2; do
@@ -27,4 +28,5 @@ if [ -t 1 ]; then
     echo ""
 fi
 
+touch /tmp/.entrypoint_ready
 exec "$@"

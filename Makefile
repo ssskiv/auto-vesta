@@ -7,7 +7,7 @@ SHELL        := /bin/bash
 .SHELLFLAGS  := -c
 .ONESHELL:
 .DEFAULT_GOAL := help
-.PHONY: help shell start up image headless rebuild stop attach exec demo demo-stop gpu check
+.PHONY: help shell start up image onnx headless rebuild stop attach exec demo demo-stop gpu check
 
 # RU: GPU=nvidia|amd|intel|cpu задаёт видеокарту вручную, иначе автоопределение.
 # EN: GPU=nvidia|amd|intel|cpu forces the GPU, otherwise it is auto-detected.
@@ -92,7 +92,7 @@ endef
 # EN: The image is built when it is missing or predates the Nav2 + perception stack (no vesta.nav label).
 define ENSURE_IMAGE
 if ! docker image inspect vesta-sim:latest >/dev/null 2>&1 || \
-   [ "$$(docker image inspect -f '{{index .Config.Labels "vesta.nav"}}' vesta-sim:latest 2>/dev/null)" != 1 ]; then
+   [ "$$(docker image inspect -f '{{index .Config.Labels "vesta.nav"}}' vesta-sim:latest 2>/dev/null)" != 2 ]; then
     say ""
     say "RU: Сборка образа (нет образа или в нём нет стека Nav2 + восприятие). Первый раз 15-25 минут, дальше запуск за секунды."
     say "EN: Building the image (missing, or without the Nav2 + perception stack). 15-25 minutes the first time, instant afterwards."
@@ -143,6 +143,11 @@ $(ENSURE_IMAGE)
 # EN: Orphaned containers from interrupted runs hold port 8080 and block the next start.
 docker rm -f $$(docker ps -aq --filter "name=docker-sim-run") 2>/dev/null || true
 
+if [ ! -f "$$VESTA_MODELS/onnx/seg.onnx" ]; then
+    say "RU: нет $$VESTA_MODELS/onnx/*.onnx: сначала выполните make onnx (экспорт нейросетей для C++ узла perception_node)"
+    say "EN: $$VESTA_MODELS/onnx/*.onnx is missing: run make onnx first (exports the networks for the C++ perception_node)"
+fi
+
 echo
 echo "  ========================================================"
 echo "   Simulation"
@@ -165,6 +170,7 @@ help:
 	  make attach         зайти в уже запущенный контейнер | open another shell in the running container   [= make exec]
 	  make exec           то же, что make attach | same as make attach
 	  make stop           остановить контейнеры | stop the containers
+	  make onnx           экспорт нейросетей в ONNX для C++ узла восприятия (после смены чекпойнтов) | export the networks to ONNX for the C++ perception node
 	  make rebuild        пересобрать образ с нуля и очистить .build | rebuild the image from scratch, clear .build
 	  make demo           собрать и запустить Nav2 + восприятие (offroad_nav2), ждать готовности | build and start Nav2 + perception
 	  make demo-stop      остановить демо | stop the demo
@@ -210,7 +216,8 @@ up:
 	# RU: Точка входа может собирать воркспейс при старте контейнера: ждём её, чтобы два colcon не мешали друг другу.
 	# EN: The entrypoint may build the workspace at container start: wait for it so two colcon runs do not collide.
 	n=0
-	until docker exec vesta_sim true 2>/dev/null && ! docker exec vesta_sim pgrep -f "[c]olcon build" >/dev/null 2>&1; do
+	until docker exec vesta_sim test -f /tmp/.entrypoint_ready 2>/dev/null; do
+	    if [ -z "$$(docker ps -q -f name=^vesta_sim$$)" ]; then say "RU: контейнер завершился, см. docker logs vesta_sim | EN: the container exited, see docker logs vesta_sim"; exit 1; fi
 	    [ $$n -eq 0 ] && say "RU: Жду сборку воркспейса при старте контейнера | EN: waiting for the workspace build at container start"
 	    n=$$((n+1))
 	    if [ $$n -gt 360 ]; then say "RU: Сборка не завершилась, см. docker logs vesta_sim | EN: the build did not finish, see docker logs vesta_sim"; exit 1; fi
@@ -244,6 +251,14 @@ shell start:
 
 headless:
 	@$(MAKE) --no-print-directory shell HEADLESS=1
+
+# RU: Экспорт трёх нейросетей (чекпойнты *.pth -> ONNX fp16) для C++ узла восприятия. Нужен после обновления чекпойнтов.
+# EN: Export the three networks (checkpoints *.pth -> fp16 ONNX) for the C++ perception node. Needed after the checkpoints change.
+onnx:
+	@$(PREAMBLE)
+	$(PREPARE)
+	mkdir -p "$$VESTA_MODELS/onnx"
+	exec $$COMPOSE run -T --rm -v "$$VESTA_MODELS/onnx:/models/onnx:rw" sim bash -lc 'cd /ros2_ws/src/offroad_nav2 && python3 tools/export_onnx.py --models-root /offroad/Models --ckpt-dir /models --out /models/onnx --check --image docs/results/domain_gap/06_rgb.png 2>&1 | grep -E "exported|agrees|Error|error"'
 
 rebuild:
 	@$(PREAMBLE)

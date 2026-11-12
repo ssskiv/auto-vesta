@@ -1,0 +1,13 @@
+p50 / p95 ms over 300 frames (1280x720 input, fp16, provider CUDAExecutionProvider, networks sequential)
+preprocess+3 nets+class maps:    30.3 /   33.0
+  preprocess    0.5 /    0.6
+  seg          14.1 /   15.4
+  contour       1.7 /    1.8
+  objseg       14.1 /   15.4
+p50 / p95 ms over 300 frames (1280x720 input, fp16, provider CUDAExecutionProvider, networks in parallel threads)
+preprocess+3 nets+class maps:    28.7 /   32.2
+  preprocess    0.7 /    0.8
+  seg          27.2 /   31.0
+  contour       3.6 /    4.1
+  objseg       27.6 /   30.9
+96 %

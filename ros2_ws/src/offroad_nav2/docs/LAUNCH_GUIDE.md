@@ -23,6 +23,16 @@ repositories must stay where they are.
 
 ## 2. Build
 
+All runtime nodes of `offroad_nav2` are **C++** (`src/nodes/`, shared pure-C++ core in `src/core/`: geometry, post-processing, tracking, vehicle logic,
+ONNX Runtime engine). Only the launch files, the Nav2 parameter generator and the operator tools (`nav_goal`, `gps_route`, `lap_*`, `tools/`) are Python.
+The three networks run through ONNX Runtime (CUDA); the PyTorch checkpoints are converted once:
+
+```bash
+make onnx       # checkpoints (*.pth in the snapshot dir) -> <snapshot>/onnx/{seg,contour,objseg}.onnx (fp16, normalisation + argmax inside)
+```
+
+Run `make onnx` once and again whenever the checkpoints change (`make up` warns when the files are missing).
+
 There is one Docker image (`vesta-sim:latest`: Webots, ROS 2 Humble, Nav2, PyTorch/CUDA, stereo). `make` builds it only when it is
 missing or older than the Nav2 + perception layers (it checks the label `vesta.nav`); the first build takes 15-25 minutes.
 

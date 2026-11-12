@@ -66,8 +66,24 @@ RUN pip3 install --no-cache-dir "numpy<2" torch torchvision --index-url https://
         --extra-index-url https://pypi.org/simple
 # torch's dependencies pull a setuptools that breaks colcon's ament_python builds on Ubuntu 22.04: restore the distro version.
 RUN pip3 install --no-cache-dir "setuptools==59.6.0"
+# ONNX Runtime GPU for the C++ perception node (headers + libs from the official release) and for tools/export_onnx.py (pip).
+# ORT 1.23 wants CUDA 12 / cuDNN 9, while the torch wheel above brings CUDA 13: install the CUDA 12 runtime libs next to it
+# (different sonames, no clash) and put them on the library path.
+ARG ONNXRUNTIME_VERSION=1.23.2
+RUN wget -qO- https://github.com/microsoft/onnxruntime/releases/download/v${ONNXRUNTIME_VERSION}/onnxruntime-linux-x64-gpu-${ONNXRUNTIME_VERSION}.tgz \
+        | tar xz -C /opt \
+    && mv /opt/onnxruntime-linux-x64-gpu-${ONNXRUNTIME_VERSION} /opt/onnxruntime
+RUN pip3 install --no-cache-dir onnx onnxscript onnxruntime-gpu==${ONNXRUNTIME_VERSION} \
+        nvidia-cuda-runtime-cu12 nvidia-cublas-cu12 nvidia-cudnn-cu12 nvidia-cufft-cu12 nvidia-curand-cu12 nvidia-cuda-nvrtc-cu12 \
+    && pip3 install --no-cache-dir "setuptools==59.6.0" \
+    && (ls -d /usr/local/lib/python3.10/dist-packages/nvidia/*/lib; echo /opt/onnxruntime/lib) > /etc/ld.so.conf.d/onnxruntime-cuda12.conf \
+    && ldconfig
+
+# onnx / onnxruntime-gpu pull numpy 2.x, which breaks Humble's cv_bridge / OpenCV (built for numpy 1.x): pin it back.
+RUN pip3 install --no-cache-dir "numpy<2" "setuptools==59.6.0"
+
 # Marker used by `make` to rebuild images that predate the Nav2 + perception layers.
-LABEL vesta.nav="1"
+LABEL vesta.nav="2"
 
 ENV RMW_IMPLEMENTATION=rmw_fastrtps_cpp
 ENV ROS_DOMAIN_ID=0

@@ -1,0 +1,17 @@
+== cpp stationary: 40 s window, 32 logical CPUs (CPU % of one core, so 100 = one full core)
+metric                                     mean      p95      max
+perception_node                            36.7     40.0     40.9
+stamp_relay                                12.8     13.7     16.7
+disparity_to_depth                          2.3      3.6      3.9
+stereo SGBM container                      54.8     60.1     60.7
+other offroad_nav2 nodes                    4.5     10.9     17.7
+Nav2 (all servers)                         20.1     26.4     58.9
+localization (ekf/navsat)                   5.2      9.1     13.7
+Webots + drivers                           56.4     61.0     71.6
+TOTAL host CPU (% of all cores)            10.7     15.3     24.9
+GPU util %                                 34.4     42.0     47.0
+GPU mem MiB                              2214.0   2214.0   2214.0
+GPU power W                                61.8     65.6     65.7
+perception_node GPU SM %                   10.1     28.0     34.0
+perception_node GPU mem MiB                 0.0      0.0      0.0
+Webots GPU SM %                            11.2     23.0     24.0

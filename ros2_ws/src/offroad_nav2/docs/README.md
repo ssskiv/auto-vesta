@@ -8,6 +8,14 @@ The final report is `REPORT.md`.
 
 How to launch step by step: `LAUNCH_GUIDE.md`.
 
+## Implementation
+
+Runtime nodes are C++17 (`src/nodes/*.cpp`, executables with the same names as before) on a pure-C++ core (`src/core/`, `include/offroad_nav2/`).
+Inference: ONNX Runtime GPU (`/opt/onnxruntime`), three fp16 graphs exported by `tools/export_onnx.py` (`make onnx`), checked against PyTorch
+(agreement 99.9 % / 100 % / 99.7 % of the outputs on a real frame). Tests: GoogleTest in `test/*.cpp` (geometry, post-processing, tracking, vehicle logic)
+plus `test/test_forward_only.py` for the generated Nav2 parameters. Measured Python-vs-C++ load and latency: `docs/perf/PERF_REPORT.md`.
+The last Python implementation is the git tag `python-baseline`.
+
 ## Run (Docker, ROS 2 Humble)
 
 ```bash

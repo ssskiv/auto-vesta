@@ -16,19 +16,22 @@
   <buildtool_depend>rosidl_default_generators</buildtool_depend>
 
   <depend>std_msgs</depend>
+  <depend>rclcpp</depend>
+  <depend>geometry_msgs</depend>
+  <depend>nav_msgs</depend>
+  <depend>sensor_msgs</depend>
+  <depend>stereo_msgs</depend>
+  <depend>vision_msgs</depend>
+  <depend>ackermann_msgs</depend>
+  <depend>tf2</depend>
+  <depend>tf2_ros</depend>
+  <depend>tf2_eigen</depend>
+  <depend>eigen</depend>
+  <depend>libopencv-dev</depend>
   <exec_depend>rosidl_default_runtime</exec_depend>
   <member_of_group>rosidl_interface_packages</member_of_group>
-  <exec_depend>rclpy</exec_depend>
-  <exec_depend>sensor_msgs</exec_depend>
-  <exec_depend>sensor_msgs_py</exec_depend>
-  <exec_depend>stereo_msgs</exec_depend>
-  <exec_depend>geometry_msgs</exec_depend>
-  <exec_depend>nav_msgs</exec_depend>
-  <exec_depend>vision_msgs</exec_depend>
   <exec_depend>geographic_msgs</exec_depend>
   <exec_depend>nav2_msgs</exec_depend>
-  <exec_depend>ackermann_msgs</exec_depend>
-  <exec_depend>tf2_ros</exec_depend>
   <exec_depend>launch_ros</exec_depend>
   <exec_depend>stereo_image_proc</exec_depend>
   <exec_depend>robot_localization</exec_depend>
@@ -39,7 +42,10 @@
   <exec_depend>nav2_velocity_smoother</exec_depend>
   <exec_depend>xacro</exec_depend>
   <exec_depend>webots_ros2_suv</exec_depend>
-  <!-- PyTorch/CUDA and the Models/ directory of autoware.off-road are not ROS packages: see docs/LAUNCH_GUIDE.md -->
+  <exec_depend>rclpy</exec_depend>   <!-- bringup tools (Python): nav_goal, gps_route, lap_mission, launch helpers -->
+  <exec_depend>sensor_msgs_py</exec_depend>
+  <test_depend>ament_cmake_gtest</test_depend>
+  <!-- ONNX Runtime GPU (/opt/onnxruntime) is not a ROS package: see docker/Dockerfile. PyTorch is only used by tools/export_onnx.py. -->
 
   <test_depend>ament_cmake_pytest</test_depend>
   <test_depend>python3-pytest</test_depend>

@@ -1,5 +1,0 @@
-#!/usr/bin/env python3
-from offroad_perception.disparity_to_depth import main
-
-if __name__ == '__main__':
-    main()
