@@ -69,6 +69,7 @@ class PerceptionNode : public rclcpp::Node {
     odom_ = declare_parameter<std::string>("odom_frame", "odom");
     temporal_ = declare_parameter<bool>("temporal_filter", true);
     tf_timeout_ = declare_parameter<double>("tf_timeout_s", 0.05);
+    vis_every_n_ = std::max<int>(1, int(declare_parameter<int>("vis_every_n", 1)));   // /perception/seg_vis every n-th frame (1 = every frame)
     const std::string image_topic = declare_parameter<std::string>("image_topic", "/stereo/left/image_rect");
     for (const char* n : kMarking) filters_.emplace(n, TemporalFilter(0.2, 3, 2));
     trackers_.emplace("vru", CentroidTracker());
@@ -251,7 +252,7 @@ class PerceptionNode : public rclcpp::Node {
     std_msgs::msg::Float32 lm; lm.data = float(lat);
     pub_lat_->publish(lm);
     ++frames_;
-    if (frames_ % 6 == 0 && seg && pub_vis_->get_subscription_count() > 0) publish_vis(chw.data(), seg, objseg, stamp);
+    if (frames_ % vis_every_n_ == 0 && seg && pub_vis_->get_subscription_count() > 0) publish_vis(chw.data(), seg, objseg, stamp);
     keep_last(wait_ms_); keep_last(lat_ms_);
     for (auto& [k, v] : stage_) keep_last(v);
     while (plane_log_.size() > 200) plane_log_.pop_front();
@@ -320,6 +321,7 @@ class PerceptionNode : public rclcpp::Node {
   bool models_enabled_ = true, temporal_ = true;
   std::string footprint_, odom_;
   double tf_timeout_ = 0.05;
+  size_t vis_every_n_ = 1;
   tf2_ros::Buffer tf_buffer_;
   tf2_ros::TransformListener tf_listener_;
   Mat3 K_ = Mat3::Identity();
