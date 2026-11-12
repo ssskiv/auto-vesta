@@ -5,6 +5,10 @@ Environment: Humble Docker image `vesta-nav:latest` (decision 7.3 answered by th
 Controller: Regulated Pure Pursuit by default, MPPI selectable. The `ai` branch's neural controller is not used.
 Nav2 tuning is intentionally unfinished (the user will complete it); see "Open issues".
 
+**Later change:** the launch options `models:=false`, `obstacles:=lidar` and `controller:=mppi` were removed afterwards: the stack always runs
+perception + Nav2 with Regulated Pure Pursuit and camera-only obstacles. The results below were measured while those options still existed
+(the lidar-only and MPPI runs are historical; `tools/eval_*_vs_lidar.py` and the lidar modes of `costmap_check.py` were deleted).
+
 ## Phase table
 
 | Phase | Result | Evidence |
@@ -72,7 +76,7 @@ modes on two seeds is within the run-to-run variation seen across attempts and s
 ## Lidar removed from the simulation (camera-only)
 
 At the user's request the VLP-16 was removed from the Webots world and URDF (auto-vesta `ai` commit "Remove the VLP-16 ..."); the driver
-treats it as optional. There is no `/lidar` topic and no `lidar_link` frame; `obstacles:=lidar` and the `eval_*_vs_lidar` tools no longer apply.
+treats it as optional. There is no `/lidar` topic and no `lidar_link` frame; the lidar mode and the `eval_*_vs_lidar` tools were removed.
 The camera stack ran unchanged (same rates, p95 latency 168 ms in that window). GPS route (3 waypoints): reached, none missed.
 Referee, seeds 1-4 (seed 5 not run; the user stopped the series), same configuration as the camera runs above
 (`results/nolidar_seed*.json`):
@@ -117,7 +121,7 @@ This is a mild domain gap on the track itself, not a bug in the stack. ObjectSeg
 
 ## Deviations from the guide
 
-1. Controller default is RPP, not MPPI: MPPI did not hold 10 Hz next to Webots plus the networks on this machine and crawled at 1-1.5 m/s. MPPI stays selectable (`controller:=mppi`) and is not tuned.
+1. Controller default is RPP, not MPPI: MPPI did not hold 10 Hz next to Webots plus the networks on this machine and crawled at 1-1.5 m/s. MPPI was later removed from the package (see the note at the top).
 2. Planner minimum radius 4.0 m (guide: 4.5 / 5.2, user TODO). The kinematic minimum is 3.87 m.
 3. Depth source: a stereo pair added to the Webots world (the user's choice), SGBM on a row crop (rows 340-624) and 10 Hz because full-frame SGBM was too slow. Depth is padded back to full frame.
 4. Global costmap uses the geometric, VRU and vehicle layers only; the semantic layer (non-drivable, natural, man-made) is local only, because stale semantic marks blocked the corridor.

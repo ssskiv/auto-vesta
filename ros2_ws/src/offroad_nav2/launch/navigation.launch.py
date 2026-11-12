@@ -1,23 +1,21 @@
-"""Nav2 (forward-only) + velocity smoother + collision monitor + zero-clamp relay.
-obstacles:=camera (perception clouds) | lidar (ablation: lidar-only obstacle layer)."""
+"""Nav2 (forward-only, Regulated Pure Pursuit) + velocity smoother + collision monitor + zero-clamp relay.
+Obstacles come from the perception clouds."""
 import os
 import tempfile
 
 import yaml
 from ament_index_python.packages import get_package_share_directory as share
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, OpaqueFunction, TimerAction
-from launch.substitutions import LaunchConfiguration
+from launch.actions import OpaqueFunction, TimerAction
 from launch_ros.actions import Node
 
 from offroad_bringup.nav2_params import build
 
 
 def setup(context):
-    mode = LaunchConfiguration('obstacles').perform(context)
     bt = os.path.join(share('offroad_nav2'), 'behavior_trees')
     map_yaml = os.path.join(share('webots_ros2_suv'), 'maps', 'robocross.yaml')
-    params = build(mode, bt, map_yaml, LaunchConfiguration('controller').perform(context))
+    params = build(bt, map_yaml)
     f = tempfile.NamedTemporaryFile('w', suffix='_nav2.yaml', delete=False)
     yaml.safe_dump(params, f)
     f.close()
@@ -45,5 +43,4 @@ def setup(context):
 
 
 def generate_launch_description():
-    return LaunchDescription([DeclareLaunchArgument('obstacles', default_value='camera'),
-                              DeclareLaunchArgument('controller', default_value='rpp'), OpaqueFunction(function=setup)])
+    return LaunchDescription([OpaqueFunction(function=setup)])

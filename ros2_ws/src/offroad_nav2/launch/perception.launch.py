@@ -1,5 +1,4 @@
-"""perception_node (three networks + depth -> clouds) and the traffic-light node.
-models:=false runs the depth-only (geometric) path with no networks."""
+"""perception_node (three networks + depth -> clouds), the traffic-light node and the stop wall."""
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.substitutions import LaunchConfiguration, PythonExpression
@@ -8,10 +7,9 @@ from launch_ros.actions import Node
 
 def generate_launch_description():
     return LaunchDescription([
-        DeclareLaunchArgument('models', default_value='true'),
         DeclareLaunchArgument('tl_source', default_value='none'),   # none | standin
         Node(package='offroad_nav2', executable='perception_node', name='perception_node', output='screen',
-             parameters=[{'use_sim_time': True, 'models_enabled': LaunchConfiguration('models'),
+             parameters=[{'use_sim_time': True, 
                           'models_root': '/offroad/Models',
                           'seg_ckpt': '/models/last_freespaceseg.pth', 'contour_ckpt': '/models/last_freespacecontour.pth',
                           'objseg_ckpt': '/models/last_objectseg.pth',

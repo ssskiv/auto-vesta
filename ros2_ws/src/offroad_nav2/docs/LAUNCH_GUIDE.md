@@ -56,11 +56,8 @@ ros2_ws/src/offroad_nav2/docker/restart.sh barrels_seed:=3 gui:=true
 | Argument | Default | Meaning |
 |---|---|---|
 | `gui` | `false` | `true` opens the Webots window (the script runs `xhost +local:` for you) |
-| `models` | `true` | `false` = no networks, depth-only geometric obstacles |
-| `controller` | `rpp` | `rpp` Regulated Pure Pursuit, `mppi` (heavy, untuned) |
 | `barrels_seed` | `7` | `>0` fixed barrel layout, `0` leave the world random |
 | `tl_source` | `none` | `standin` = traffic light state from the world (a labelled stand-in, not perception) and a stop wall at the stop line |
-| `obstacles` | `camera` | `lidar` is **not usable**: the lidar was removed from the simulation |
 
 Example with the traffic-light stand-in and the window:
 `ros2_ws/src/offroad_nav2/docker/restart.sh gui:=true tl_source:=standin barrels_seed:=5`
@@ -100,8 +97,8 @@ The start-line stop line is at map x = 9.2. Limits: forward-only, max 3.0 m/s (1
 ### Several referee runs in a row
 
 ```bash
-TAG=nolidar ros2_ws/src/offroad_nav2/docker/run_seeds.sh "1 2 3 4 5"      # restarts the demo per seed, records a /cmd_vel bag
-ls ros2_ws/src/offroad_nav2/docs/results/nolidar_seed*.json
+TAG=run ros2_ws/src/offroad_nav2/docker/run_seeds.sh "1 2 3 4 5"      # restarts the demo per seed, records a /cmd_vel bag
+ls ros2_ws/src/offroad_nav2/docs/results/run_seed*.json
 ```
 
 Each run takes about 6 minutes. Results (score, touches, reversing, goals failed, bag check) are written to `ros2_ws/src/offroad_nav2/docs/results/`.
@@ -132,7 +129,6 @@ docker rm -f nav_sim
 | `cannot open display` or black Webots | run `xhost +local:` on the host; check `echo $DISPLAY` |
 | `CUDA` errors in `perception_node` | GPU not passed in: the script uses `--gpus all`; check `nvidia-smi` on the host and the toolkit |
 | Checkpoint not found | files must be in `ml_models_snapshot/` (mounted read-only as `/models`) |
-| `/lidar` missing | intended: the lidar was removed from the world (commit "Remove the VLP-16" on the `ai`/`nav2ai` branch) |
 | Another ROS 2 system on the host or network interferes | use another domain: `ROS_DOMAIN_ID=7 NAME=nav_sim ros2_ws/src/offroad_nav2/docker/run.sh '...'` |
 
 ## 8. Where things are

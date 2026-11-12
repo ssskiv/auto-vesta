@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Referee runs: for each seed restart the whole demo with that barrel layout, drive one lap (lap_run), record a /cmd_vel
-# bag, store the result in ros2_ws/src/offroad_nav2/docs/results/. Usage: run_seeds.sh "1 2 3 4 5" [launch args, e.g. obstacles:=lidar] 
+# bag, store the result in ros2_ws/src/offroad_nav2/docs/results/. Usage: run_seeds.sh "1 2 3 4 5" [launch args, e.g. tl_source:=standin]
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SEEDS=${1:-"1 2 3 4 5"}; shift
 TAG=${TAG:-camera}

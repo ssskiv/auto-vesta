@@ -5,7 +5,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 SHELL ["/bin/bash", "-c"]
 RUN apt-get update && apt-get install -y --no-install-recommends \
         ros-humble-stereo-image-proc ros-humble-image-proc ros-humble-vision-msgs \
-        ros-humble-nav2-mppi-controller ros-humble-nav2-collision-monitor \
+        ros-humble-nav2-collision-monitor \
         ros-humble-nav2-velocity-smoother ros-humble-nav2-behavior-tree \
         ros-humble-xacro ros-humble-urdfdom ros-humble-cv-bridge \
         python3-pytest \

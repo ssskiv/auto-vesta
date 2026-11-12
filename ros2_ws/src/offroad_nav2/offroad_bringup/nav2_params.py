@@ -1,8 +1,7 @@
-"""Nav2 (Humble 1.1.x) parameters, forward-only. Built in Python so the obstacle source (camera models vs lidar) and
-the vehicle numbers (offroad_description/config/vehicle.yaml) switch cleanly.  `python3 -m offroad_bringup.nav2_params
-camera > nav2_params.camera.yaml` dumps the file for inspection.
+"""Nav2 (Humble 1.1.x) parameters, forward-only, obstacles from the perception clouds only (no lidar). Built in Python;
+`python3 -m offroad_bringup.nav2_params > nav2_params.yaml` dumps the file for inspection.
 
-Forward-only everywhere: Smac Hybrid DUBIN, MPPI vx_min 0, smoother min_velocity x 0, BT without BackUp/Spin,
+Forward-only everywhere: Smac Hybrid DUBIN, Regulated Pure Pursuit (no reversing), smoother min_velocity x 0, BT without BackUp/Spin,
 collision_monitor + zero-clamp relay (offroad_vehicle_interface). Heights are in the costmap frame (odom/map): the
 ground sits at z = -base_link_height (EKF 2D mode keeps base_link at z = 0).
 """
@@ -29,17 +28,17 @@ CAMERA_SOURCES = {     # layer -> list of (source name, topic, marking, clearing
 }
 
 
-def obs_layer(sources, lidar=False):
+def obs_layer(sources):
     d = {'plugin': 'nav2_costmap_2d::ObstacleLayer', 'enabled': True,
          'observation_sources': ' '.join(s[0] for s in sources)}
     for name, topic, marking, clearing in sources:
         d[name] = {
             'topic': topic, 'data_type': 'PointCloud2', 'marking': marking, 'clearing': clearing,
             'sensor_frame': '', 'observation_persistence': 0.0, 'expected_update_rate': 0.0,
-            'inf_is_valid': False, 'obstacle_max_range': 20.0 if not lidar else 30.0, 'obstacle_min_range': 0.0,
-            'raytrace_max_range': 22.0 if not lidar else 32.0, 'raytrace_min_range': 0.0,
+            'inf_is_valid': False, 'obstacle_max_range': 20.0, 'obstacle_min_range': 0.0,
+            'raytrace_max_range': 22.0, 'raytrace_min_range': 0.0,
             # heights are in the costmap frame; clouds are already height-filtered against the fitted ground plane
-            'min_obstacle_height': GROUND_Z + (0.15 if lidar else -0.4), 'max_obstacle_height': 3.0,
+            'min_obstacle_height': GROUND_Z - 0.4, 'max_obstacle_height': 3.0,
         }
     return d
 
@@ -48,7 +47,7 @@ def inflation(radius, scale=3.0):
     return {'plugin': 'nav2_costmap_2d::InflationLayer', 'cost_scaling_factor': scale, 'inflation_radius': radius}
 
 
-def costmap(kind, mode):
+def costmap(kind):
     c = {'update_frequency': 10.0 if kind == 'local' else 2.0, 'publish_frequency': 5.0 if kind == 'local' else 1.0,
          'global_frame': 'odom' if kind == 'local' else 'map', 'robot_base_frame': 'base_link',
          'footprint': FOOTPRINT, 'footprint_padding': 0.2,   # planning margin (0.12: 1-3 barrel touches/lap; 0.3: planner pinned the car against a barrel)
@@ -59,28 +58,23 @@ def costmap(kind, mode):
     else:
         c.update({'rolling_window': False, 'track_unknown_space': True})
     layers = {}
-    if mode == 'camera':
-        order = (['vru_layer', 'vru_inflation', 'vehicle_layer', 'vehicle_inflation', 'geometric_layer', 'semantic_layer',
-                  'inflation_layer'] if kind == 'local' else
-                 ['static_layer', 'vru_layer', 'vehicle_layer', 'geometric_layer', 'inflation_layer'])
-        for n, srcs in CAMERA_SOURCES.items():
-            layers[n] = obs_layer(srcs)
-        layers['vru_inflation'] = inflation(3.0, 1.5)        # VRU halo larger than the vehicle halo (check in rviz)
-        layers['vehicle_inflation'] = inflation(2.0, 2.0)
-    else:   # lidar-only ablation
-        order = ['lidar_layer', 'inflation_layer'] if kind == 'local' else ['static_layer', 'lidar_layer', 'inflation_layer']
-        layers['lidar_layer'] = obs_layer([('lidar', '/lidar', True, True)], lidar=True)
+    order = (['vru_layer', 'vru_inflation', 'vehicle_layer', 'vehicle_inflation', 'geometric_layer', 'semantic_layer',
+              'inflation_layer'] if kind == 'local' else
+             ['static_layer', 'vru_layer', 'vehicle_layer', 'geometric_layer', 'inflation_layer'])
+    for n, srcs in CAMERA_SOURCES.items():
+        layers[n] = obs_layer(srcs)
+    layers['vru_inflation'] = inflation(3.0, 1.5)        # VRU halo larger than the vehicle halo (check in rviz)
+    layers['vehicle_inflation'] = inflation(2.0, 2.0)
     layers['static_layer'] = {'plugin': 'nav2_costmap_2d::StaticLayer', 'map_subscribe_transient_local': True}
-    # final inflation. MPPI CostCritic wants radius >= half the largest footprint dimension (4.56 m / 2 = 2.28 m) for
-    # corner-only footprint checks; a steep decay keeps the slalom gaps open (cost at 1.6 m from the hull: ~14 of 253).
+    # final inflation: radius >= half the largest footprint dimension (4.56 m / 2 = 2.28 m); a steep decay keeps the
+    # slalom gaps open (cost at 1.6 m from the hull: ~14 of 253).
     layers['inflation_layer'] = inflation(2.4, 4.0)
     c['plugins'] = order
     c.update({k: v for k, v in layers.items() if k in order})
     return c
 
 
-def build(mode='camera', bt_dir='/tmp', map_yaml='', controller='mppi'):
-    assert mode in ('camera', 'lidar') and controller in ('mppi', 'rpp')
+def build(bt_dir='/tmp', map_yaml=''):
     p = {}
     p['planner_server'] = {'ros__parameters': {
         'use_sim_time': True, 'expected_planner_frequency': 2.0, 'planner_plugins': ['GridBased'],
@@ -103,45 +97,21 @@ def build(mode='camera', bt_dir='/tmp', map_yaml='', controller='mppi'):
                              'movement_time_allowance': 45.0},
         'general_goal_checker': {'stateful': True, 'plugin': 'nav2_controller::SimpleGoalChecker',
                                  'xy_goal_tolerance': 1.5, 'yaw_goal_tolerance': 3.14},
+        # Regulated Pure Pursuit: the planner path is already curvature-feasible (Dubin); short lookahead = less corner cutting
         'FollowPath': {
-            'plugin': 'nav2_mppi_controller::MPPIController', 'time_steps': 30, 'model_dt': 0.1, 'batch_size': 800,   # 3 s horizon; heavier settings missed 20 Hz here
-            
-            'vx_std': 0.3, 'vy_std': 0.2, 'wz_std': 0.4, 'vx_max': V_MAX, 'vx_min': 0.0, 'vy_max': 0.0, 'wz_max': 1.0,
-            'iteration_count': 1, 'prune_distance': 1.7, 'transform_tolerance': 0.1, 'temperature': 0.3,
-            'gamma': 0.015, 'motion_model': 'Ackermann', 'visualize': True, 'reset_period': 1.0,
-            'regenerate_noises': True,
-            'TrajectoryVisualizer': {'trajectory_step': 5, 'time_step': 3},
-            'AckermannConstraints': {'min_turning_r': R_MIN},
-            'critics': ['ConstraintCritic', 'CostCritic', 'GoalCritic', 'PathAlignCritic', 'PathFollowCritic',
-                        'PathAngleCritic', 'PreferForwardCritic'],
-            'ConstraintCritic': {'enabled': True, 'cost_power': 1, 'cost_weight': 4.0},
-            'GoalCritic': {'enabled': True, 'cost_power': 1, 'cost_weight': 5.0, 'threshold_to_consider': 1.4},
-            'CostCritic': {'enabled': True, 'cost_power': 1, 'cost_weight': 3.81, 'critical_cost': 300.0,
-                           'consider_footprint': True, 'collision_cost': 1000000.0, 'near_goal_distance': 1.0,
-                           'trajectory_point_step': 2},
-            'PathAlignCritic': {'enabled': True, 'cost_power': 1, 'cost_weight': 14.0, 'max_path_occupancy_ratio': 0.05,
-                                'trajectory_point_step': 4, 'threshold_to_consider': 0.5, 'offset_from_furthest': 20,
-                                'use_path_orientations': False},
-            'PathFollowCritic': {'enabled': True, 'cost_power': 1, 'cost_weight': 5.0, 'offset_from_furthest': 5,
-                                 'threshold_to_consider': 1.4},
-            'PathAngleCritic': {'enabled': True, 'cost_power': 1, 'cost_weight': 2.0, 'offset_from_furthest': 4,
-                                'threshold_to_consider': 0.5, 'max_angle_to_furthest': 1.0},
-            'PreferForwardCritic': {'enabled': True, 'cost_power': 1, 'cost_weight': 5.0,
-                                    'threshold_to_consider': 0.5}}}}
-    if controller == 'rpp':   # fallback / comparison: the planner path is already curvature-feasible (Dubin)
-        p['controller_server']['ros__parameters']['FollowPath'] = {
             'plugin': 'nav2_regulated_pure_pursuit_controller::RegulatedPurePursuitController',
             'desired_linear_vel': 3.0, 'lookahead_dist': 3.0, 'min_lookahead_dist': 2.0, 'max_lookahead_dist': 5.0,
-            'lookahead_time': 1.0,   # shorter lookahead: less corner cutting past barrels
+            'lookahead_time': 1.0,
             'rotate_to_heading_angular_vel': 0.0, 'transform_tolerance': 0.1,
             'use_velocity_scaled_lookahead_dist': True, 'min_approach_linear_velocity': 1.0,
             'approach_velocity_scaling_dist': 4.0, 'use_collision_detection': True,
             'max_allowed_time_to_collision_up_to_carrot': 1.0, 'use_regulated_linear_velocity_scaling': True,
             'use_cost_regulated_linear_velocity_scaling': True, 'regulated_linear_scaling_min_radius': 6.0,
             'regulated_linear_scaling_min_speed': 1.5, 'use_rotate_to_heading': False, 'allow_reversing': False,
-            'max_angular_accel': 3.2, 'cost_scaling_dist': 1.0, 'cost_scaling_gain': 1.0, 'inflation_cost_scaling_factor': 4.0}
-    p['local_costmap'] = {'local_costmap': {'ros__parameters': costmap('local', mode)}}
-    p['global_costmap'] = {'global_costmap': {'ros__parameters': costmap('global', mode)}}
+            'max_angular_accel': 3.2, 'cost_scaling_dist': 1.0, 'cost_scaling_gain': 1.0,
+            'inflation_cost_scaling_factor': 4.0}}}
+    p['local_costmap'] = {'local_costmap': {'ros__parameters': costmap('local')}}
+    p['global_costmap'] = {'global_costmap': {'ros__parameters': costmap('global')}}
     p['map_server'] = {'ros__parameters': {'use_sim_time': True, 'yaml_filename': map_yaml}}
     p['behavior_server'] = {'ros__parameters': {
         'use_sim_time': True, 'costmap_topic': 'local_costmap/costmap_raw',
@@ -187,11 +157,10 @@ def build(mode='camera', bt_dir='/tmp', map_yaml='', controller='mppi'):
                      'visualize': True, 'polygon_pub_topic': 'stop_polygon', 'enabled': True},
         'SlowZone': {'type': 'polygon', 'points': slow, 'action_type': 'slowdown', 'min_points': 4,
                      'slowdown_ratio': 0.5, 'visualize': True, 'polygon_pub_topic': 'slow_polygon', 'enabled': True},
-        'observation_sources': ['stop_wall'] + (['perception_geo'] if mode == 'camera' else ['lidar_pc']),
+        'observation_sources': ['stop_wall', 'perception_geo'],
         'stop_wall': {'type': 'pointcloud', 'topic': '/perception/stop_wall', 'min_height': -1.0, 'max_height': 3.0},
         'perception_geo': {'type': 'pointcloud', 'topic': '/perception/points/geometric', 'min_height': -0.05,
-                           'max_height': 2.0},
-        'lidar_pc': {'type': 'pointcloud', 'topic': '/lidar', 'min_height': 0.1, 'max_height': 2.0}}}
+                           'max_height': 2.0}}}
     p['lifecycle_manager_navigation'] = {'ros__parameters': {
         'use_sim_time': True, 'autostart': True, 'bond_timeout': 8.0,
         'node_names': ['map_server', 'planner_server', 'controller_server', 'behavior_server', 'bt_navigator',
@@ -200,5 +169,4 @@ def build(mode='camera', bt_dir='/tmp', map_yaml='', controller='mppi'):
 
 
 if __name__ == '__main__':
-    import sys
-    print(yaml.safe_dump(build(sys.argv[1] if len(sys.argv) > 1 else 'camera'), sort_keys=False))
+    print(yaml.safe_dump(build(), sort_keys=False))

@@ -26,9 +26,6 @@ Launch arguments of `webots_nav.launch.py`:
 | Argument | Default | Meaning |
 |---|---|---|
 | `gui` | `false` | Webots window |
-| `models` | `true` | run the three networks (`false`: depth-only geometric obstacles) |
-| `obstacles` | `camera` | `camera` = perception clouds in the costmaps, `lidar` = lidar-only ablation (perception not started) |
-| `controller` | `rpp` | `rpp` Regulated Pure Pursuit, `mppi` (see limitations) |
 | `tl_source` | `none` | `none` or `standin` (world truth, NOT perception) |
 | `barrels_seed` | `7` | `>0` fixed barrel layout, `0` leave the world random |
 
@@ -63,11 +60,10 @@ Vehicle numbers: `offroad_description/config/vehicle.yaml` (sim values). Nav2: g
 - Webots camera and IMU plugins stamp with wall time; handled by `stamp_relay` (images) and by the driver stamping with
   Webots time (`/imu/data`). Do not use `/vesta/imu/data`.
 - Depth: SGBM stereo, 2.4-2.9 % low versus lidar from 5 to 20 m; trusted to 20 m; blind zone below ~2.4 m from the camera
-  (lidar covers it in the lidar run only).
+  (nothing covers it: there is no lidar in the simulation).
 - base_link is 0.108 m above ground in Webots after settling (not 0.4 m).
-- MPPI does not hold 10 Hz next to Webots plus the networks on this machine; RPP is the default.
+- The controller is Regulated Pure Pursuit only (MPPI was removed: it did not hold 10 Hz next to Webots plus the networks here).
 - The models were trained on real photos; barrels are labelled inconsistently (man-made / vehicle). Geometry from depth is
   what the costmaps rely on for barrels.
 - No detector, no light-state classifier, no elevation network exist yet. The traffic-light test uses a stand-in.
 - Real-car drive-by-wire is an abstract logging stub (`offroad_vehicle_interface/dbw_adapter_base.py`).
-- MPPI logs an ERROR about inflation versus the footprint's circumscribed radius (3.78 m from the rear axle); harmless.
