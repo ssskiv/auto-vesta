@@ -1,0 +1,81 @@
+{
+ "label": "python stationary",
+ "duration": 40.0,
+ "metrics": {
+  "perception_node": {
+   "mean": 75.2,
+   "p95": 107.5,
+   "max": 109.19
+  },
+  "stamp_relay": {
+   "mean": 66.08,
+   "p95": 103.05,
+   "max": 104.97
+  },
+  "disparity_to_depth": {
+   "mean": 9.33,
+   "p95": 23.33,
+   "max": 24.29
+  },
+  "stereo SGBM container": {
+   "mean": 83.81,
+   "p95": 111.25,
+   "max": 113.86
+  },
+  "other offroad_nav2 nodes": {
+   "mean": 33.23,
+   "p95": 65.33,
+   "max": 72.86
+  },
+  "Nav2 (all servers)": {
+   "mean": 38.05,
+   "p95": 98.93,
+   "max": 123.78
+  },
+  "localization (ekf/navsat)": {
+   "mean": 9.59,
+   "p95": 28.0,
+   "max": 32.12
+  },
+  "Webots + drivers": {
+   "mean": 84.33,
+   "p95": 129.01,
+   "max": 131.62
+  },
+  "TOTAL host CPU (% of all cores)": {
+   "mean": 20.15,
+   "p95": 31.2,
+   "max": 32.58
+  },
+  "GPU util %": {
+   "mean": 29.86,
+   "p95": 43.0,
+   "max": 44.0
+  },
+  "GPU mem MiB": {
+   "mean": 1774.0,
+   "p95": 1774.0,
+   "max": 1774.0
+  },
+  "GPU power W": {
+   "mean": 62.41,
+   "p95": 78.78,
+   "max": 81.36
+  },
+  "perception_node GPU SM %": {
+   "mean": 13.2,
+   "p95": 33.0,
+   "max": 37.0
+  },
+  "perception_node GPU mem MiB": {
+   "mean": 0.0,
+   "p95": 0.0,
+   "max": 0.0
+  },
+  "Webots GPU SM %": {
+   "mean": 5.09,
+   "p95": 14.0,
+   "max": 14.0
+  }
+ }
+}

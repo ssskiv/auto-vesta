@@ -1,0 +1,17 @@
+== python stationary: 40 s window, 32 logical CPUs (CPU % of one core, so 100 = one full core)
+metric                                     mean      p95      max
+perception_node                            75.2    107.5    109.2
+stamp_relay                                66.1    103.1    105.0
+disparity_to_depth                          9.3     23.3     24.3
+stereo SGBM container                      83.8    111.2    113.9
+other offroad_nav2 nodes                   33.2     65.3     72.9
+Nav2 (all servers)                         38.0     98.9    123.8
+localization (ekf/navsat)                   9.6     28.0     32.1
+Webots + drivers                           84.3    129.0    131.6
+TOTAL host CPU (% of all cores)            20.2     31.2     32.6
+GPU util %                                 29.9     43.0     44.0
+GPU mem MiB                              1774.0   1774.0   1774.0
+GPU power W                                62.4     78.8     81.4
+perception_node GPU SM %                   13.2     33.0     37.0
+perception_node GPU mem MiB                 0.0      0.0      0.0
+Webots GPU SM %                             5.1     14.0     14.0

@@ -1,0 +1,6 @@
+p50 / p95 ms over 300 frames (1280x720 input, fp16, GPU may be shared with training)
+preprocess+3 nets+postprocess:   36.3 /   39.8
+  seg        15.8 /   17.2
+  contour     4.2 /    5.6
+  objseg     15.7 /   17.2
+0 %
