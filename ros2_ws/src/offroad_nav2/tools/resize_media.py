@@ -5,6 +5,7 @@ A source that is not 2:1 is first centre-cropped to 2:1 (never stretched), then 
 files run in parallel), so videos and images share one code path.
 
   resize_media.py clip.mp4 frame.png                 # -> clip_640x320.mp4, frame_640x320.png next to the inputs
+  resize_media.py clip.mp4 -o /tmp/small.mp4         # explicit output file (single input)
   resize_media.py data/ -o out/ -r                   # whole directory tree, mirrored into out/
   resize_media.py clip.mp4 --width 1280 --height 640 --crf 18
 """
@@ -40,7 +41,7 @@ def convert(src, dst, a):
 def main():
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument('inputs', nargs='+', type=Path, help='image/video files or directories')
-    p.add_argument('-o', '--out', type=Path, help='output directory (default: next to the input, suffix _WxH)')
+    p.add_argument('-o', '--out', type=Path, help='output directory, or a file path for a single input (default: next to the input, suffix _WxH)')
     p.add_argument('-r', '--recursive', action='store_true', help='descend into directories')
     p.add_argument('--width', type=int, default=640)
     p.add_argument('--height', type=int, default=320)
@@ -60,7 +61,10 @@ def main():
                     dst = (a.out / rel) if a.out else f.with_name(f'{f.stem}_{a.width}x{a.height}{f.suffix}')
                     jobs.append((f, dst))
         elif inp.suffix.lower() in IMAGES | VIDEOS:
-            dst = (a.out / inp.name) if a.out else inp.with_name(f'{inp.stem}_{a.width}x{a.height}{inp.suffix}')
+            if a.out and len(a.inputs) == 1 and a.out.suffix.lower() in IMAGES | VIDEOS:
+                dst = a.out  # -o is a file path
+            else:
+                dst = (a.out / inp.name) if a.out else inp.with_name(f'{inp.stem}_{a.width}x{a.height}{inp.suffix}')
             jobs.append((inp, dst))
         else:
             print(f'skip (not an image/video): {inp}', file=sys.stderr)
