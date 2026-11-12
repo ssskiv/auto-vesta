@@ -9,3 +9,6 @@ virtual/
 ros2_ws/src/vesta_rl/runs/
 ros2_ws/src/vesta_rl/runs_backup/
 ros2_ws/src/vesta_rl/data/pool/previews/
+
+# local agent notes / handoff files
+.claude/

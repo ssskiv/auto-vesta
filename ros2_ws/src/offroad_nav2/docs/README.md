@@ -3,7 +3,7 @@
 One ament_cmake package, `ros2_ws/src/offroad_nav2/`, containing the Python packages `offroad_perception`, `offroad_vehicle_interface`,
 `offroad_bringup`, the message `TrafficLightState` (as `offroad_nav2/msg/TrafficLightState`), launch files, configs and the vehicle
 description (`config/vehicle.yaml`, `urdf/`). Architecture and decisions: `INTEGRATION_GUIDE.md` in the autoware.off-road repo
-(`Modules/Nav2/`). Current state and open items: `PROGRESS.md`.
+(`Modules/Nav2/`). Current state and open items: `.claude/PROGRESS.md` in the repo root (local note, not tracked).
 The final report is `REPORT.md`.
 
 How to launch step by step: `LAUNCH_GUIDE.md`.

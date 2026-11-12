@@ -124,7 +124,7 @@ This is a mild domain gap on the track itself, not a bug in the stack. ObjectSeg
 5. Collision monitor: a tight stop zone (half-width 0.85 m, 3.75-4.7 m ahead) plus a slow-down zone; a large stop zone froze the forward-only car.
 6. The BT keeps following the last path when a replan fails (`AlwaysSuccess` fallback) instead of aborting.
 7. Costmap heights are relative to the ground in the costmap frame (ground at z = -0.108 m, see below), not to a hard-coded 0.
-8. `base_link` is 0.108 m above ground in Webots after settling, not 0.4 m (the 0.4 m in NN.md is the spawn drop height); GPS lever arm x = 0.4 m, not 0.3 m.
+8. `base_link` is 0.108 m above ground in Webots after settling, not 0.4 m (the 0.4 m in `.claude/NN.md` (local note) is the spawn drop height); GPS lever arm x = 0.4 m, not 0.3 m.
 9. Guide P4 asked for IMU >= 100 Hz: Webots delivers 41 Hz (24 ms step). Calibration RMS and real-car reference bags are not applicable in the sim.
 10. The perception clouds are not published in `base_footprint`; they are in the optical frame and the costmaps transform them.
 11. Lap missions use `NavigateToPose` with live waypoint snapping (`lap_mission`), not plain `FollowWaypoints`, because a barrel on a centreline waypoint made the planner fail. `gps_route` (FromLL -> FollowWaypoints) is used for the GPS route test.
