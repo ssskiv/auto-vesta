@@ -21,7 +21,8 @@ VIDEOS = {'.mp4', '.avi', '.mov', '.mkv', '.webm', '.m4v'}
 
 def vf(w, h):
     # centre crop to w:h (2:1 by default), then scale; floor to even numbers for yuv420
-    return (f"crop='if(gte(iw*{h},ih*{w}),trunc(ih*{w}/{h}/2)*2,iw)':'if(gte(iw*{h},ih*{w}),ih,trunc(iw*{h}/{w}/2)*2)',"
+    return (f"scale=trunc(iw*sar/2)*2:ih,setsar=1,"  # square pixels first (anamorphic sources would otherwise look stretched)
+            f"crop='if(gte(iw*{h},ih*{w}),trunc(ih*{w}/{h}/2)*2,iw)':'if(gte(iw*{h},ih*{w}),ih,trunc(iw*{h}/{w}/2)*2)',"
             f"scale={w}:{h}:flags=lanczos")
 
 
