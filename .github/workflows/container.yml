@@ -52,7 +52,7 @@ jobs:
           docker_root=$(docker info --format '{{.DockerRootDir}}')
           buildkit_root=$(docker inspect "buildx_buildkit_${BUILDER}0" \
             --format '{{range .Mounts}}{{if eq .Destination "/var/lib/buildkit"}}{{.Source}}{{end}}{{end}}')
-          containerd_root=$(sudo containerd config dump | awk '$1 == "root" {gsub(/"/, "", $3); print $3; exit}')
+          containerd_root=$(sudo containerd config dump | awk '$1 == "root" {gsub(/["\047]/, "", $3); print $3; exit}')
           printf '%s\n' "$docker_root" "$buildkit_root" "$containerd_root" > "$EVIDENCE/roots"
           while read -r root; do
             [[ "$root" == /* ]] && sudo test -d "$root"
