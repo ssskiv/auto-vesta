@@ -7,7 +7,7 @@ SHELL        := /bin/bash
 .SHELLFLAGS  := -c
 .ONESHELL:
 .DEFAULT_GOAL := help
-.PHONY: help shell start up image onnx headless rebuild stop attach exec demo demo-stop gpu check
+.PHONY: help shell start up image pull image-build onnx headless rebuild stop attach exec demo demo-stop gpu check
 
 # RU: GPU=nvidia|amd|intel|cpu задаёт видеокарту вручную, иначе автоопределение.
 # EN: GPU=nvidia|amd|intel|cpu forces the GPU, otherwise it is auto-detected.
@@ -16,7 +16,7 @@ GPU      ?=
 HEADLESS ?= 0
 # RU: CMD="..." — выполнить команду в контейнере и выйти (без TTY). EN: CMD="..." — run a command and exit (no TTY).
 CMD      ?=
-export GPU HEADLESS CMD
+export GPU HEADLESS CMD VESTA_IMAGE
 
 # -------------------------------------------------------------------------
 # RU: Общая часть: проверка Docker, compose, определение видеокарты.
@@ -25,6 +25,7 @@ export GPU HEADLESS CMD
 define PREAMBLE
 set -uo pipefail
 cd "$(CURDIR)"
+source docker/image.sh || exit $$?
 say() { echo -e "  $$*"; }
 
 if ! command -v docker >/dev/null 2>&1; then
@@ -88,17 +89,10 @@ fi
 COMPOSE="$$DC -f docker/docker-compose.yml -f $$OVERLAY"
 endef
 
-# RU: Образ собирается, если его нет или он старше стека Nav2 + восприятие (нет метки vesta.nav).
-# EN: The image is built when it is missing or predates the Nav2 + perception stack (no vesta.nav label).
+# RU: Общий выбор, скачивание и проверка образа без автоматической сборки.
+# EN: Shared image selection, acquisition and validation without automatic builds.
 define ENSURE_IMAGE
-if ! docker image inspect vesta-sim:latest >/dev/null 2>&1 || \
-   [ "$$(docker image inspect -f '{{index .Config.Labels "vesta.nav"}}' vesta-sim:latest 2>/dev/null)" != 2 ]; then
-    say ""
-    say "RU: Сборка образа (нет образа или в нём нет стека Nav2 + восприятие). Первый раз 15-25 минут, дальше запуск за секунды."
-    say "EN: Building the image (missing, or without the Nav2 + perception stack). 15-25 minutes the first time, instant afterwards."
-    say ""
-    $$COMPOSE build || exit 1
-fi
+vesta_image_acquire || exit $$?
 endef
 
 # -------------------------------------------------------------------------
@@ -164,14 +158,17 @@ help:
 	  Auto Vesta: симуляция Lada Vesta в Webots (+ восприятие и Nav2) | Webots simulation (+ perception and Nav2)
 
 	  make                показать эту справку | show this help
-	  make up             собрать образ (если нужно), поднять контейнер в фоне и зайти в bash | build (if needed), start in background, open bash
+	  make up             скачать образ (если нужно), поднять контейнер в фоне и зайти в bash | pull (if needed), start in background, open bash
+	  make image          получить и проверить выбранный образ | acquire and validate the selected image
+	  make pull           обновить выбранный образ из реестра | refresh the selected registry image
+	  make image-build    собрать локальный vesta-sim:latest | build local vesta-sim:latest incrementally
 	  make shell          одноразовый контейнер с bash (удаляется при выходе) | throw-away container with bash (removed on exit)
 	  make headless       то же без графики | same without a window                [= make shell HEADLESS=1]
 	  make attach         зайти в уже запущенный контейнер | open another shell in the running container   [= make exec]
 	  make exec           то же, что make attach | same as make attach
 	  make stop           остановить контейнеры | stop the containers
 	  make onnx           экспорт нейросетей в ONNX для C++ узла восприятия (после смены чекпойнтов) | export the networks to ONNX for the C++ perception node
-	  make rebuild        пересобрать образ с нуля и очистить .build | rebuild the image from scratch, clear .build
+	  make rebuild        пересобрать локальный vesta-sim:latest с нуля и очистить .build | rebuild local vesta-sim:latest from scratch, clear .build
 	  make demo           собрать и запустить Nav2 + восприятие (offroad_nav2), ждать готовности | build and start Nav2 + perception
 	  make demo-stop      остановить демо | stop the demo
 	  make gpu            показать определённую видеокарту | show the detected GPU
@@ -182,6 +179,9 @@ help:
 	    HEADLESS=1                 без графики | no window
 	    CMD="команда"              выполнить команду в контейнере и выйти | run a command in the container and exit
 	    ARGS="..."                 аргументы launch для make demo | launch arguments for make demo  (ARGS="gui:=true barrels_seed:=3")
+	    VESTA_IMAGE=...             образ из реестра (можно @sha256:...) или локальный vesta-sim:latest | registry image (tag or digest) or local vesta-sim:latest
+
+	  Прямой Compose | direct Compose: source docker/image.sh; docker compose -f docker/docker-compose.yml -f docker/compose.cpu.yml config
 
 	  Внутри контейнера | inside the container:   ros2 launch webots_ros2_suv robot.launch.py
 	  Демо Nav2 + восприятие | Nav2 + perception demo:   см. ros2_ws/src/offroad_nav2/docs/LAUNCH_GUIDE.md
@@ -198,9 +198,9 @@ gpu:
 # -------------------------------------------------------------------------
 # RU: Запуск | EN: Launch
 # -------------------------------------------------------------------------
-# RU: up = собрать образ (если нужно), поднять контейнер vesta_sim в фоне, дождаться сборки воркспейса, зайти в bash.
+# RU: up = скачать образ (если нужно), поднять контейнер vesta_sim в фоне, дождаться сборки воркспейса, зайти в bash.
 #     Контейнер продолжает работать после выхода из bash: повторный `make up` просто заходит в него, `make stop` его останавливает.
-# EN: up = build the image (if needed), start container vesta_sim in the background, wait for the workspace build, open bash.
+# EN: up = pull the image (if needed), start container vesta_sim in the background, wait for the workspace build, open bash.
 #     The container keeps running after you leave bash: another `make up` just re-enters it, `make stop` stops it.
 up:
 	@$(PREAMBLE)
@@ -212,7 +212,7 @@ up:
 	$(PREPARE)
 	# RU: up -d идемпотентен: ничего не делает, если контейнер актуален, и пересоздаёт его, если изменился образ или конфигурация.
 	# EN: up -d is idempotent: it does nothing if the container is current and recreates it if the image or configuration changed.
-	$$COMPOSE up -d sim || exit 1
+	$$COMPOSE up --no-build --pull never -d sim || exit 1
 	# RU: Точка входа может собирать воркспейс при старте контейнера: ждём её, чтобы два colcon не мешали друг другу.
 	# EN: The entrypoint may build the workspace at container start: wait for it so two colcon runs do not collide.
 	n=0
@@ -231,10 +231,19 @@ up:
 	fi
 	exec docker exec -it vesta_sim bash -lc "$$BUILD; exec bash"
 
-# RU: Собрать образ, если нужно (без запуска контейнера). EN: Build the image if needed (no container is started).
+# RU: Получить образ без запуска контейнера. EN: Acquire the image without starting a container.
 image:
 	@$(PREAMBLE)
 	$(ENSURE_IMAGE)
+
+pull:
+	@$(PREAMBLE)
+	vesta_image_acquire pull || exit $$?
+
+# RU: Локальная сборка всегда имеет отдельный тег. EN: Local builds always use their own tag.
+image-build:
+	@$(PREAMBLE)
+	VESTA_IMAGE=vesta-sim:latest $$COMPOSE build sim || exit $$?
 
 shell start:
 	@$(PREAMBLE)
@@ -245,9 +254,9 @@ shell start:
 	fi
 	$(PREPARE)
 	if [ -n "$${CMD:-}" ]; then
-	    exec $$COMPOSE run -T --rm --service-ports sim bash -lc "$$CMD"
+	    exec $$COMPOSE run --pull never -T --rm --service-ports sim bash -lc "$$CMD"
 	fi
-	exec $$COMPOSE run --name webots_vesta --rm --service-ports sim bash
+	exec $$COMPOSE run --pull never --name webots_vesta --rm --service-ports sim bash
 
 headless:
 	@$(MAKE) --no-print-directory shell HEADLESS=1
@@ -258,16 +267,16 @@ onnx:
 	@$(PREAMBLE)
 	$(PREPARE)
 	mkdir -p "$$VESTA_MODELS/onnx"
-	exec $$COMPOSE run -T --rm -v "$$VESTA_MODELS/onnx:/models/onnx:rw" sim bash -lc 'cd /ros2_ws/src/offroad_nav2 && python3 tools/export_onnx.py --models-root /offroad/Models --ckpt-dir /models --out /models/onnx --check --image docs/results/domain_gap/06_rgb.png 2>&1 | grep -E "exported|agrees|Error|error"'
+	exec $$COMPOSE run --pull never -T --rm -v "$$VESTA_MODELS/onnx:/models/onnx:rw" sim bash -lc 'cd /ros2_ws/src/offroad_nav2 && python3 tools/export_onnx.py --models-root /offroad/Models --ckpt-dir /models --out /models/onnx --check --image docs/results/domain_gap/06_rgb.png 2>&1 | grep -E "exported|agrees|Error|error"'
 
 rebuild:
 	@$(PREAMBLE)
 	say "RU: Пересборка образа с нуля | EN: rebuilding image from scratch"
-	$$COMPOSE build --no-cache
+	VESTA_IMAGE=vesta-sim:latest $$COMPOSE build --no-cache sim || exit $$?
 	# RU: Артефакты сборки colcon лежат на хосте в .build (root-владелец): чистим через контейнер.
 	# EN: colcon artifacts live on the host in .build (root-owned): clean them through a container.
 	if [ -d .build ]; then
-	    docker run --rm -v "$(CURDIR)/.build:/b" vesta-sim:latest bash -c 'rm -rf /b/build /b/install /b/log' 2>/dev/null || rm -rf .build
+	    docker run --pull=never --rm -v "$(CURDIR)/.build:/b" vesta-sim:latest bash -c 'rm -rf /b/build /b/install /b/log' 2>/dev/null || rm -rf .build
 	fi
 	mkdir -p .build/build .build/install .build/log
 	say "RU: Готово. Запуск: make up | EN: Done. Start with: make up"

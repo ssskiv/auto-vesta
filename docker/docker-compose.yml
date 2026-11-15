@@ -13,7 +13,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: vesta-sim:latest
+    # RU: Сначала source docker/image.sh. EN: First source docker/image.sh.
+    image: ${VESTA_IMAGE:?source docker/image.sh or export VESTA_IMAGE}
+    pull_policy: never
     container_name: vesta_sim
     hostname: vesta-sim
 
