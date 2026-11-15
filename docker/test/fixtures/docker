@@ -1,0 +1,72 @@
+#!/usr/bin/env bash
+set -euo pipefail
+printf '%q ' "$@" >> "$STATE/calls"; echo >> "$STATE/calls"
+case "$1" in
+    info) exit 0 ;;
+    image)
+        ref="${@: -1}"
+        [ -f "$STATE/ref" ] && [ "$(<"$STATE/ref")" = "$ref" ] || exit 1
+        if [ "$#" -gt 3 ]; then cat "$STATE/meta"; fi
+        ;;
+    pull)
+        [ "$#" = 2 ] || exit 90
+        [[ "$2" =~ ^[a-zA-Z0-9._/@:-]+$ ]] || exit 1
+        echo "$2" >> "$STATE/pulls"
+        if [ -f "$STATE/pull-fail" ]; then exit "$(<"$STATE/pull-fail")"; fi
+        [ ! -f "$STATE/pull-lie" ] || exit 0
+        echo "$2" > "$STATE/ref"
+        if [ -f "$STATE/remote-meta" ]; then
+            cp "$STATE/remote-meta" "$STATE/meta"
+        else
+            echo 'linux/amd64 2' > "$STATE/meta"
+        fi
+        ;;
+    compose)
+        shift
+        [ "$1" != version ] || exit 0
+        while [ "${1:-}" = -f ]; do shift 2; done
+        case "$1" in
+            build)
+                [ ! -f "$STATE/build-fail" ] || exit 24
+                [ "$VESTA_IMAGE" = vesta-sim:latest ] || exit 91
+                echo "$VESTA_IMAGE" > "$STATE/built"
+                echo "$VESTA_IMAGE" > "$STATE/ref"
+                echo 'linux/amd64 2' > "$STATE/meta"
+                printf '%s\n' "${@:2}" > "$STATE/build-options"
+                ;;
+            up|run)
+                # No implicit acquisition is allowed at the runtime boundary.
+                [[ " $* " = *" --pull never "* ]] || exit 92
+                if [ "$1" = up ]; then [[ " $* " = *" --no-build "* ]] || exit 93; fi
+                [ "$(<"$STATE/ref")" = "$VESTA_IMAGE" ] || exit 94
+                echo "$VESTA_IMAGE" > "$STATE/ran"
+                printf '%s\n' "$@" > "$STATE/runtime-options"
+                ;;
+            *) exit 95 ;;
+        esac
+        ;;
+    run)
+        [[ " $* " = *" --pull=never "* ]] || exit 96
+        shift
+        printf '%s\n' "$@" > "$STATE/runtime-options"
+        while [ "$#" -gt 0 ]; do
+            case "$1" in
+                -v|-e|--name|--gpus|--entrypoint) shift 2 ;;
+                --help) echo 'Usage: docker run [OPTIONS] IMAGE [COMMAND] [ARG...]'; exit 0 ;;
+                --) shift; break ;;
+                --*) shift ;;
+                *) break ;;
+            esac
+        done
+        # Docker rejects a leading-option image after option parsing ends.
+        [[ "$1" != -* ]] || exit 125
+        [ -f "$STATE/ref" ] || exit 125
+        [ "$(<"$STATE/ref")" = "$1" ] || exit 97
+        echo "$1" > "$STATE/ran"
+        shift
+        printf '%s\n' "$@" > "$STATE/command"
+        exit "${RUN_EXIT:-0}"
+        ;;
+    ps|rm|exec) exit 0 ;;
+    *) exit 98 ;;
+esac

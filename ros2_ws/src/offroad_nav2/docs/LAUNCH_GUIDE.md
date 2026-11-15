@@ -7,11 +7,11 @@ from the stereo camera and the three networks.
 
 | Needed | Check |
 |---|---|
-| Docker with the NVIDIA container toolkit | `docker run --rm --gpus all ubuntu nvidia-smi` |
+| Linux `amd64`, NVIDIA GPU, compatible host driver, and NVIDIA Container Toolkit for full perception | `docker run --rm --gpus all ubuntu nvidia-smi` |
 | An X display on the host (Webots camera rendering needs OpenGL, even with `gui:=false`) | `echo $DISPLAY` (`:0`) |
-| Base image `vesta-sim:latest` (the auto-vesta image) | `docker images vesta-sim` |
+| Public image `ghcr.io/ssskiv/vesta-sim:nav2ai` | `docker image inspect ghcr.io/ssskiv/vesta-sim:nav2ai` |
 | auto-vesta repo at `/home/skiv/Programming/auto-vesta` on branch `nav2ai` (this package lives in it: `ros2_ws/src/offroad_nav2/`) | `git -C /home/skiv/Programming/auto-vesta branch --show-current` |
-| The `autoware.off-road` repo (only its `Models/` directory is used, mounted read-only as `/offroad`) | `ls /home/skiv/Programming/autoware.off-road/Models` |
+| The `autoware.off-road` repo (repository root mounted read-only as `/offroad`; model definitions are in `/offroad/Models`) | `ls /home/skiv/Programming/autoware.off-road/Models` |
 | Checkpoint copies in `/home/skiv/autoware_data/ml_models_snapshot/` (`last_freespaceseg.pth`, `last_freespacecontour.pth`, `last_objectseg.pth`) | `ls /home/skiv/autoware_data/ml_models_snapshot` |
 
 If you are on another branch: `cd /home/skiv/Programming/auto-vesta && git checkout nav2ai` (your earlier uncommitted sim work is saved on the branch `sim-wip`).
@@ -20,6 +20,44 @@ To refresh the ObjectSeg snapshot while training runs, copy the file; never poin
 
 All commands below are run from `/home/skiv/Programming/auto-vesta` (the auto-vesta checkout on branch `nav2ai`). The paths inside the scripts are absolute, so the
 repositories must stay where they are.
+
+The published image is `ghcr.io/ssskiv/vesta-sim:nav2ai`. Public pulls do not
+require GHCR login. To acquire it without starting containers, run `make image`:
+this uses the cached image when available and downloads it only when missing.
+Use `make pull` to explicitly refresh it from the registry. For a local,
+incremental image build use `make image-build`; `make rebuild` rebuilds the
+local `vesta-sim:latest` without cache and clears `.build`.
+
+For a direct Compose command, source the shared image selector in that same
+operator shell. `make` cannot export a variable back to its caller:
+
+```bash
+source docker/image.sh
+# Optional: select the locally built image
+export VESTA_IMAGE=vesta-sim:latest
+docker compose -f docker/docker-compose.yml -f docker/compose.nvidia.yml config
+```
+
+To pin or roll back to the verified bootstrap image, use its observed digest:
+
+```bash
+export VESTA_IMAGE=ghcr.io/ssskiv/vesta-sim@sha256:cf0a98f3e5544443acee5c4e0e95dfdd6349c9d653b931589762435bc56c6524
+make image
+```
+
+Image tags can move; this digest identifies the verified bootstrap image.
+The image targets `linux/amd64`. Full perception needs an NVIDIA GPU, a
+compatible host driver, and NVIDIA Container Toolkit. A CPU dependency smoke
+check does not prove GPU execution or Webots rendering. Model checkpoints and
+the external `autoware.off-road/Models` source are mounted separately from the
+image, and ROS workspace builds run at container startup and incrementally
+through `make up`. Changing or pinning the image does not roll back mounts or
+build caches.
+
+Publishing is a maintainer operation: it requires GHCR login with a secure
+package-publishing PAT, package visibility set to Public, the package connected
+to this repository, and appropriate repository Actions access. Anonymous
+consumer pulls do not require those publisher credentials.
 
 ## 2. Build
 
@@ -33,24 +71,28 @@ make onnx       # checkpoints (*.pth in the snapshot dir) -> <snapshot>/onnx/{se
 
 Run `make onnx` once and again whenever the checkpoints change (`make up` warns when the files are missing).
 
-There is one Docker image (`vesta-sim:latest`: Webots, ROS 2 Humble, Nav2, PyTorch/CUDA, stereo). `make` builds it only when it is
-missing or older than the Nav2 + perception layers (it checks the label `vesta.nav`); the first build takes 15-25 minutes.
+The shared Docker image contains Webots, ROS 2 Humble, Nav2, CUDA-enabled
+perception dependencies and stereo support. The default is the public
+`ghcr.io/ssskiv/vesta-sim:nav2ai`; `make image` acquires and validates it
+without starting a container. Local builds use the separate tag
+`vesta-sim:latest`.
 
 ```bash
-make image      # build the image if needed (without starting anything)
+make image      # acquire and validate the selected image
 ```
 
 ### Interactive: `make up` (recommended)
 
 ```bash
-make up         # build the image if needed, start the container vesta_sim in the background,
-                # run colcon build, source install/setup.bash and open bash
+make up         # acquire image if missing; start vesta_sim, build workspace, open bash
 ros2 launch offroad_nav2 webots_nav.launch.py        # inside the container
 ```
 
 The container keeps running when you leave bash. Every `make up` re-runs the (incremental) `colcon build` and sources the workspace, and
-`make exec` / `make attach` opens another shell without building. The checkpoints (`~/autoware_data/ml_models_snapshot`, `VESTA_MODELS=`)
-and `Models/` of autoware.off-road (`~/Programming/autoware.off-road`, `OFFROAD_REPO=`) are mounted read-only as `/models` and `/offroad`.
+`make exec` / `make attach` opens another shell without building. The checkpoint snapshot directory (`~/autoware_data/ml_models_snapshot`, `VESTA_MODELS=`)
+is mounted read-only as `/models`; the autoware.off-road repository root
+(`~/Programming/autoware.off-road`, `OFFROAD_REPO=`) is mounted read-only as
+`/offroad`, with model definitions under `/offroad/Models`.
 
 ### Scripted: the helpers under `ros2_ws/src/offroad_nav2/docker/`
 

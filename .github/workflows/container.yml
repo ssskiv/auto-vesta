@@ -1,0 +1,176 @@
+name: Publish environment image
+
+on:
+  push:
+    branches: [nav2ai, ci/ghcr-image]
+    paths:
+      - docker/Dockerfile
+      - docker/entrypoint.sh
+      - docker/.dockerignore
+      - docker/smoke-image.sh
+      - .github/workflows/container.yml
+
+permissions: {}
+concurrency:
+  group: vesta-environment-publisher
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    permissions:
+      contents: read
+      packages: write
+    defaults:
+      run:
+        shell: bash
+    env:
+      IMAGE: ghcr.io/ssskiv/vesta-sim
+      DOCKER_BUILD_RECORD_UPLOAD: 'false'
+    steps:
+      - name: Require disposable GitHub host
+        env:
+          HOST_ENVIRONMENT: ${{ runner.environment }}
+        run: |
+          [[ "$HOST_ENVIRONMENT" == github-hosted && "$RUNNER_OS" == Linux && "$RUNNER_ARCH" == X64 ]]
+          echo "EVIDENCE=$RUNNER_TEMP/vesta-publication" >> "$GITHUB_ENV"
+          mkdir -p "$RUNNER_TEMP/vesta-publication"
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4
+        id: builder
+        with:
+          cache-binary: false
+      - name: Qualify backing filesystems and monitor reserve
+        env:
+          HOST_ENVIRONMENT: ${{ runner.environment }}
+          BUILDER: ${{ steps.builder.outputs.name }}
+        run: |
+          [[ "$HOST_ENVIRONMENT" == github-hosted && "$RUNNER_OS" == Linux && "$RUNNER_ARCH" == X64 ]]
+          docker_root=$(docker info --format '{{.DockerRootDir}}')
+          buildkit_root=$(docker inspect "buildx_buildkit_${BUILDER}0" \
+            --format '{{range .Mounts}}{{if eq .Destination "/var/lib/buildkit"}}{{.Source}}{{end}}{{end}}')
+          containerd_root=$(sudo containerd config dump | awk '$1 == "root" {gsub(/["\047]/, "", $3); print $3; exit}')
+          printf '%s\n' "$docker_root" "$buildkit_root" "$containerd_root" > "$EVIDENCE/roots"
+          while read -r root; do
+            [[ "$root" == /* ]] && sudo test -d "$root"
+            sudo findmnt -T "$root"
+            sudo df -B1 "$root"
+          done < "$EVIDENCE/roots"
+          cat > "$EVIDENCE/sample" <<'BASH'
+          set -euo pipefail
+          required=$1
+          phase=$2
+          while read -r root; do
+            available=$(sudo df -B1 --output=avail "$root" | tail -n 1)
+            printf '%s\t%s\t%s\t%s\n' "$(date -u +%FT%TZ)" "$phase" "$root" "$available" >> "$EVIDENCE/disk.tsv"
+            if (( available < required )); then
+              printf '::error::%s has %s bytes available; %s requires %s\n' "$root" "$available" "$phase" "$required" >&2
+              exit 78
+            fi
+          done < "$EVIDENCE/roots"
+          BASH
+          bash "$EVIDENCE/sample" 0 before-cleanup
+          # These SDKs are unused by checkout, Buildx, Docker, and the CPU smoke.
+          sudo rm -rf -- /usr/local/lib/android /usr/share/dotnet /opt/ghc /opt/hostedtoolcache
+          bash "$EVIDENCE/sample" "$((40 * 1024**3))" admission
+          (
+            while [[ ! -f "$EVIDENCE/stop" ]]; do
+              if ! bash "$EVIDENCE/sample" "$((5 * 1024**3))" reserve; then
+                touch "$EVIDENCE/reserve-failed"
+                exit 78
+              fi
+              sleep 5
+            done
+          ) > "$EVIDENCE/monitor.log" 2>&1 &
+          echo "$!" > "$EVIDENCE/monitor.pid"
+      - uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Reserve unique candidate
+        id: candidate
+        run: |
+          candidate="$IMAGE:sha-$GITHUB_SHA-run-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          if docker buildx imagetools inspect "$candidate" > "$EVIDENCE/collision.log" 2>&1; then
+            echo '::error::Candidate already exists; refusing overwrite'
+            exit 1
+          fi
+          # Only a confirmed absent manifest permits publication; auth/network errors fail closed.
+          grep -Eq 'manifest unknown|not found' "$EVIDENCE/collision.log"
+          echo "tag=$candidate" >> "$GITHUB_OUTPUT"
+      - name: Cold build and direct push
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7
+        id: build
+        with:
+          context: ./docker
+          file: ./docker/Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: ${{ steps.candidate.outputs.tag }}
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+      - name: Anonymous digest pull and CPU dependency smoke
+        id: smoke
+        env:
+          DIGEST: ${{ steps.build.outputs.digest }}
+        run: |
+          [[ "$DIGEST" =~ ^sha256:[0-9a-f]{64}$ ]]
+          bash "$EVIDENCE/sample" "$((5 * 1024**3))" before-pull
+          anonymous_config=$(mktemp -d)
+          trap 'rm -rf "$anonymous_config"' EXIT
+          DOCKER_CONFIG="$anonymous_config" docker pull "$IMAGE@$DIGEST" 2>&1 | tee "$EVIDENCE/pull.log"
+          bash docker/smoke-image.sh "$IMAGE@$DIGEST" 2>&1 | tee "$EVIDENCE/smoke.log"
+          bash "$EVIDENCE/sample" "$((5 * 1024**3))" after-smoke
+          test ! -f "$EVIDENCE/reserve-failed"
+      - name: Promote current nav2ai only after smoke
+        id: promote
+        if: ${{ success() && steps.smoke.outcome == 'success' && github.event_name == 'push' && github.ref == 'refs/heads/nav2ai' }}
+        env:
+          DIGEST: ${{ steps.build.outputs.digest }}
+        run: |
+          remote_head=$(GIT_MASTER=1 git ls-remote --exit-code origin refs/heads/nav2ai | cut -f1)
+          if [[ "$remote_head" != "$GITHUB_SHA" ]]; then
+            echo 'Obsolete source; channel unchanged'
+            echo 'promoted=false' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          test ! -f "$EVIDENCE/reserve-failed"
+          docker buildx imagetools create --prefer-index=false --tag "$IMAGE:nav2ai" "$IMAGE@$DIGEST"
+          echo 'promoted=true' >> "$GITHUB_OUTPUT"
+      - name: Record qualification evidence
+        if: ${{ always() }}
+        env:
+          DIGEST: ${{ steps.build.outputs.digest }}
+          SMOKE: ${{ steps.smoke.outcome }}
+          PROMOTED: ${{ steps.promote.outputs.promoted || 'false' }}
+        run: |
+          touch "$EVIDENCE/stop"
+          if [[ -f "$EVIDENCE/monitor.pid" ]]; then kill "$(cat "$EVIDENCE/monitor.pid")" 2>/dev/null || true; fi
+          reserve_status=0
+          if [[ -f "$EVIDENCE/sample" ]]; then
+            bash "$EVIDENCE/sample" "$((5 * 1024**3))" final || reserve_status=$?
+          fi
+          {
+            printf 'Source: `%s`\n\nCandidate: `%s@%s`\n\n' "$GITHUB_SHA" "$IMAGE" "$DIGEST"
+            printf 'CPU smoke: %s; promoted: %s\n\n' "$SMOKE" "$PROMOTED"
+            echo 'Capacity budgets: provisional 40 GiB admission; 5 GiB reserve; samples every 5 seconds.'
+            if [[ -f "$EVIDENCE/disk.tsv" ]]; then
+              awk -F '\t' '{if (!($3 in min) || $4 < min[$3]) min[$3]=$4} END {for (root in min) printf "\nMinimum %s: %s bytes (%.2f GiB)\n", root, min[root], min[root]/1073741824}' "$EVIDENCE/disk.tsv"
+            fi
+            echo
+            echo 'CPU dependencies only; no GPU execution or rendering qualified.'
+          } >> "$GITHUB_STEP_SUMMARY"
+          for log in roots disk.tsv monitor.log pull.log smoke.log; do
+            if [[ -f "$EVIDENCE/$log" ]]; then
+              echo "EVIDENCE_BEGIN $log"
+              cat "$EVIDENCE/$log"
+              echo "EVIDENCE_END $log"
+            fi
+          done
+          test ! -f "$EVIDENCE/reserve-failed"
+          exit "$reserve_status"
