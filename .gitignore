@@ -12,6 +12,8 @@ ros2_ws/src/vesta_rl/data/pool/previews/
 
 # local agent notes / handoff files
 .claude/
+.omo/
+AGENTS.md
 
 # large files (purged from history, kept locally)
 /models/vesta/vesta.blend
