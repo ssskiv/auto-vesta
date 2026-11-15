@@ -17,75 +17,7 @@ unset VESTA_IMAGE DOCKER_EXTRA NAME
 export VESTA_MODELS="$HOME/models" OFFROAD_REPO="$HOME/offroad"
 mkdir -p "$VESTA_MODELS" "$OFFROAD_REPO"
 cd "$TMP/work"
-cat > "$TMP/bin/docker" <<'DOCKER'
-#!/usr/bin/env bash
-set -euo pipefail
-printf '%q ' "$@" >> "$STATE/calls"; echo >> "$STATE/calls"
-case "$1" in
-    info) exit 0 ;;
-    image)
-        ref="${@: -1}"
-        [ -f "$STATE/ref" ] && [ "$(<"$STATE/ref")" = "$ref" ] || exit 1
-        if [ "$#" -gt 3 ]; then cat "$STATE/meta"; fi
-        ;;
-    pull)
-        [ "$#" = 2 ] || exit 90
-        [[ "$2" =~ ^[a-zA-Z0-9._/@:-]+$ ]] || exit 1
-        echo "$2" >> "$STATE/pulls"
-        if [ -f "$STATE/pull-fail" ]; then exit "$(<"$STATE/pull-fail")"; fi
-        [ ! -f "$STATE/pull-lie" ] || exit 0
-        echo "$2" > "$STATE/ref"
-        if [ -f "$STATE/remote-meta" ]; then
-            cp "$STATE/remote-meta" "$STATE/meta"
-        else
-            echo 'linux/amd64 2' > "$STATE/meta"
-        fi
-        ;;
-    compose)
-        shift
-        [ "$1" != version ] || exit 0
-        while [ "${1:-}" = -f ]; do shift 2; done
-        case "$1" in
-            build)
-                [ ! -f "$STATE/build-fail" ] || exit 24
-                [ "$VESTA_IMAGE" = vesta-sim:latest ] || exit 91
-                echo "$VESTA_IMAGE" > "$STATE/built"
-                echo "$VESTA_IMAGE" > "$STATE/ref"
-                echo 'linux/amd64 2' > "$STATE/meta"
-                printf '%s\n' "${@:2}" > "$STATE/build-options"
-                ;;
-            up|run)
-                # No implicit acquisition is allowed at the runtime boundary.
-                [[ " $* " = *" --pull never "* ]] || exit 92
-                if [ "$1" = up ]; then [[ " $* " = *" --no-build "* ]] || exit 93; fi
-                [ "$(<"$STATE/ref")" = "$VESTA_IMAGE" ] || exit 94
-                echo "$VESTA_IMAGE" > "$STATE/ran"
-                printf '%s\n' "$@" > "$STATE/runtime-options"
-                ;;
-            *) exit 95 ;;
-        esac
-        ;;
-    run)
-        [ "$1" = run ] && [ "$2" = --pull=never ] || exit 96
-        shift
-        printf '%s\n' "$@" > "$STATE/runtime-options"
-        while [ "$#" -gt 0 ]; do
-            case "$1" in
-                -v|-e|--name|--gpus) shift 2 ;;
-                --*) shift ;;
-                *) break ;;
-            esac
-        done
-        [ "$(<"$STATE/ref")" = "$1" ] || exit 97
-        echo "$1" > "$STATE/ran"
-        shift
-        printf '%s\n' "$@" > "$STATE/command"
-        exit "${RUN_EXIT:-0}"
-        ;;
-    ps|rm|exec) exit 0 ;;
-    *) exit 98 ;;
-esac
-DOCKER
+cp "$REPO/docker/test/fixtures/docker" "$TMP/bin/docker"
 printf '#!/usr/bin/env bash\nexit 0\n' > "$TMP/bin/xhost"
 # RU: Ловушка для безопасного опровержения проверки. EN: Tripwire for safe guard falsification.
 printf '#!/usr/bin/env bash\n: > "$STATE/escaped"\nexit 112\n' > "$TMP/fallback/docker"
@@ -259,4 +191,33 @@ pass 'run.sh preserves image command name environment and cache mounts'
 reset; cache "$DEFAULT"; export RUN_EXIT=7
 invoke 7 "$RUN" 'exit 7'
 pass 'run.sh propagates Docker runtime failure'
+
+# Smoke CLI owner: reject invalid input before dependency execution.
+SMOKE="$REPO/docker/smoke-image.sh"
+unset RUN_EXIT
+for input in missing empty extra; do
+    reset
+    case "$input" in
+        missing) invoke 2 bash "$SMOKE" ;;
+        empty) invoke 2 bash "$SMOKE" '' ;;
+        extra) invoke 2 bash "$SMOKE" "$DIGEST" extra ;;
+    esac
+    absent calls
+    pass "smoke $input argument rejected before Docker"
+done
+reset
+invoke 125 bash "$SMOKE" --help
+absent ran; absent pulls; absent built
+pass 'smoke leading-option image fails instead of successful Docker help'
+reset
+invoke 125 bash "$SMOKE" vesta-smoke-missing:never
+absent ran; absent pulls; absent built
+pass 'smoke missing image fails without acquisition'
+reset; cache "$DIGEST"
+invoke 0 bash "$SMOKE" "$DIGEST"
+equal "$(<"$STATE/ran")" "$DIGEST"; absent pulls; absent built
+pass 'smoke explicit cached image reaches runtime without acquisition'
+reset; cache "$DIGEST"; export RUN_EXIT=7
+invoke 7 bash "$SMOKE" "$DIGEST"
+pass 'smoke propagates Docker runtime failure'
 echo 'All image contracts passed.'
