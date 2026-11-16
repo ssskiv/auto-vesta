@@ -25,10 +25,13 @@ ros2_ws/src/offroad_nav2/docker/build.sh                     # colcon build into
 NAME=nav_sim ros2_ws/src/offroad_nav2/docker/run.sh 'ros2 launch offroad_nav2 webots_nav.launch.py'
 ```
 
-Needs: an X display, the NVIDIA container toolkit, and checkpoint copies in
-`/home/skiv/autoware_data/ml_models_snapshot/` (`last_freespaceseg.pth`, `last_freespacecontour.pth`,
-`last_objectseg.pth`; the live `ml_models/` directory is never written). The simulator side is the same branch (`nav2ai`) (
-`/home/skiv/Programming/auto-vesta` is mounted at `/vesta`).
+Needs: an X display, the NVIDIA container toolkit, and checkpoint copies in this checkout's
+`ml_models/` directory (`last_freespaceseg.pth`, `last_freespacecontour.pth`, `last_objectseg.pth`).
+Keep these copies separate from live training output. `VESTA_MODELS` overrides the directory for both workflows.
+The simulator side is the same branch (`nav2ai`); the scripted helpers mount the current checkout at `/vesta`.
+ONNX export uses the model definitions vendored under `tools/model_components/`; no external checkout is needed.
+Runtime inference reads the exported ONNX files.
+See [LAUNCH_GUIDE.md](LAUNCH_GUIDE.md) for setup commands.
 
 Launch arguments of `webots_nav.launch.py`:
 

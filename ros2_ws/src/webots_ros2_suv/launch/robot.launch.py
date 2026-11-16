@@ -20,6 +20,7 @@ from launch_ros.descriptions import ComposableNode, ParameterFile
 
 
 from webots_ros2_suv import referee as referee_script
+from webots_ros2_suv.runtime_assets import link_runtime_assets
 
 PACKAGE_NAME = 'webots_ros2_suv'
 USE_SIM_TIME = True
@@ -27,6 +28,7 @@ USE_SIM_TIME = True
 
 def generate_launch_description():
     package_dir = get_package_share_directory(PACKAGE_NAME)
+    link_runtime_assets(pathlib.Path(package_dir))
     world = LaunchConfiguration('world')
 
     webots = WebotsLauncher(

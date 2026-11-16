@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Export the three networks to ONNX for the C++ perception node (ONNX Runtime). Offline tool, needs PyTorch and Models/.
+"""Export the three networks to ONNX for the C++ perception node (ONNX Runtime). Offline tool, uses PyTorch and local model_components/.
 
 Each file takes a uint8 RGB image (1, 3, 320, 640) and returns the argmax class map as uint8:
   seg.onnx      -> (1, 320, 640)  {0 non-drivable, 1 drivable}       (FreespaceSeg checkpoint, seg path only)
   contour.onnx  -> (1, 37)        bins 0..45                          (FreespaceContour checkpoint, contour path only)
   objseg.onnx   -> (1, 320, 640)  {0 bg, 1 man-made, 2 vru, 3 vehicle, 4 natural}
 ImageNet normalisation, fp16 weights/activations and the argmax are part of the graph.
-Usage: export_onnx.py --models-root /offroad/Models --ckpt-dir /models --out /onnx_out [--check]"""
+Usage: export_onnx.py --ckpt-dir /models --out /onnx_out [--check]"""
 import argparse
 import os
 import sys
@@ -35,17 +35,15 @@ class Wrapper(torch.nn.Module):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('--models-root', default='/offroad/Models')
     ap.add_argument('--ckpt-dir', default='/models')
     ap.add_argument('--out', required=True)
     ap.add_argument('--check', action='store_true', help='compare with the PyTorch engine on a test image')
     ap.add_argument('--image', help='RGB image for --check (default: a smooth synthetic scene)')
     a = ap.parse_args()
-    E._ensure_models_on_path(a.models_root)
     nets = {
-        'seg': E._SegPath(E._build_freespace(a.models_root, f'{a.ckpt_dir}/last_freespaceseg.pth', 'cpu')),
-        'contour': E._ContourPath(E._build_freespace(a.models_root, f'{a.ckpt_dir}/last_freespacecontour.pth', 'cpu')),
-        'objseg': E._build_objectseg(a.models_root, f'{a.ckpt_dir}/last_objectseg.pth'),
+        'seg': E._SegPath(E._build_freespace(f'{a.ckpt_dir}/last_freespaceseg.pth')),
+        'contour': E._ContourPath(E._build_freespace(f'{a.ckpt_dir}/last_freespacecontour.pth')),
+        'objseg': E._build_objectseg(f'{a.ckpt_dir}/last_objectseg.pth'),
     }
     dev = 'cuda' if torch.cuda.is_available() else 'cpu'
     dummy = torch.randint(0, 255, (1, 3, 320, 640), dtype=torch.uint8, device=dev)

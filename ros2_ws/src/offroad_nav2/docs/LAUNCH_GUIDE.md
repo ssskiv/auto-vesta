@@ -10,16 +10,27 @@ from the stereo camera and the three networks.
 | Linux `amd64`, NVIDIA GPU, compatible host driver, and NVIDIA Container Toolkit for full perception | `docker run --rm --gpus all ubuntu nvidia-smi` |
 | An X display on the host (Webots camera rendering needs OpenGL, even with `gui:=false`) | `echo $DISPLAY` (`:0`) |
 | Public image `ghcr.io/ssskiv/vesta-sim:nav2ai` | `docker image inspect ghcr.io/ssskiv/vesta-sim:nav2ai` |
-| auto-vesta repo at `/home/skiv/Programming/auto-vesta` on branch `nav2ai` (this package lives in it: `ros2_ws/src/offroad_nav2/`) | `git -C /home/skiv/Programming/auto-vesta branch --show-current` |
-| The `autoware.off-road` repo (repository root mounted read-only as `/offroad`; model definitions are in `/offroad/Models`) | `ls /home/skiv/Programming/autoware.off-road/Models` |
-| Checkpoint copies in `/home/skiv/autoware_data/ml_models_snapshot/` (`last_freespaceseg.pth`, `last_freespacecontour.pth`, `last_objectseg.pth`) | `ls /home/skiv/autoware_data/ml_models_snapshot` |
+| An auto-vesta checkout on branch `nav2ai` (this package lives in `ros2_ws/src/offroad_nav2/`) | From its root: `git branch --show-current` |
+| Local network definitions included in auto-vesta | `ls ros2_ws/src/offroad_nav2/tools/model_components/` |
+| Checkpoint copies in the checkout's `ml_models/` directory (`last_freespaceseg.pth`, `last_freespacecontour.pth`, `last_objectseg.pth`) | `ls ml_models/` |
 
-If you are on another branch: `cd /home/skiv/Programming/auto-vesta && git checkout nav2ai` (your earlier uncommitted sim work is saved on the branch `sim-wip`).
-To refresh the ObjectSeg snapshot while training runs, copy the file; never point the demo at the live `ml_models/` folder:
-`cp /home/skiv/autoware_data/ml_models/ObjectSeg/last_objectseg.pth /home/skiv/autoware_data/ml_models_snapshot/`.
+Run commands from the root of your auto-vesta checkout. Its location is unrestricted.
+Create the local checkpoint directory:
 
-All commands below are run from `/home/skiv/Programming/auto-vesta` (the auto-vesta checkout on branch `nav2ai`). The paths inside the scripts are absolute, so the
-repositories must stay where they are.
+```bash
+mkdir -p ml_models
+```
+
+Copy completed training checkpoints into `ml_models/`; keep this directory separate from live training output.
+The folder is ignored by Git. For example, with `TRAINING_MODELS` set to your training output directory:
+
+```bash
+cp "$TRAINING_MODELS/ObjectSeg/last_objectseg.pth" ml_models/
+```
+
+`make onnx` uses the vendored `tools/model_components/` definitions to construct the networks before loading
+the checkpoint weights. No external model repository or repository-path variables are needed.
+The C++ perception runtime reads the exported `ml_models/onnx/*.onnx` files.
 
 The published image is `ghcr.io/ssskiv/vesta-sim:nav2ai`. Public pulls do not
 require GHCR login. To acquire it without starting containers, run `make image`:
@@ -89,10 +100,15 @@ ros2 launch offroad_nav2 webots_nav.launch.py        # inside the container
 ```
 
 The container keeps running when you leave bash. Every `make up` re-runs the (incremental) `colcon build` and sources the workspace, and
-`make exec` / `make attach` opens another shell without building. The checkpoint snapshot directory (`~/autoware_data/ml_models_snapshot`, `VESTA_MODELS=`)
-is mounted read-only as `/models`; the autoware.off-road repository root
-(`~/Programming/autoware.off-road`, `OFFROAD_REPO=`) is mounted read-only as
-`/offroad`, with model definitions under `/offroad/Models`.
+`make exec` / `make attach` opens another shell without building. The checkpoint snapshot directory (`ml_models/` in this checkout, overridden with `VESTA_MODELS=`)
+is mounted read-only as `/models`. Model definitions are included in the mounted auto-vesta source tree.
+
+The scripted helpers use the same `ml_models/` default and honor `VESTA_MODELS`.
+
+Webots controller and plugin links are generated locally when the simulator launches and refreshed after an
+installation move. They use `WEBOTS_HOME` (the Docker image sets it to `/usr/local/webots`).
+For an installation outside Docker, set `WEBOTS_HOME` to its directory before launching or running
+`ros2_ws/src/webots_ros2_suv/tools/vendor_webots_assets.py`.
 
 ### Scripted: the helpers under `ros2_ws/src/offroad_nav2/docker/`
 
@@ -194,7 +210,7 @@ docker rm -f nav_sim
 | Car does not move after a goal, `no valid path` in the log | a forward-only car can be trapped near a wall or barrel (no reverse by design). Teleport it back with `teleport.py`, or restart. Nav2 tuning is not finished |
 | `cannot open display` or black Webots | run `xhost +local:` on the host; check `echo $DISPLAY` |
 | `CUDA` errors in `perception_node` | GPU not passed in: the script uses `--gpus all`; check `nvidia-smi` on the host and the toolkit |
-| Checkpoint not found | files must be in `ml_models_snapshot/` (mounted read-only as `/models`) |
+| Checkpoint not found | put checkpoint copies in this checkout's `ml_models/` directory, or set `VESTA_MODELS` (mounted read-only as `/models`) |
 | Another ROS 2 system on the host or network interferes | use another domain: `ROS_DOMAIN_ID=7 NAME=nav_sim ros2_ws/src/offroad_nav2/docker/run.sh '...'` |
 
 ## 8. Where things are

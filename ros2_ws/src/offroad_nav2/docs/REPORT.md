@@ -1,6 +1,6 @@
 # Final report: perception-to-Nav2 rebuild for the Lada Vesta (Webots)
 
-Branch `ai` of autoware.off-road; auto-vesta changes on branch `ai` (worktree `/home/skiv/Programming/auto-vesta`).
+Branch `ai` of autoware.off-road; auto-vesta changes on branch `ai` in a separate auto-vesta worktree.
 Environment: Humble Docker image `vesta-nav:latest` (decision 7.3 answered by the user), Nav2 1.1.20 (`cmd_vel` is Twist).
 Controller: Regulated Pure Pursuit by default, MPPI selectable. The `ai` branch's neural controller is not used.
 Nav2 tuning is intentionally unfinished (the user will complete it); see "Open issues".
@@ -150,13 +150,13 @@ interface (7.6, abstract stub only); measured real vehicle numbers and the plann
 default); non-drivable cost policy lethal vs soft (7.10); checkpoints, domain gap and road approval (7.11); real venue datum lat/lon
 (placeholder 54.3282, 48.3866); maintainer and license fields of all `package.xml`/`setup.py`.
 
-## Files changed outside autoware.off-road (auto-vesta, branch `ai`, worktree `/home/skiv/Programming/auto-vesta`)
+## Files changed outside autoware.off-road (auto-vesta worktree, branch `ai`)
 
 - `ros2_ws/src/webots_ros2_suv/resource/vesta.urdf`: stereo links and optical frames, `base_footprint` (z -0.108), two stereo camera devices (`/stereo_raw/{left,right}`), GPS x 0.4.
 - `ros2_ws/src/webots_ros2_suv/worlds/robocross.wbt`: two stereo cameras in the front slot (plus the user's offline-vendoring path rewrites copied from the `sim` working tree).
 - `ros2_ws/src/webots_ros2_suv/webots_ros2_suv/vesta_driver.py`: Webots-time stamps, 16 `spin_once` per step, `VESTA_PUBLISH_ODOM_TF` switch, optional stand-in traffic-light publisher (`VESTA_STANDIN_TL`).
 - `ros2_ws/src/webots_ros2_suv/protos/webots/`, `protos/*.proto`, textures, `tools/vendor_webots_assets.py`: copied from the user's uncommitted `sim` working tree (offline vendoring). The merge of `sim` into `ai` (referee, barrel generator) is commit `eb523c4`.
-- Nothing was pushed. The user's `sim` working tree and `/home/skiv/autoware_data/ml_models/` were not modified (checkpoints were copied to `/home/skiv/autoware_data/ml_models_snapshot/`).
+- Nothing was pushed. The user's `sim` working tree and live training checkpoint directory were not modified; checkpoints were copied to a separate snapshot directory for these historical runs.
 
 Files changed inside autoware.off-road outside the new `ROS2/` and `ros2_ws/src/offroad_nav2/docs/`: `Models/model_components/backbone.py` and
 `Models/model_components/scene_seg_network.py` (`pretrained=` argument, default keeps training unchanged). No other training or

@@ -118,18 +118,15 @@ fi
 
 mkdir -p .build/build .build/install .build/log
 
-# RU: Нейросети: чекпойнты (/models) и каталог Models/ из autoware.off-road (/offroad). Если каталога нет, монтируем пустой.
-# EN: Networks: checkpoints (/models) and the Models/ directory of autoware.off-road (/offroad). If a directory is missing, mount an empty one.
-export VESTA_MODELS="$${VESTA_MODELS:-$$HOME/autoware_data/ml_models_snapshot}"
-export OFFROAD_REPO="$${OFFROAD_REPO:-$$HOME/Programming/autoware.off-road}"
-for v in VESTA_MODELS OFFROAD_REPO; do
-    if [ ! -d "$${!v}" ]; then
-        say "RU: нет каталога $$v=$${!v}, восприятие работать не будет (задайте $$v=...)"
-        say "EN: directory $$v=$${!v} is missing, perception will not work (set $$v=...)"
-        mkdir -p ".build/missing_$$v"
-        declare -gx "$$v=$(CURDIR)/.build/missing_$$v"
-    fi
-done
+# RU: Снимки чекпойнтов (/models); определения сетей входят в исходники. Если каталога нет, монтируем пустой.
+# EN: Checkpoint snapshots (/models); network definitions are included in the source. If the directory is missing, mount an empty one.
+export VESTA_MODELS="$${VESTA_MODELS:-$(CURDIR)/ml_models}"
+if [ ! -d "$$VESTA_MODELS" ]; then
+    say "RU: нет каталога VESTA_MODELS=$$VESTA_MODELS, восприятие работать не будет (задайте VESTA_MODELS=...)"
+    say "EN: directory VESTA_MODELS=$$VESTA_MODELS is missing, perception will not work (set VESTA_MODELS=...)"
+    mkdir -p ".build/missing_VESTA_MODELS"
+    export VESTA_MODELS="$(CURDIR)/.build/missing_VESTA_MODELS"
+fi
 
 $(ENSURE_IMAGE)
 
@@ -267,7 +264,7 @@ onnx:
 	@$(PREAMBLE)
 	$(PREPARE)
 	mkdir -p "$$VESTA_MODELS/onnx"
-	exec $$COMPOSE run --pull never -T --rm -v "$$VESTA_MODELS/onnx:/models/onnx:rw" sim bash -lc 'cd /ros2_ws/src/offroad_nav2 && python3 tools/export_onnx.py --models-root /offroad/Models --ckpt-dir /models --out /models/onnx --check --image docs/results/domain_gap/06_rgb.png 2>&1 | grep -E "exported|agrees|Error|error"'
+	exec $$COMPOSE run --pull never -T --rm -v "$$VESTA_MODELS/onnx:/models/onnx:rw" sim bash -lc 'cd /ros2_ws/src/offroad_nav2 && python3 tools/export_onnx.py --ckpt-dir /models --out /models/onnx --check --image docs/results/domain_gap/06_rgb.png 2>&1 | grep -E "exported|agrees|Error|error"'
 
 rebuild:
 	@$(PREAMBLE)

@@ -91,6 +91,8 @@ file(GLOB SCRIPTS ${CMAKE_CURRENT_SOURCE_DIR}/scripts/*)
 install(PROGRAMS ${SCRIPTS} DESTINATION lib/${PROJECT_NAME})
 file(GLOB TOOLS ${CMAKE_CURRENT_SOURCE_DIR}/tools/*.py)
 install(PROGRAMS ${TOOLS} DESTINATION lib/${PROJECT_NAME})
+install(DIRECTORY tools/model_components DESTINATION lib/${PROJECT_NAME}
+  PATTERN "__pycache__" EXCLUDE)
 
 install(DIRECTORY launch config behavior_trees urdf DESTINATION share/${PROJECT_NAME})
 install(DIRECTORY include/ DESTINATION include)

@@ -14,8 +14,8 @@ mkdir -p "$TMP/bin" "$TMP/fallback" "$TMP/work" "$HOME" "$DOCKER_CONFIG" "$STATE
 ln -s "$REPO/docker" "$TMP/work/docker"
 export PATH="$TMP/bin:$TMP/fallback:$PATH" GPU=cpu HEADLESS=1
 unset VESTA_IMAGE DOCKER_EXTRA NAME
-export VESTA_MODELS="$HOME/models" OFFROAD_REPO="$HOME/offroad"
-mkdir -p "$VESTA_MODELS" "$OFFROAD_REPO"
+export VESTA_MODELS="$HOME/models"
+mkdir -p "$VESTA_MODELS"
 cd "$TMP/work"
 cp "$REPO/docker/test/fixtures/docker" "$TMP/bin/docker"
 printf '#!/usr/bin/env bash\nexit 0\n' > "$TMP/bin/xhost"
@@ -184,10 +184,14 @@ reset; export VESTA_IMAGE="$DIGEST" NAME='nav_contract' DOCKER_EXTRA='-e CONTRAC
 invoke 0 "$RUN" 'printf "%s\n" "two words"; exit 7'
 equal "$(<"$STATE/ran")" "$DIGEST"; absent built
 equal "$(<"$STATE/command")" $'bash\n-lc\nsource /opt/ros/humble/setup.bash; [ -f /ws/install/setup.bash ] && source /ws/install/setup.bash; printf "%s\\n" "two words"; exit 7'
-for arg in nav_contract CONTRACT=selected "$HOME/.cache/vesta-nav:/ws" "$REPO:/vesta"; do
+for arg in nav_contract CONTRACT=selected "$HOME/.cache/vesta-nav:/ws" "$REPO:/vesta" "$VESTA_MODELS:/models:ro"; do
     grep -Fxq -- "$arg" "$STATE/runtime-options" || fail "lost runtime argument: $arg"
 done
 pass 'run.sh preserves image command name environment and cache mounts'
+reset; cache "$DEFAULT"
+invoke 0 env -u VESTA_MODELS "$RUN" 'true'
+grep -Fxq -- "$REPO/ml_models:/models:ro" "$STATE/runtime-options" || fail 'models must default to the checkout ml_models directory'
+pass 'run.sh defaults models to the checkout regardless of HOME or working directory'
 reset; cache "$DEFAULT"; export RUN_EXIT=7
 invoke 7 "$RUN" 'exit 7'
 pass 'run.sh propagates Docker runtime failure'

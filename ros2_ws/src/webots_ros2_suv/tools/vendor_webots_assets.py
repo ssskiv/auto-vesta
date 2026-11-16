@@ -13,7 +13,8 @@ Without internet the world loads with missing objects and textures. This script:
 Some PROTOs build file names in their JavaScript templates (TexturedBackground: cubic/<texture>_<side>.jpg);
 those are listed in EXTRA. To find what is still fetched from the net, run the sim without network
 (`docker run --network none ...`) and look for "Cannot download" / "Unable to find resource" in the Webots
-log; add the paths to EXTRA. Controllers of those PROTOs: see CONTROLLERS.
+log; add the paths to EXTRA. Controller and plugin links use WEBOTS_HOME and are
+refreshed both here and when the simulator launches.
 
     python3 tools/vendor_webots_assets.py           # download what is missing and rewrite
     python3 tools/vendor_webots_assets.py --check   # only list URLs that still point to the net
@@ -23,8 +24,12 @@ import os
 import re
 import sys
 import urllib.request
+from pathlib import Path
 
 PKG = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, PKG)
+from webots_ros2_suv.runtime_assets import link_runtime_assets  # noqa: E402
+
 OUT = os.path.join(PKG, 'protos', 'webots')          # mirror root: OUT/projects/...
 RAW = 'https://raw.githubusercontent.com/cyberbotics/webots/%s/%s'
 INSTALLED = 'R2025a'                                  # webots:// and default sounds come from this release
@@ -43,12 +48,6 @@ EXTRA += [(INSTALLED, f'projects/appearances/protos/textures/leather/{n}.jpg')  
                     'dollaro_leather_occlusion')]
 EXTRA += [(INSTALLED, f'projects/appearances/protos/textures/pavement/braun_square_stone_pavement_{n}.jpg')
           for n in ('base_color', 'roughness', 'normal', 'occlusion')]                # Pavement of Road
-# Controllers and plugins of downloaded PROTOs. Webots looks for them next to the PROTO (../controllers/<name>,
-# ../plugins/...). The compiled ones ship with the Webots install of the image, so the mirror links there
-# (the links dangle outside the image).
-CONTROLLERS = ['projects/objects/traffic/controllers',        # generic_traffic_light: switches the start light
-               'projects/vehicles/plugins']                   # robot window "automobile" of Car (Webots GUI)
-WEBOTS_HOME = '/usr/local/webots'
 # ContactProperties sounds: Webots' defaults are URLs; the world sets them to these copies
 SOUNDS = [(INSTALLED, f'projects/default/worlds/sounds/{n}.wav') for n in ('bump', 'roll', 'slide')]
 
@@ -177,12 +176,7 @@ def main():
                 todo.append((t, p, None))
 
     save_manifest(sources)
-    for path in CONTROLLERS:
-        link = local(path)
-        if not os.path.lexists(link):
-            os.makedirs(os.path.dirname(link), exist_ok=True)
-            os.symlink(os.path.join(WEBOTS_HOME, path), link)
-            print(f'linked {path} -> {os.path.join(WEBOTS_HOME, path)}')
+    link_runtime_assets(Path(PKG))
 
     for f in list(own_files()) + list(mirrored_protos()):
         text = open(f, encoding='utf-8').read()
