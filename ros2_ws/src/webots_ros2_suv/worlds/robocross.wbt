@@ -1,11 +1,11 @@
 #VRML_SIM R2023b utf8
 
-EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/backgrounds/protos/TexturedBackground.proto"
-EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
-EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/floors/protos/RectangleArena.proto"
-EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/road/protos/Road.proto"
-EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/road/protos/RoadLine.proto"
-EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/traffic/protos/GenericTrafficLight.proto"
+EXTERNPROTO "../protos/webots/projects/objects/backgrounds/protos/TexturedBackground.proto"
+EXTERNPROTO "../protos/webots/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
+EXTERNPROTO "../protos/webots/projects/objects/floors/protos/RectangleArena.proto"
+EXTERNPROTO "../protos/webots/projects/objects/road/protos/Road.proto"
+EXTERNPROTO "../protos/webots/projects/objects/road/protos/RoadLine.proto"
+EXTERNPROTO "../protos/webots/projects/objects/traffic/protos/GenericTrafficLight.proto"
 EXTERNPROTO "../protos/PlasticBarrel.proto"
 IMPORTABLE EXTERNPROTO "../protos/RobocrossBarrels.proto"
 EXTERNPROTO "../protos/LadaVesta.proto"
@@ -14,9 +14,9 @@ EXTERNPROTO "../protos/WinderStart.proto"
 EXTERNPROTO "../protos/WinderFinish.proto"
 EXTERNPROTO "../protos/WinderFreeDeal.proto"
 EXTERNPROTO "../protos/WinderGaz.proto"
-EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/trees/protos/Forest.proto"
-EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/floors/protos/UnevenTerrain.proto"
-EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/solids/protos/SolidBox.proto"
+EXTERNPROTO "../protos/webots/projects/objects/trees/protos/Forest.proto"
+EXTERNPROTO "../protos/webots/projects/objects/floors/protos/UnevenTerrain.proto"
+EXTERNPROTO "../protos/webots/projects/objects/solids/protos/SolidBox.proto"
 
 
 
@@ -28,6 +28,9 @@ WorldInfo {
   lineScale 1
   contactProperties [
     ContactProperties {
+      slideSound "../protos/webots/projects/default/worlds/sounds/slide.wav"
+      rollSound "../protos/webots/projects/default/worlds/sounds/roll.wav"
+      bumpSound "../protos/webots/projects/default/worlds/sounds/bump.wav"
       coulombFriction [
         8
       ]
@@ -37,9 +40,10 @@ WorldInfo {
   ]
 }
 Viewpoint {
-  orientation -0.17843641152971212 -0.09496934842010782 0.9793575802029917 3.8607517218709444
-  position 20.932208681385298 9.422973514905046 10.658689416063641
-  follow "vehicle"
+  orientation 0 1 0 0.35
+  position -7.5 -2.26 5
+  follow "vesta"
+  followType "Mounted Shot"
 }
 TexturedBackground {
 }
@@ -175,7 +179,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -197,7 +201,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -219,7 +223,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -241,7 +245,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -263,7 +267,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -285,7 +289,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -307,7 +311,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -329,7 +333,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -351,7 +355,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -373,7 +377,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -395,7 +399,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -417,7 +421,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -439,7 +443,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -461,7 +465,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -483,7 +487,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -505,7 +509,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -527,7 +531,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -549,7 +553,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -571,7 +575,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -593,7 +597,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -615,7 +619,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -637,7 +641,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -659,7 +663,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -681,7 +685,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -703,7 +707,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -725,7 +729,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -747,7 +751,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -769,7 +773,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -791,7 +795,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -813,7 +817,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -835,7 +839,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -857,7 +861,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -879,7 +883,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -901,7 +905,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -923,7 +927,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -945,7 +949,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -967,7 +971,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -989,7 +993,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -1011,7 +1015,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -1033,7 +1037,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -1055,7 +1059,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -1077,7 +1081,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -1099,7 +1103,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -1121,7 +1125,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -1143,7 +1147,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -1165,7 +1169,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -1187,7 +1191,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -1209,7 +1213,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -1231,7 +1235,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -1253,7 +1257,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -1275,7 +1279,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -1297,7 +1301,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -1319,7 +1323,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -1341,7 +1345,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -1363,7 +1367,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -1385,7 +1389,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -1407,7 +1411,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -1429,7 +1433,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -1451,7 +1455,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -1473,7 +1477,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -1495,7 +1499,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -1517,7 +1521,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -1539,7 +1543,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -1561,7 +1565,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -1583,7 +1587,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -1605,7 +1609,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -1627,7 +1631,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -1649,7 +1653,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -1671,7 +1675,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -1693,7 +1697,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -1715,7 +1719,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -1737,7 +1741,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -1759,7 +1763,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -1781,7 +1785,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -1802,7 +1806,7 @@ DEF Barrier Solid {
           appearance PBRAppearance {
             baseColorMap ImageTexture {
               url [
-                "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/rock.jpg"
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
               ]
             }
             roughness 1
@@ -1846,7 +1850,7 @@ DEF Road Solid {
       appearance Appearance {
         texture ImageTexture {
           url [
-            "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/vehicles/worlds/textures/ground.jpg"
+            "../protos/webots/projects/vehicles/worlds/textures/ground.jpg"
           ]
         }
       }
@@ -1871,7 +1875,7 @@ DEF Road Solid {
       appearance Appearance {
         texture ImageTexture {
           url [
-            "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/vehicles/worlds/textures/ground.jpg"
+            "../protos/webots/projects/vehicles/worlds/textures/ground.jpg"
           ]
         }
       }
@@ -1895,7 +1899,7 @@ DEF Road Solid {
       appearance Appearance {
         texture ImageTexture {
           url [
-            "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/vehicles/worlds/textures/ground.jpg"
+            "../protos/webots/projects/vehicles/worlds/textures/ground.jpg"
           ]
         }
       }
@@ -1997,7 +2001,7 @@ DEF Terrain RectangleArena {
   floorAppearance PBRAppearance {
     baseColorMap ImageTexture {
       url [
-        "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/default/worlds/textures/sand.jpg"
+        "../protos/webots/projects/default/worlds/textures/sand.jpg"
       ]
       filtering 3
     }
@@ -2027,6 +2031,44 @@ DEF Vesta1 LadaVesta {
             baseColor 0.05 0.05 0.05
             metalness 0.3
             roughness 0.5
+          }
+          geometry Box {
+            size 0.04 0.03 0.03
+          }
+        }
+      ]
+    }
+    Camera {
+      translation -2.21 0.1 0.42
+      rotation 0 0 1 0
+      name "stereo_left_camera"
+      width 1280
+      height 720
+      fieldOfView 1.0
+      near 0.1
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.05 0.05 0.05
+          }
+          geometry Box {
+            size 0.04 0.03 0.03
+          }
+        }
+      ]
+    }
+    Camera {
+      translation -2.21 -0.1 0.42
+      rotation 0 0 1 0
+      name "stereo_right_camera"
+      width 1280
+      height 720
+      fieldOfView 1.0
+      near 0.1
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.05 0.05 0.05
           }
           geometry Box {
             size 0.04 0.03 0.03

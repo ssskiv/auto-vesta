@@ -148,32 +148,30 @@ if (-not $Headless) {
 # RU: Каталоги сборки на хосте: пересборка не нужна при каждом запуске.
 # EN: Host-side build directories: no rebuild on every start.
 foreach ($d in @("build", "install", "log")) {
-    New-Item -ItemType Directory -Force -Path (Join-Path $Here ".build\$d") | Out-Null
+    New-Item -ItemType Directory -Force -Path (Join-Path $Here "..\.build\$d") | Out-Null
 }
 
 # -------------------------------------------------------------------------
 # RU: Сборка образа | EN: Image build
 # -------------------------------------------------------------------------
-$imageExists = $false
-try {
-    docker image inspect vesta-sim:latest 2>&1 | Out-Null
-    $imageExists = $true
-} catch { }
-
+if (-not $env:VESTA_IMAGE) { $env:VESTA_IMAGE = "ghcr.io/ssskiv/vesta-sim:nav2ai" }
 if ($Rebuild) {
-    Say "RU: Пересборка образа с нуля | EN: rebuilding image from scratch"
+    $env:VESTA_IMAGE = "vesta-sim:latest"
     & docker @ComposeArgs build --no-cache
-    Remove-Item -Recurse -Force (Join-Path $Here ".build") -ErrorAction SilentlyContinue
-    foreach ($d in @("build", "install", "log")) {
-        New-Item -ItemType Directory -Force -Path (Join-Path $Here ".build\$d") | Out-Null
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+} else {
+    & docker image inspect $env:VESTA_IMAGE 2>&1 | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+        if ($env:VESTA_IMAGE -eq "vesta-sim:latest") {
+            throw "Local image missing; build it with -Rebuild"
+        }
+        & docker pull $env:VESTA_IMAGE
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
     }
-} elseif (-not $imageExists) {
-    Say ""
-    Say "RU: Первая сборка образа. Это 15-25 минут, дальше запуск за секунды."
-    Say "EN: First image build. Takes 15-25 minutes; later starts are instant."
-    Say ""
-    & docker @ComposeArgs build
-    if ($LASTEXITCODE -ne 0) { exit 1 }
+}
+$metadata = & docker image inspect --format '{{.Os}}/{{.Architecture}} {{index .Config.Labels "vesta.nav"}}' $env:VESTA_IMAGE
+if ($LASTEXITCODE -ne 0 -or $metadata -ne "linux/amd64 2") {
+    throw "Incompatible image: $metadata (requires linux/amd64, vesta.nav=2)"
 }
 
 # -------------------------------------------------------------------------

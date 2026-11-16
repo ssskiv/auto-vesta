@@ -1,11 +1,11 @@
 # =========================================================================
 # RU: Базовая конфигурация. Настройки видеокарты подключаются отдельным
 #     файлом: compose.nvidia.yml, compose.amd.yml, compose.intel.yml или
-#     compose.cpu.yml. Скрипты start.sh и start.ps1 выбирают его сами.
+#     compose.cpu.yml. Makefile (`make`) выбирает его сам.
 #
 # EN: Base configuration. GPU settings come from a separate overlay file:
 #     compose.nvidia.yml, compose.amd.yml, compose.intel.yml or
-#     compose.cpu.yml. The start.sh and start.ps1 scripts pick one
+#     compose.cpu.yml. The Makefile (`make`) picks one
 #     automatically.
 # =========================================================================
 services:
@@ -13,7 +13,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: vesta-sim:latest
+    # RU: Сначала source docker/image.sh. EN: First source docker/image.sh.
+    image: ${VESTA_IMAGE:-ghcr.io/ssskiv/vesta-sim:nav2ai}
+    pull_policy: never
     container_name: vesta_sim
     hostname: vesta-sim
 
@@ -23,13 +25,18 @@ services:
       - DISPLAY=${DISPLAY:-:0}
       - QT_X11_NO_MITSHM=1
       - XDG_RUNTIME_DIR=/tmp/runtime-root
-      # RU: WSLg на Windows подставляет свой сокет Wayland.
-      # EN: WSLg on Windows provides its own Wayland socket.
+      # RU: Сокет Wayland (если сессия Wayland). EN: Wayland socket (if the session is Wayland).
       - WAYLAND_DISPLAY=${WAYLAND_DISPLAY:-}
       - PULSE_SERVER=${PULSE_SERVER:-}
 
     volumes:
-      - ../src:/ros2_ws/src:rw
+      - ../ros2_ws/src:/ros2_ws/src:rw
+      # RU: точка входа берётся из репозитория (правки без пересборки образа).
+      # EN: the entrypoint comes from the repo (edits need no image rebuild).
+      - ./entrypoint.sh:/entrypoint.sh:ro
+      # RU: rviz открывается с ros2_ws/src/rviz/default.rviz.
+      # EN: rviz starts with ros2_ws/src/rviz/default.rviz.
+      - ../ros2_ws/src/rviz:/root/.rviz2:rw
       # RU: Артефакты сборки живут на хосте: пересборка не нужна при
       #     каждом запуске контейнера.
       # EN: Build artifacts live on the host, so the workspace is not

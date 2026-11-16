@@ -1,8 +1,11 @@
 import math
+import os
 import time
 
 import rclpy
-from geometry_msgs.msg import Quaternion, TransformStamped, Twist
+from builtin_interfaces.msg import Time
+from geometry_msgs.msg import PoseStamped, Quaternion, TransformStamped, Twist
+from nav_msgs.msg import Odometry
 from rclpy.parameter import Parameter
 from sensor_msgs.msg import Imu, JointState, PointCloud2
 from sensor_msgs_py import point_cloud2
@@ -34,6 +37,10 @@ def _clamp(value, low, high):
     return max(low, min(high, value))
 
 
+def _yaw(q):
+    return math.atan2(2.0 * (q.w * q.z + q.x * q.y), 1.0 - 2.0 * (q.y * q.y + q.z * q.z))
+
+
 class VestaDriver:
     def init(self, webots_node, properties):
         self.__driver = webots_node.robot
@@ -55,7 +62,9 @@ class VestaDriver:
         self.__cruising_speed_kmh = 0.0
         self.__last_cmd_time = time.monotonic()
         self.__orientation = Quaternion(x=0.0, y=0.0, z=0.0, w=1.0)
+        self.__yaw_rate = 0.0
         self.__gps_origin = None
+        self.__teleport_request = None
         self.__barrels_request = None
         self.__barrels_countdown = 0
 
@@ -68,9 +77,11 @@ class VestaDriver:
         self.__radar.enable(timestep)
         self.__gps = self.__driver.getDevice('gps')
         self.__gps.enable(timestep)
+        # The lidar is optional: absent from the world (camera-only test) -> no /lidar topic.
         self.__lidar = self.__driver.getDevice('lidar')
-        self.__lidar.enable(timestep)
-        self.__lidar.enablePointCloud()
+        if self.__lidar is not None:
+            self.__lidar.enable(timestep)
+            self.__lidar.enablePointCloud()
 
         for imu_device_name in ('imu', 'imu_gyro', 'imu_accelerometer'):
             self.__driver.getDevice(imu_device_name).enable(timestep)
@@ -86,23 +97,66 @@ class VestaDriver:
             'vesta_driver', parameter_overrides=[Parameter('use_sim_time', Parameter.Type.BOOL, True)])
         self.__node.create_subscription(Twist, '/cmd_vel', self.__on_cmd_vel, qos)
         self.__node.create_subscription(Imu, '/vesta/imu/data', self.__on_imu, qos)
-        self.__node.create_subscription(PointCloud2, '/vesta/lidar/point_cloud', self.__on_point_cloud, qos)
+        if self.__lidar is not None:
+            self.__node.create_subscription(PointCloud2, '/vesta/lidar/point_cloud', self.__on_point_cloud, qos)
+        # RL resets: move the car to a pose given in the odom frame (the robot
+        # node has supervisor TRUE and Driver is a Supervisor subclass).
+        self.__node.create_subscription(PoseStamped, '/vesta/teleport', self.__on_teleport, 1)
         # New barrel layout (RobocrossBarrels.proto) with this randomSeed (<= 0: random).
         self.__node.create_subscription(Int32, '/vesta/barrels_seed', self.__on_barrels_seed, 1)
         
+        # VESTA_PUBLISH_ODOM_TF=0 (set by a localization stack that owns odom->base_link): do not broadcast it.
+        self.__publish_odom_tf = os.environ.get('VESTA_PUBLISH_ODOM_TF', '1').lower() not in ('0', 'false', 'no')
+        # STAND-IN (not perception): VESTA_STANDIN_TL=1 publishes the world's traffic-light state on /standin/traffic_light_state
+        self.__standin_tl = os.environ.get('VESTA_STANDIN_TL', '0') == '1'
+        self.__tl_node, self.__tl_count = None, 0
+        if self.__standin_tl:
+            from std_msgs.msg import String
+            self.__tl_pub = self.__node.create_publisher(String, '/standin/traffic_light_state', 5)
         self.__tf_broadcaster = TransformBroadcaster(self.__node)
         self.__imu_publisher = self.__node.create_publisher(Imu, '/imu/data', qos)
-        self.__lidar_publisher = self.__node.create_publisher(PointCloud2, '/lidar', qos)
+        self.__lidar_publisher = self.__node.create_publisher(PointCloud2, '/lidar', qos) if self.__lidar is not None else None
         self.__radar_publisher = self.__node.create_publisher(PointCloud2, '/radar', qos)
         self.__joint_state_pub = self.__node.create_publisher(JointState, '/joint_states', qos)
+        self.__odom_pub = self.__node.create_publisher(Odometry, '/odom', qos)
 
+
+    def __publish_standin_tl(self):
+        self.__tl_count += 1
+        if self.__tl_count % 4:
+            return
+        if self.__tl_node is None:
+            stack = [self.__driver.getRoot().getField('children')]
+            while stack and self.__tl_node is None:
+                field = stack.pop()
+                for i in range(field.getCount()):
+                    node = field.getMFNode(i)
+                    if node is None:
+                        continue
+                    if node.getTypeName() == 'GenericTrafficLight':
+                        self.__tl_node = node
+                        break
+                    sub = node.getField('children')
+                    if sub is not None:
+                        stack.append(sub)
+            if self.__tl_node is None:
+                return
+        from std_msgs.msg import String
+        self.__tl_pub.publish(String(data=self.__tl_node.getField('state').getSFString().upper()))
+
+    def __sim_stamp(self):
+        """Webots simulation time (== /clock), exact for this step, independent of how far the node's own clock lags."""
+        t = self.__driver.getTime()
+        sec = int(t)
+        return Time(sec=sec, nanosec=int((t - sec) * 1e9))
 
     def __on_imu(self, msg):
         try:
             p = msg
-            p.header.stamp = self.__node.get_clock().now().to_msg()
+            p.header.stamp = self.__sim_stamp()
             self.__imu_publisher.publish(p)
             self.__orientation = msg.orientation
+            self.__yaw_rate = msg.angular_velocity.z
         except  Exception as err:
             self.__node._logger.error(''.join(traceback.TracebackException.from_exception(err).format()))
             
@@ -114,15 +168,23 @@ class VestaDriver:
         self.__cruising_speed_kmh = linear_x * 3.6
         self.__brake = 0.0
         if abs(linear_x) > 1e-3:
-            self.__steer = _clamp(math.atan2(-msg.angular.z * WHEELBASE, linear_x), -MAX_STEER, MAX_STEER)
+            # atan, not atan2: atan2 maps any negative linear_x to ~+-pi (full lock when reversing).
+            self.__steer = _clamp(math.atan(-msg.angular.z * WHEELBASE / linear_x), -MAX_STEER, MAX_STEER)
         self.__last_cmd_time = time.monotonic()
 
+    def __on_teleport(self, msg):
+        self.__teleport_request = msg.pose
     def __on_barrels_seed(self, msg):
         self.__barrels_request = msg.data
 
     def step(self):
-        rclpy.spin_once(self.__node, timeout_sec=0)
+        # spin_once handles ONE callback; with imu, lidar, /clock and /cmd_vel pending it lagged behind by several steps
+        for _ in range(16):
+            rclpy.spin_once(self.__node, timeout_sec=0)
 
+        if self.__teleport_request is not None:
+            self.__teleport(self.__teleport_request)
+            self.__teleport_request = None
         if self.__barrels_request is not None:
             if self.__barrels_countdown == 0:
                 self.__barrels_countdown = self.__announce_reseed(self.__barrels_request)
@@ -147,9 +209,62 @@ class VestaDriver:
             self.__driver.setBrakeIntensity(self.__brake)
 
         self.__driver.setSteeringAngle(self.__steer)
+        if self.__standin_tl:
+            self.__publish_standin_tl()
         self.__radar_publisher.publish(self.__radar_point_cloud())
         self.__joint_state_pub.publish(self.__joint_states())
-        self.__tf_broadcaster.sendTransform(self.__base_link_transform())
+        base_link = self.__base_link_transform()
+        if self.__publish_odom_tf:
+            self.__tf_broadcaster.sendTransform(base_link)
+        self.__odom_pub.publish(self.__odometry(base_link))
+
+    def __odometry(self, base_link):
+        """/odom with the same pose as the odom->base_link TF.
+
+        Forward speed is the GPS speed vector projected on the heading (signed,
+        so reversing gives v < 0); yaw rate comes from the IMU gyro.
+        """
+        msg = Odometry()
+        msg.header = base_link.header
+        msg.child_frame_id = BASE_FRAME
+        msg.pose.pose.position.x = base_link.transform.translation.x
+        msg.pose.pose.position.y = base_link.transform.translation.y
+        msg.pose.pose.position.z = base_link.transform.translation.z
+        msg.pose.pose.orientation = base_link.transform.rotation
+
+        speed = self.__gps.getSpeedVector()
+        if not any(math.isnan(v) for v in speed):
+            yaw = _yaw(self.__orientation)
+            msg.twist.twist.linear.x = speed[0] * math.cos(yaw) + speed[1] * math.sin(yaw)
+        msg.twist.twist.angular.z = self.__yaw_rate
+        return msg
+
+    def __teleport(self, pose):
+        """Put base_link (= the GPS antenna, see __base_link_transform) at an odom pose."""
+        if self.__gps_origin is None:
+            return
+        root = self.__driver.getSelf()
+        root_pos = root.getPosition()
+        gps = self.__gps.getValues()
+        r = root.getOrientation()
+        yaw_now = math.atan2(r[3], r[0])
+        # GPS offset from the robot root, in the robot's own frame
+        dx, dy = gps[0] - root_pos[0], gps[1] - root_pos[1]
+        off_x = math.cos(yaw_now) * dx + math.sin(yaw_now) * dy
+        off_y = -math.sin(yaw_now) * dx + math.cos(yaw_now) * dy
+
+        yaw = _yaw(pose.orientation)
+        gps_x = self.__gps_origin[0] + pose.position.x
+        gps_y = self.__gps_origin[1] + pose.position.y
+        x = gps_x - (math.cos(yaw) * off_x - math.sin(yaw) * off_y)
+        y = gps_y - (math.sin(yaw) * off_x + math.cos(yaw) * off_y)
+
+        root.getField('translation').setSFVec3f([x, y, root_pos[2] + 0.05])
+        root.getField('rotation').setSFRotation([0.0, 0.0, 1.0, yaw])
+        root.resetPhysics()
+        self.__cruising_speed_kmh = 0.0
+        self.__steer = 0.0
+        self.__driver.setCruisingSpeed(0.0)
 
     def __announce_reseed(self, seed):
         """Tell the referee (DEF REFEREE, customData) that the barrels go away, before removing them.
@@ -194,7 +309,7 @@ class VestaDriver:
         the vehicle happens to spawn in the world.
         """
         t = TransformStamped()
-        t.header.stamp = self.__node.get_clock().now().to_msg()
+        t.header.stamp = self.__sim_stamp()
         t.header.frame_id = ODOM_FRAME
         t.child_frame_id = BASE_FRAME
         t.transform.rotation = self.__orientation
@@ -209,7 +324,7 @@ class VestaDriver:
         return t
 
     def __radar_point_cloud(self):
-        header = Header(frame_id=RADAR_FRAME, stamp=self.__node.get_clock().now().to_msg())
+        header = Header(frame_id=RADAR_FRAME, stamp=self.__sim_stamp())
         points = [
             # Webots' azimuth sign is flipped from the usual math convention: per
             # WbRadar.cpp, a target on the sensor's local +y side gets a NEGATIVE
@@ -223,7 +338,7 @@ class VestaDriver:
     def __on_point_cloud(self, data):
         try:
             p = data
-            p.header.stamp = self.__node.get_clock().now().to_msg()
+            p.header.stamp = self.__sim_stamp()
             p.header.frame_id = 'lidar_link'
             self.__lidar_publisher.publish(p)
         except  Exception as err:
@@ -232,7 +347,7 @@ class VestaDriver:
     def __joint_states(self):
         steer = self.__driver.getSteeringAngle()* -1
         msg = JointState()
-        msg.header.stamp = self.__node.get_clock().now().to_msg()
+        msg.header.stamp = self.__sim_stamp()
         msg.name = list(STEER_JOINTS) + [joint_name for _, joint_name in self.__wheel_sensors]
         msg.position = [steer] * len(STEER_JOINTS) + [sensor.getValue() for sensor, _ in self.__wheel_sensors]
         return msg

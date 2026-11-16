@@ -150,7 +150,44 @@
     <joint name="gps_joint" type="fixed">
         <parent link="base_link"/>
         <child link="gps_link"/>
-        <origin xyz="0.3 0 1.4" rpy="0 0 0"/>
+        <!-- x measured in Webots: GPS world position minus robot root = 0.400 m (was 0.3) --><origin xyz="0.4 0 1.4" rpy="0 0 0"/>
+    </joint>
+
+    <!-- base_footprint: ground level under the rear axle. MEASURED in Webots: after the suspension settles base_link
+         is 0.108 m above ground (ground plane fitted from stereo and VLP-16 ground returns agree within 1 cm);
+         0.4 m is only the spawn drop height of the world file. -->
+    <link name="base_footprint"/>
+    <joint name="base_footprint_joint" type="fixed">
+        <parent link="base_link"/>
+        <child link="base_footprint"/>
+        <origin xyz="0 0 -0.108" rpy="0 0 0"/>
+    </joint>
+
+    <!-- Stereo pair (Webots only so far): baseline 0.20 m, windshield mount (the original RGB camera is retained for compatibility). *_link are body axes
+         (x forward); *_optical_frame is the pinhole frame (z forward, x right, y down) the images are stamped in. -->
+    <link name="stereo_left_link"/>
+    <joint name="stereo_left_joint" type="fixed">
+        <parent link="base_link"/>
+        <child link="stereo_left_link"/>
+        <origin xyz="1.55 0.10 1.05" rpy="0 0 0"/>
+    </joint>
+    <link name="stereo_left_optical_frame"/>
+    <joint name="stereo_left_optical_joint" type="fixed">
+        <parent link="stereo_left_link"/>
+        <child link="stereo_left_optical_frame"/>
+        <origin xyz="0 0 0" rpy="-1.5707963267948966 0 -1.5707963267948966"/>
+    </joint>
+    <link name="stereo_right_link"/>
+    <joint name="stereo_right_joint" type="fixed">
+        <parent link="base_link"/>
+        <child link="stereo_right_link"/>
+        <origin xyz="1.55 -0.10 1.05" rpy="0 0 0"/>
+    </joint>
+    <link name="stereo_right_optical_frame"/>
+    <joint name="stereo_right_optical_joint" type="fixed">
+        <parent link="stereo_right_link"/>
+        <child link="stereo_right_optical_frame"/>
+        <origin xyz="0 0 0" rpy="-1.5707963267948966 0 -1.5707963267948966"/>
     </joint>
 
     <!-- Generic RGB camera: windshield-mounted, facing forward. -->
@@ -184,6 +221,24 @@
                 <updateRate>30</updateRate>
                 <topicName>/camera/image_raw</topicName>
                 <frameName>camera_link</frameName>
+            </ros>
+        </device>
+        <device reference="stereo_left_camera" type="Camera">
+            <ros>
+                <enabled>true</enabled>
+                <alwaysOn>true</alwaysOn>
+                <updateRate>30</updateRate>
+                <topicName>/stereo_raw/left</topicName>
+                <frameName>stereo_left_optical_frame</frameName>
+            </ros>
+        </device>
+        <device reference="stereo_right_camera" type="Camera">
+            <ros>
+                <enabled>true</enabled>
+                <alwaysOn>true</alwaysOn>
+                <updateRate>30</updateRate>
+                <topicName>/stereo_raw/right</topicName>
+                <frameName>stereo_right_optical_frame</frameName>
             </ros>
         </device>
 

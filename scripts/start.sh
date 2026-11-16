@@ -14,6 +14,8 @@ set -uo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DOCKER_DIR="$HERE/../docker"
 
+source "$DOCKER_DIR/image.sh"
+
 MODE="shell"
 GPU=""
 HEADLESS=false
@@ -156,16 +158,13 @@ mkdir -p "$HERE/../.build/build" "$HERE/../.build/install" "$HERE/../.build/log"
 # -------------------------------------------------------------------------
 if [ "$MODE" = "rebuild" ]; then
     say "RU: Пересборка образа с нуля | EN: rebuilding image from scratch"
-    $COMPOSE build --no-cache
+    export VESTA_IMAGE=vesta-sim:latest
+    $COMPOSE build --no-cache || exit $?
     rm -rf "$HERE/../.build"
     mkdir -p "$HERE/../.build"/{build,install,log}
     MODE="shell"
-elif ! docker image inspect vesta-sim:latest >/dev/null 2>&1; then
-    say ""
-    say "RU: Первая сборка образа. Это 15-25 минут, дальше запуск за секунды."
-    say "EN: First image build. Takes 15-25 minutes; later starts are instant."
-    say ""
-    $COMPOSE build || exit 1
+else
+    vesta_image_acquire || exit $?
 fi
 
 # -------------------------------------------------------------------------

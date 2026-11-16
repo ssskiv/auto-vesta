@@ -55,6 +55,35 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         ros-humble-nav2-rviz-plugins \
     && rm -rf /var/lib/apt/lists/*
 
+# Nav2 + perception stack (ros2_ws/src/offroad_nav2): stereo depth, vision_msgs, collision monitor, PyTorch/CUDA.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        ros-humble-stereo-image-proc ros-humble-image-proc ros-humble-vision-msgs \
+        ros-humble-nav2-collision-monitor ros-humble-nav2-velocity-smoother ros-humble-nav2-behavior-tree \
+        ros-humble-xacro ros-humble-urdfdom ros-humble-cv-bridge python3-pytest \
+    && rm -rf /var/lib/apt/lists/*
+# Humble's cv_bridge is built against numpy 1.x, so numpy<2. The cu128 index is needed for Blackwell GPUs (sm_120).
+RUN pip3 install --no-cache-dir "numpy<2" torch torchvision --index-url https://download.pytorch.org/whl/cu128 \
+        --extra-index-url https://pypi.org/simple
+# torch's dependencies pull a setuptools that breaks colcon's ament_python builds on Ubuntu 22.04: restore the distro version.
+RUN pip3 install --no-cache-dir "setuptools==59.6.0"
+# ONNX Runtime GPU for the C++ perception node (headers + libs from the official release) and for tools/export_onnx.py (pip).
+# ORT 1.23 wants CUDA 12 / cuDNN 9, while the torch wheel above brings CUDA 13: install the CUDA 12 runtime libs next to it
+# (different sonames, no clash) and put them on the library path.
+ARG ONNXRUNTIME_VERSION=1.23.2
+RUN wget -qO- https://github.com/microsoft/onnxruntime/releases/download/v${ONNXRUNTIME_VERSION}/onnxruntime-linux-x64-gpu-${ONNXRUNTIME_VERSION}.tgz \
+        | tar xz -C /opt \
+    && mv /opt/onnxruntime-linux-x64-gpu-${ONNXRUNTIME_VERSION} /opt/onnxruntime
+RUN pip3 install --no-cache-dir onnx onnxscript onnxruntime-gpu==${ONNXRUNTIME_VERSION} \
+        nvidia-cuda-runtime-cu12 nvidia-cublas-cu12 nvidia-cudnn-cu12 nvidia-cufft-cu12 nvidia-curand-cu12 nvidia-cuda-nvrtc-cu12 \
+    && pip3 install --no-cache-dir "setuptools==59.6.0" \
+    && (ls -d /usr/local/lib/python3.10/dist-packages/nvidia/*/lib; echo /opt/onnxruntime/lib) > /etc/ld.so.conf.d/onnxruntime-cuda12.conf \
+    && ldconfig
+
+# onnx / onnxruntime-gpu pull numpy 2.x, which breaks Humble's cv_bridge / OpenCV (built for numpy 1.x): pin it back.
+RUN pip3 install --no-cache-dir "numpy<2" "setuptools==59.6.0"
+
+# Marker used by `make` to rebuild images that predate the Nav2 + perception layers.
+LABEL vesta.nav="2"
 
 ENV RMW_IMPLEMENTATION=rmw_fastrtps_cpp
 ENV ROS_DOMAIN_ID=0
@@ -71,7 +100,8 @@ RUN echo 'source /opt/ros/humble/setup.bash' >> /root/.bashrc && \
     echo "PS1='${debian_chroot:+($debian_chroot)}\[\033[01;31m\]\u@\h\[\033[00m\]:\[\033[01;33m\]\w\[\033[00m\]\$ '" \
         >> /root/.bashrc && \
     echo "USERNAME=root" \
-        >> /root/.bashrc
+        >> /root/.bashrc && \
+    echo "USER=root" >> /root/.bashrc
 
 WORKDIR /ros2_ws
 
