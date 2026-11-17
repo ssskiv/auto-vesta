@@ -20,7 +20,7 @@ PROTO WinderFreeDeal [
             children [
               CadShape {
                 url [
-                  "models/WinderFreeDeal/winder_free_deal.dae"
+                  "../models/WinderFreeDeal/winder_free_deal.dae"
                 ]
               }
             ]

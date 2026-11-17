@@ -1,0 +1,2216 @@
+#VRML_SIM R2023b utf8
+
+EXTERNPROTO "../protos/webots/projects/objects/backgrounds/protos/TexturedBackground.proto"
+EXTERNPROTO "../protos/webots/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
+EXTERNPROTO "../protos/webots/projects/objects/floors/protos/RectangleArena.proto"
+EXTERNPROTO "../protos/webots/projects/objects/road/protos/Road.proto"
+EXTERNPROTO "../protos/webots/projects/objects/road/protos/RoadLine.proto"
+EXTERNPROTO "../protos/webots/projects/objects/traffic/protos/GenericTrafficLight.proto"
+EXTERNPROTO "../protos/PlasticBarrel.proto"
+IMPORTABLE EXTERNPROTO "../protos/RobocrossBarrels.proto"
+EXTERNPROTO "../protos/LadaVesta.proto"
+EXTERNPROTO "../protos/Buggy.proto"
+EXTERNPROTO "../protos/RobocrossSign.proto"
+EXTERNPROTO "../protos/WinderStart.proto"
+EXTERNPROTO "../protos/WinderFinish.proto"
+EXTERNPROTO "../protos/WinderFreeDeal.proto"
+EXTERNPROTO "../protos/WinderGaz.proto"
+EXTERNPROTO "../protos/webots/projects/objects/trees/protos/Forest.proto"
+EXTERNPROTO "../protos/webots/projects/objects/floors/protos/UnevenTerrain.proto"
+EXTERNPROTO "../protos/webots/projects/objects/solids/protos/SolidBox.proto"
+
+
+
+WorldInfo {
+  ERP 0.6
+  basicTimeStep 24
+  FPS 30
+  optimalThreadCount 4
+  lineScale 1
+  contactProperties [
+    ContactProperties {
+      slideSound "../protos/webots/projects/default/worlds/sounds/slide.wav"
+      rollSound "../protos/webots/projects/default/worlds/sounds/roll.wav"
+      bumpSound "../protos/webots/projects/default/worlds/sounds/bump.wav"
+      coulombFriction [
+        8
+      ]
+      softCFM 1e-05
+      maxContactJoints 13
+    }
+  ]
+}
+Viewpoint {
+  orientation 0 1 0 0.35
+  position -7.5 -2.26 5
+  follow "buggy"
+  followType "Mounted Shot"
+}
+TexturedBackground {
+}
+Solid {
+  children [
+    GenericTrafficLight {
+      translation 18.96 -11.73 0
+      rotation 0 0 1 3.14159
+      startGreen FALSE
+      greenTime 20
+      state "red"
+    }
+  ]
+  name "solid(2)"
+}
+TexturedBackgroundLight {
+  castShadows FALSE
+}
+RobocrossSign {
+  translation 15.25 -10.98 0.52
+  rotation 0 0 1 1.5708
+}
+RobocrossSign {
+  translation 15.58 10.73 0.52
+  rotation 0 0 1 -1.5707953071795862
+  name "robocross_sign(7)"
+}
+RobocrossSign {
+  translation 34.32 -11.05 0.52
+  rotation 0 0 1 1.5708
+  name "robocross_sign(1)"
+}
+RobocrossSign {
+  translation 34.32 10.67 0.52
+  rotation 0 0 1 -1.5707953071795862
+  name "robocross_sign(8)"
+}
+RobocrossSign {
+  translation 54.36 -11.19 0.52
+  rotation 0 0 1 1.56
+  name "robocross_sign(2)"
+}
+RobocrossSign {
+  translation 54.5919 10.479 0.52
+  rotation 0 0 1 -1.59
+  name "robocross_sign(9)"
+}
+RobocrossSign {
+  translation 72.287 -11.7115 0.52
+  rotation 0 0 -1 -1.52
+  name "robocross_sign(3)"
+}
+RobocrossSign {
+  translation 73.3876 9.92078 0.52
+  rotation 0 0 1 -1.6215953071795859
+  name "robocross_sign(10)"
+}
+RobocrossSign {
+  translation 91.3786 -13.2659 0.52
+  rotation 0 0 -1 -1.43
+  name "robocross_sign(4)"
+}
+RobocrossSign {
+  translation 94.4238 8.23922 0.52
+  rotation 0 0 1 -1.7115953071795866
+  name "robocross_sign(11)"
+}
+RobocrossSign {
+  translation 120.281 -26.6904 0.52
+  rotation 0 0 -1 -0.98
+  name "robocross_sign(5)"
+}
+RobocrossSign {
+  translation 132.636 -8.80444 0.52
+  rotation 0 0 1 -2.161595307179586
+  name "robocross_sign(13)"
+}
+RobocrossSign {
+  translation 106.981 -17.8538 0.52
+  rotation 0 0 1 1.04
+  name "robocross_sign(6)"
+}
+RobocrossSign {
+  translation 117.876 0.713477 0.52
+  rotation 0 0 1 -2.09
+  name "robocross_sign(12)"
+}
+WinderStart {
+  translation 11.46 10.09 0.1
+  rotation 0 0 1 -3.1415853071795863
+}
+WinderStart {
+  translation 11.37 -10.6 0.1
+  rotation 0 0 1 7.38701e-06
+  name "winder_start(1)"
+}
+WinderFinish {
+  translation 9.59 -13.94 -0.04
+  rotation -3.59841e-07 2.09385e-07 1 1.5708
+}
+WinderFinish {
+  translation -4.47 -13.94 -0.0400007
+  rotation 2.09386e-07 3.59842e-07 1 -1.5707953071795862
+  name "winder_finish(1)"
+}
+WinderFreeDeal {
+  translation 154.54 -23.79 0.05
+  rotation 0 0 1 2.618
+}
+WinderFreeDeal {
+  translation 143.155 -41.3522 0.05
+  rotation 0 0 1 -0.523595307179586
+  name "winder_free_deal(1)"
+}
+WinderGaz {
+  translation 180.81 -41.21 0.05
+  rotation 0 0 1 2.618
+}
+WinderGaz {
+  translation 169.248 -58.8164 0.05
+  rotation 0 0 1 -0.523595307179586
+  name "winder_gaz(1)"
+}
+DEF Barrier Solid {
+  translation 126.593 -30.2546 0.530002
+  rotation -3.2024999999909137e-07 2.3605099999933025e-06 -0.9999999999971627 -0.9799953071795864
+  children [
+    Solid {
+      translation 1.74844e-05 -4.76 0
+      rotation 0 0 1 1.5708
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(1)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation 3.94133e-05 -10.73 0
+      rotation 0 0 1 1.5708
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(2)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation 6.08279e-05 -16.56 0
+      rotation 0 0 1 1.5708
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(3)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation 8.19857e-05 -22.32 0
+      rotation 0 0 1 1.5708
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(4)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation 0.000102006 -27.77 0
+      rotation 0 0 1 1.5708
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(5)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation 0.000126361 -34.4 0
+      rotation 0 0 1 1.5708
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(6)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation 0.000149807 -40.78 0
+      rotation 0 0 1 1.5708
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(7)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation 0.000171992 -46.82 0
+      rotation 0 0 1 1.5708
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(8)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation 0.000195503 -53.22 0
+      rotation 0 0 1 1.5708
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(9)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation 0.000218977 -59.61 0
+      rotation 0 0 1 1.5708
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(22)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation 0.000247395 -67.35 0
+      rotation 0 0 1 1.5708
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(23)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation 21.0902 -53.22 0
+      rotation 0 0 1 1.5708
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(10)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation 21.0902 -59.44 0
+      rotation 0 0 1 1.5708
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(20)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation 21.0902 -66.4 0
+      rotation 0 0 1 1.5708
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(21)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation 21.0902 -73.07 0
+      rotation 0 0 1 1.5708
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(24)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation 21.0902 -86.14 0
+      rotation 0 0 1 1.5708
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(26)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation 21.0902 -92.4 0
+      rotation 0 0 1 1.5708
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(27)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation 21.0902 -98.24 0
+      rotation 0 0 1 1.5708
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(28)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation -29.3117 -97.2085 0
+      rotation 0 0 1 1.8326
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(40)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation -30.4479 -92.9691 0
+      rotation 0 0 1 1.8326
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(41)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation -31.68 -88.3707 0
+      rotation 0 0 1 1.8326
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(42)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation -32.782 -84.2567 0
+      rotation 0 0 1 1.8326
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(43)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation -33.8987 -80.0833 0
+      rotation 0 0 1 1.8326
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(44)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation -34.9218 -76.2675 0
+      rotation 0 0 1 1.8326
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(45)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation 17.8302 -99.12 0
+      rotation 0 0 -1 -5.307179586466759e-06
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(29)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation 14.0502 -99.12 0
+      rotation 0 0 -1 -5.307179586466759e-06
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(30)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation 10.0702 -99.12 0
+      rotation 0 0 -1 -5.307179586466759e-06
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(31)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation 5.8802 -99.12 0
+      rotation 0 0 -1 -5.307179586466759e-06
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(32)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation 1.4302 -99.12 0
+      rotation 0 0 -1 -5.307179586466759e-06
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(33)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation -4.2198 -99.12 0
+      rotation 0 0 -1 -5.307179586466759e-06
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(34)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation -9.2798 -99.12 0
+      rotation 0 0 -1 -5.307179586466759e-06
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(35)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation -14.0398 -99.12 0
+      rotation 0 0 -1 -5.307179586466759e-06
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(36)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation -18.7798 -99.12 0
+      rotation 0 0 -1 -5.307179586466759e-06
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(37)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation -23.4298 -99.12 0
+      rotation 0 0 -1 -5.307179586466759e-06
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(38)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation -28.0398 -99.12 0
+      rotation 0 0 -1 -5.307179586466759e-06
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(39)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation 21.0902 -79.73 0
+      rotation 0 0 1 1.5708
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(25)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation 21.0902 -46.26 0
+      rotation 0 0 1 1.5708
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(11)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation 21.0902 -40.72 0
+      rotation 0 0 1 1.5708
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(12)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation 21.0902 -34.36 0
+      rotation 0 0 1 1.5708
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(13)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation 21.0902 -27.21 0
+      rotation 0 0 1 1.5708
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(14)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation 21.0902 -21.95 0
+      rotation 0 0 1 1.5708
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(15)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation 21.0902 -15.93 0
+      rotation 0 0 1 1.5708
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(16)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation 21.0902 -10.06 0
+      rotation 0 0 1 1.5708
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(17)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation 21.0902 -4.43 0
+      rotation 0 0 1 1.5708
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(18)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation 21.0902 0.39 0
+      rotation 0 0 1 1.5708
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(19)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation -31.7929 120.453 0
+      rotation 0 0 1 2.16
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(46)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation -34.0152 123.781 0
+      rotation 0 0 1 2.16
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(47)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation -36.5147 127.532 0
+      rotation 0 0 1 2.16
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(48)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation -38.7575 130.895 0
+      rotation 0 0 1 2.16
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(49)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation -40.3952 132.053 0
+      rotation 0 0 1 -2.5523853071795863
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(50)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation -44.1744 129.505 0
+      rotation 0 0 1 -2.5523853071795863
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(51)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation -48.4373 126.651 0
+      rotation 0 0 1 -2.5523853071795863
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(52)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation -56.5657 121.194 0
+      rotation 0 0 1 -2.5523853071795863
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(53)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation -60.5242 118.567 0
+      rotation 0 0 1 -2.5523853071795863
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(55)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation -64.0488 116.206 0
+      rotation 0 0 1 -2.5523853071795863
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(56)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation -67.3077 113.35 0
+      rotation 0 0 1 -2.2905853071795863
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(57)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation -70.0392 110.226 0
+      rotation 0 0 1 -2.2905853071795863
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(58)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation -72.6122 106.48 0
+      rotation 0 0 -1 2.02879
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(59)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation -74.6147 102.403 0
+      rotation 0 0 -1 2.02879
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(60)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation -76.0148 98.226 0
+      rotation 0 0 -1 1.76699
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(61)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation -76.205 93.842 0
+      rotation 0 0 -1 1.50519
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(62)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation -25.6449 5.94398 0
+      rotation 0 0 1 -1.5051853071795867
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(63)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation -26.0706 10.0857 0
+      rotation 0 0 1 -1.5051853071795867
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(64)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation -50.1972 8.50029 0
+      rotation 0 0 1 -1.5051853071795867
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(69)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation -51.1497 12.2293 0
+      rotation 0 0 -1 1.24339
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(70)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation -52.5885 16.1953 0
+      rotation 0 0 -1 1.24339
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(71)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation -53.9619 20.0163 0
+      rotation 0 0 -1 1.24339
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(72)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation -49.8945 4.6793 0
+      rotation 0 0 1 -1.5051853071795867
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(73)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation -49.424 1.05205 0
+      rotation 0 0 1 -1.5051853071795867
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(74)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation -26.9378 14.0849 0
+      rotation 0 0 -1 1.24339
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(65)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation -28.3503 17.8699 0
+      rotation 0 0 1 -1.2433953071795862
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(66)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation -29.6548 21.6508 0
+      rotation 0 0 -1 1.24339
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(67)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation -30.8092 25.0495 0
+      rotation 0 0 -1 1.24339
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(68)"
+      boundingObject USE brick
+    }
+    Solid {
+      translation -52.6103 123.858 0
+      rotation 0 0 1 -2.5523853071795863
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      name "solid(54)"
+      boundingObject USE brick
+    }
+    Solid {
+      rotation 0 0 1 1.5708
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../protos/webots/projects/default/worlds/textures/rock.jpg"
+              ]
+            }
+            roughness 1
+            metalness 0
+          }
+          geometry DEF brick Box {
+            size 2.5 1 1
+          }
+        }
+      ]
+      boundingObject USE brick
+    }
+  ]
+  name "solid(3)"
+}
+DEF Road Solid {
+  translation 0.0478663 -0.137844 0.1
+  children [
+    DEF road Road {
+      name "road(1)"
+      width 20
+      lines [
+        RoadLine {
+          type "none"
+        }
+      ]
+      rightBarrier TRUE
+      leftBarrier TRUE
+      wayPoints [
+        11 0 0
+        100 0 0
+        115 -10 0
+        130 -20 0
+      ]
+      roadTilt [
+        0, 0, 0, 0
+      ]
+      startingAngle [
+        0
+      ]
+      appearance Appearance {
+        texture ImageTexture {
+          url [
+            "../protos/webots/projects/vehicles/worlds/textures/ground.jpg"
+          ]
+        }
+      }
+      roadBoundingObject TRUE
+      rightBorderBoundingObject TRUE
+      leftBorderBoundingObject TRUE
+    }
+    DEF road Road {
+      name "road(2)"
+      width 20
+      lines [
+        RoadLine {
+          type "none"
+        }
+      ]
+      roadBorderHeight 0
+      wayPoints [
+        130 -20 0
+        190 -60 0
+        215 -77 0
+      ]
+      appearance Appearance {
+        texture ImageTexture {
+          url [
+            "../protos/webots/projects/vehicles/worlds/textures/ground.jpg"
+          ]
+        }
+      }
+      roadBoundingObject TRUE
+      rightBorderBoundingObject TRUE
+      leftBorderBoundingObject TRUE
+    }
+    DEF road Road {
+      name "road(3)"
+      width 20
+      lines [
+        RoadLine {
+          type "none"
+        }
+      ]
+      roadBorderHeight 0
+      wayPoints [
+        -5 0 0
+        11 0 0
+      ]
+      appearance Appearance {
+        texture ImageTexture {
+          url [
+            "../protos/webots/projects/vehicles/worlds/textures/ground.jpg"
+          ]
+        }
+      }
+      roadBoundingObject TRUE
+      rightBorderBoundingObject TRUE
+      leftBorderBoundingObject TRUE
+    }
+    Solid {
+      translation 11.35 0 0.005
+      children [
+        Pose {
+          rotation 1 0 0 0
+          children [
+            Pose {
+              rotation 0 0 1 1.5708
+              children [
+                Shape {
+                  appearance PBRAppearance {
+                    roughness 1
+                    metalness 0
+                  }
+                  geometry Box {
+                    size 20 0.5 0.01
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+      name "stop_line"
+      rotationStep 0.261799
+    }
+    Solid {
+      translation 149.68 -33.13 0.03
+      children [
+        Pose {
+          rotation 1 0 0 0
+          children [
+            Pose {
+              rotation 0 0 1 0.99
+              children [
+                Pose {
+                  children [
+                    Shape {
+                      appearance PBRAppearance {
+                        roughness 1
+                        metalness 0
+                      }
+                      geometry Box {
+                        size 20 0.5 0.01
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+      name "stop_line_end_adjusted"
+    }
+    Solid {
+      translation 175.18 -50.02 0.03
+      children [
+        Pose {
+          rotation 1 0 0 0
+          children [
+            Pose {
+              rotation 0 0 1 0.99
+              children [
+                Pose {
+                  children [
+                    Shape {
+                      appearance PBRAppearance {
+                        roughness 1
+                        metalness 0
+                      }
+                      geometry Box {
+                        size 20 0.5 0.01
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+      name "stop_line_end_adjusted(1)"
+    }
+  ]
+  name "solid(1)"
+}
+DEF Terrain RectangleArena {
+  translation 109.42 -31.39 0
+  floorSize 500 500
+  floorTileSize 2 2
+  floorAppearance PBRAppearance {
+    baseColorMap ImageTexture {
+      url [
+        "../protos/webots/projects/default/worlds/textures/sand.jpg"
+      ]
+      filtering 3
+    }
+    roughness 1
+    metalness 0
+  }
+}
+DEF BARRELS RobocrossBarrels {
+}
+DEF Buggy1 Buggy {
+  # Rear-axle origin: tyre radius 0.29155 m + 0.15 m ground clearance.
+  translation 2.43536 -2.26087 0.44155
+  name "buggy"
+  controller "<extern>"
+  supervisor TRUE
+  
+}
+
+Forest {
+  translation 78.43 -26.32 -0.11
+  shape [
+    -68 -12
+    20 -9
+    101 43
+    96 51
+    20 15
+    -64 0
+  ]
+  randomSeed 9
+  minHeight 4
+  minRadius 3
+}
+Forest {
+  translation 78.43 -73.25 -0.1
+  shape [
+    -98 -60
+    -87 -60
+    -85 -47
+    -78 -33
+    7 -7
+    117 41
+    110 51
+    -49 2
+    -72 -15
+    -89 -27
+  ]
+  randomSeed 3
+  minHeight 4
+  minRadius 3
+}
+Forest {
+  translation 78.43 16 -0.07
+  rotation 1 0 0 4.692820414042842e-06
+  shape [
+    -81 -10
+    34 -4
+    154 73
+    147 84
+    42 13
+    27 7
+    12 4
+    -88 2
+  ]
+  density 0.4
+  randomSeed 13
+  minHeight 4
+  minRadius 3
+}
+UnevenTerrain {
+  translation 189.33 -90.17 -0.03
+  name "uneven terrain(1)"
+  size 50 50 0.5
+  xDimension 61
+  yDimension 61
+  randomSeed 7
+  flatBounds TRUE
+  perlinNOctaves 9
+}
+UnevenTerrain {
+  translation 129.34 -68.43 -0.03
+  rotation 0 0 1 1.0472
+  name "uneven terrain(2)"
+  size 50 50 0.5
+  xDimension 61
+  yDimension 61
+  randomSeed 7
+  flatBounds TRUE
+  perlinNOctaves 9
+}
+UnevenTerrain {
+  translation 73.46 -50.06 -0.03
+  rotation 0 0 1 -0.785395307179586
+  name "uneven terrain(3)"
+  size 50 50 0.5
+  xDimension 61
+  yDimension 61
+  randomSeed 7
+  flatBounds TRUE
+  perlinNOctaves 9
+}
+UnevenTerrain {
+  translation 26.63 -36.74 -0.03
+  rotation 0 0 1 -1.8325953071795862
+  name "uneven terrain(4)"
+  size 50 50 0.5
+  xDimension 61
+  yDimension 61
+  randomSeed 7
+  flatBounds TRUE
+  perlinNOctaves 9
+}
+SolidBox {
+  translation 63.3771 -33.1528 2.01
+  rotation 0 0 -1 0.2
+  size 52 2 5
+  appearance PBRAppearance {
+    transparency 1
+    roughness 0.5
+    metalness 0
+  }
+  castShadows FALSE
+}
+SolidBox {
+  translation 177.509 -71.1582 2.01
+  rotation 0 0 -1 -0.8510553071795863
+  name "box(1)"
+  size 10 2 5
+  appearance PBRAppearance {
+    transparency 1
+    roughness 0.5
+    metalness 0
+  }
+  castShadows FALSE
+}
+SolidBox {
+  translation 142.309 -60.6304 2.01
+  rotation 0 0 1 2.68365
+  name "box(2)"
+  size 68 2 5
+  appearance PBRAppearance {
+    transparency 1
+    roughness 0.5
+    metalness 0
+  }
+  castShadows FALSE
+}
+SolidBox {
+  translation 117.758 -83.557 2.01
+  rotation 0 0 1 2.68365
+  name "box(3)"
+  size 45 2 5
+  appearance PBRAppearance {
+    transparency 1
+    roughness 0.5
+    metalness 0
+  }
+  castShadows FALSE
+}
+SolidBox {
+  translation 150.737 -97.2019 2.01
+  rotation 0 0 1 2.8
+  name "box(4)"
+  size 45 2 5
+  appearance PBRAppearance {
+    transparency 1
+    roughness 0.5
+    metalness 0
+  }
+  castShadows FALSE
+}
+SolidBox {
+  translation 43.0353 -55.2257 2.01
+  rotation 0 0 1 2.85
+  name "box(5)"
+  size 76 2 5
+  appearance PBRAppearance {
+    transparency 1
+    roughness 0.5
+    metalness 0
+  }
+  castShadows FALSE
+}
+SolidBox {
+  translation 14.951 -18.7827 2.01
+  rotation 0 0 1 2.0646
+  name "box(6)"
+  size 13 2 5
+  appearance PBRAppearance {
+    transparency 1
+    roughness 0.5
+    metalness 0
+  }
+  castShadows FALSE
+}
+SolidBox {
+  translation 32.0385 -26.6363 2.01
+  rotation 0 0 1 3
+  name "box(7)"
+  size 29 2 5
+  appearance PBRAppearance {
+    transparency 1
+    roughness 0.5
+    metalness 0
+  }
+  castShadows FALSE
+}
+DEF REFEREE Robot {
+  name "referee"
+  controller "<extern>"
+  supervisor TRUE
+}

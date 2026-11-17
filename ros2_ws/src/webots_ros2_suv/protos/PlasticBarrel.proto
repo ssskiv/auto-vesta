@@ -7,11 +7,11 @@ PROTO PlasticBarrel [
   field SFBool     castShadows       TRUE
   field SFBool     isPickable        TRUE
   field SFString   contactMaterial   "default"
-  field MFString   modelPath            ["models/plastic_barrel/plastic_barrel.dae"]
-  field MFString   baseColorTexturePath ["models/plastic_barrel/textures/base_map.jpg"]
-  field MFString   roughnessTexturePath ["models/plastic_barrel/textures/roughness_map.jpg"]
-  field MFString   metallicTexturePath  ["models/plastic_barrel/textures/metallic_map.jpg"]
-  field MFString   normalTexturePath    ["models/plastic_barrel/textures/normal_map.png"]
+  field MFString   modelPath            ["../models/plastic_barrel/plastic_barrel.dae"]
+  field MFString   baseColorTexturePath ["../models/plastic_barrel/textures/base_map.jpg"]
+  field MFString   roughnessTexturePath ["../models/plastic_barrel/textures/roughness_map.jpg"]
+  field MFString   metallicTexturePath  ["../models/plastic_barrel/textures/metallic_map.jpg"]
+  field MFString   normalTexturePath    ["../models/plastic_barrel/textures/normal_map.png"]
   field SFFloat    translationStep   0.01
   field SFFloat    rotationStep      0.262
   field SFFloat    bodyMass          10.0        # Масса объекта в кг

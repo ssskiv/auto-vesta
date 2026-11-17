@@ -83,7 +83,7 @@ python3 src/webots_ros2_suv/tools/smoke_sim.py --gate --log /tmp/sim.log
 - `ros2_ws/src/webots_ros2_suv` — ROS 2 пакет: мир `worlds/robocross.wbt`,
   PROTO-модель машины (`LadaVesta*.proto`), драйвер `vesta_driver.py`,
   launch-файл `launch/robot.launch.py`.
-- `models/vesta` — 3D-модель кузова (Blender/OBJ/Collada) и текстуры.
+- `ros2_ws/src/webots_ros2_suv/models/vesta` — 3D-модель кузова (Blender/OBJ/Collada) и текстуры.
 - `docker/` — `Dockerfile` (ROS humble + Webots) и compose-оверлеи по GPU.
 - `Makefile` — основной запуск; `scripts/` — совместимые прежние точки входа.
 - `oscc`, `ros2_ws/src/ros2cco` — git-подмодули (сторонние зависимости).

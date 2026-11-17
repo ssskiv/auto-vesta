@@ -20,7 +20,7 @@ PROTO RobocrossSign [
             children [
               CadShape {
                 url [
-                  "models/RobocrossSign/robocross_sign.dae"
+                  "../models/RobocrossSign/robocross_sign.dae"
                 ]
               }
             ]

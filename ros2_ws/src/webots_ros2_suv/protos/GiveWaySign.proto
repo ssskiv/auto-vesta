@@ -7,11 +7,11 @@ PROTO GiveWaySign [
   field SFBool     castShadows       TRUE
   field SFBool     isPickable        TRUE
   field SFString   contactMaterial   "default"
-  field MFString   modelPath            ["models/signs/give_way_sign.dae"]
-  field MFString   baseColorTexturePath ["models/signs/textures/base_map.png"]
-  field MFString   roughnessTexturePath ["models/signs/textures/roughness_map.png"]
-  field MFString   metallicTexturePath  ["models/signs/textures/metallic_map.png"]
-  field MFString   normalTexturePath    ["models/signs/textures/normal_map.png"]
+  field MFString   modelPath            ["../models/signs/give_way_sign.dae"]
+  field MFString   baseColorTexturePath ["../models/signs/textures/base_map.png"]
+  field MFString   roughnessTexturePath ["../models/signs/textures/roughness_map.png"]
+  field MFString   metallicTexturePath  ["../models/signs/textures/metallic_map.png"]
+  field MFString   normalTexturePath    ["../models/signs/textures/normal_map.png"]
   field SFFloat    translationStep   0.01
   field SFFloat    rotationStep      0.262
 ] {

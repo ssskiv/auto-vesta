@@ -20,7 +20,7 @@ PROTO WinderFinish [
             children [
               CadShape {
                 url [
-                  "models/WinderFinish/winder_finish.dae"
+                  "../models/WinderFinish/winder_finish.dae"
                 ]
               }
             ]

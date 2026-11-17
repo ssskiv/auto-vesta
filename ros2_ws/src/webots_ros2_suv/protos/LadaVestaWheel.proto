@@ -45,7 +45,7 @@ PROTO LadaVestaWheel [
               metalness 0
               baseColorMap ImageTexture {
                 url [
-                  "../resource/textures/gerb.png"
+                  "../models/vesta/textures/gerb.png"
                 ]
               }
             }

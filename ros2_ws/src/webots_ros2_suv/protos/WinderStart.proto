@@ -20,7 +20,7 @@ PROTO WinderStart [
             children [
               CadShape {
                 url [
-                  "models/WinderStart/winder_start.dae"
+                  "../models/WinderStart/winder_start.dae"
                 ]
               }
             ]

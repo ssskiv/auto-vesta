@@ -7,7 +7,7 @@ SHELL        := /bin/bash
 .SHELLFLAGS  := -c
 .ONESHELL:
 .DEFAULT_GOAL := help
-.PHONY: help shell start up image pull image-build headless rebuild stop attach exec gpu check
+.PHONY: help shell start up image pull image-build headless rebuild stop down attach exec gpu check
 
 # RU: GPU=nvidia|amd|intel|cpu задаёт видеокарту вручную, иначе автоопределение.
 # EN: GPU=nvidia|amd|intel|cpu forces the GPU, otherwise it is auto-detected.
@@ -150,6 +150,7 @@ help:
 	  make attach         зайти в уже запущенный контейнер | open another shell in the running container   [= make exec]
 	  make exec           то же, что make attach | same as make attach
 	  make stop           остановить контейнеры | stop the containers
+	  make down           остановить и удалить контейнер make up | stop and remove the make up container
 	  make rebuild        пересобрать локальный vesta-sim:latest с нуля и очистить .build | rebuild local vesta-sim:latest from scratch, clear .build
 	  make gpu            показать определённую видеокарту | show the detected GPU
 	  make check          проверить Docker и compose | check Docker and compose
@@ -255,6 +256,17 @@ stop:
 	@$(PREAMBLE)
 	say "RU: Останавливаю | EN: stopping"
 	$$COMPOSE down --remove-orphans   # RU: заодно убирает контейнеры удалённых сервисов (CARLA, Autoware) | EN: also removes containers of removed services (CARLA, Autoware)
+
+# RU: Только постоянный контейнер, созданный make up.
+# EN: Only the persistent container created by make up.
+down:
+	@container=$$(docker ps -aq --filter 'name=^/vesta_sim$$') || exit $$?
+	if [ -z "$$container" ]; then
+	    echo "  RU: Контейнер vesta_sim отсутствует | EN: No vesta_sim container to remove"
+	    exit 0
+	fi
+	docker stop $$container || exit $$?
+	docker rm $$container
 
 attach exec:
 	@c=$$(docker ps --format '{{.Names}}' | grep -E '^(vesta_sim|webots_vesta)$$' | head -1)

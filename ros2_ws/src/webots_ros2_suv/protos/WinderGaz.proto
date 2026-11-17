@@ -20,7 +20,7 @@ PROTO WinderGaz [
             children [
               CadShape {
                 url [
-                  "models/WinderGaz/winder_gaz.dae"
+                  "../models/WinderGaz/winder_gaz.dae"
                 ]
               }
             ]

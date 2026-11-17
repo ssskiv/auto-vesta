@@ -418,6 +418,7 @@ class Score:
 
 # ---- Webots side
 def main():
+    global CAR_X, CAR_Y, CAR_L, CAR_W
     from controller import Supervisor
     sup = Supervisor()
     dt_ms = int(sup.getBasicTimeStep())
@@ -438,6 +439,14 @@ def main():
         if bo is not None and bo.getTypeName() == 'Box':
             fence.append(box_of(n, bo.getField('size').getSFVec3f()))
     car = sup.getFromDef('Vesta1')
+    if car is None:
+        car = sup.getFromDef('Buggy1')
+        # Buggy.proto frame collision plus the tyre extents, in the node frame.
+        CAR_X = (-0.29155, 1.799622521265 + 0.29155)
+        CAR_Y = (-0.706703986095, 0.706703986095)
+        CAR_L, CAR_W = CAR_X[1] - CAR_X[0], CAR_Y[1] - CAR_Y[0]
+    if car is None:
+        raise RuntimeError('World must define Vesta1 or Buggy1 for the referee')
     spawn = tuple(car.getPosition()[:2])
     map_yaml = os.environ.get('REFEREE_MAP') or os.path.join(
         os.path.dirname(os.path.dirname(os.path.abspath(sup.getWorldPath()))), 'maps', MAP_YAML)

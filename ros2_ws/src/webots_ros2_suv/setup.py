@@ -10,6 +10,9 @@ def package_files(src_dir):
     """(share/<package>/<rel_dir>, [files]) tuples for every file under src_dir."""
     files_by_dest = {}
     for path in glob(os.path.join(src_dir, '**', '*'), recursive=True):
+        # The package marker is installed separately in the ament index.
+        if path == os.path.join('resource', package_name):
+            continue
         if os.path.isfile(path):
             dest = os.path.join('share', package_name, os.path.relpath(os.path.dirname(path), '.'))
             files_by_dest.setdefault(dest, []).append(path)
@@ -21,7 +24,7 @@ data_files = [
         ['resource/' + package_name]),
     ('share/' + package_name, ['package.xml']),
 ]
-for directory in ('launch', 'maps', 'worlds', 'protos', 'resource'):
+for directory in ('launch', 'maps', 'worlds', 'protos', 'resource', 'models'):
     data_files += package_files(directory)
 
 setup(

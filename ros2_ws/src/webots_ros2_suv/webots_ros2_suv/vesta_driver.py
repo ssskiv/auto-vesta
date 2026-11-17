@@ -30,7 +30,6 @@ WHEEL_SENSOR_JOINTS = (
 STEER_JOINTS = ('front_left_steer_joint', 'front_right_steer_joint')
 
 COMMAND_TIMEOUT = 0.5
-WHEELBASE = 2.648
 MAX_STEER = 0.6
 
 def _clamp(value, low, high):
@@ -44,6 +43,7 @@ def _yaw(q):
 class VestaDriver:
     def init(self, webots_node, properties):
         self.__driver = webots_node.robot
+        self.__wheelbase = float(properties.get('wheelbase', '2.648'))
         self.__driver.setGear(1)
         self.__driver.setThrottle(0.0)
         self.__driver.setBrakeIntensity(0.0)
@@ -74,7 +74,8 @@ class VestaDriver:
 
         timestep = int(self.__driver.getBasicTimeStep())
         self.__radar = self.__driver.getDevice('radar')
-        self.__radar.enable(timestep)
+        if self.__radar is not None:
+            self.__radar.enable(timestep)
         self.__gps = self.__driver.getDevice('gps')
         self.__gps.enable(timestep)
         # The lidar is optional: absent from the world (camera-only test) -> no /lidar topic.
@@ -98,7 +99,9 @@ class VestaDriver:
         self.__node.create_subscription(Twist, '/cmd_vel', self.__on_cmd_vel, qos)
         self.__node.create_subscription(Imu, '/vesta/imu/data', self.__on_imu, qos)
         if self.__lidar is not None:
-            self.__node.create_subscription(PointCloud2, '/vesta/lidar/point_cloud', self.__on_point_cloud, qos)
+            self.__node.create_subscription(
+                PointCloud2, f'/{self.__driver.getName()}/lidar/point_cloud',
+                self.__on_point_cloud, qos)
         # RL resets: move the car to a pose given in the odom frame (the robot
         # node has supervisor TRUE and Driver is a Supervisor subclass).
         self.__node.create_subscription(PoseStamped, '/vesta/teleport', self.__on_teleport, 1)
@@ -116,7 +119,9 @@ class VestaDriver:
         self.__tf_broadcaster = TransformBroadcaster(self.__node)
         self.__imu_publisher = self.__node.create_publisher(Imu, '/imu/data', qos)
         self.__lidar_publisher = self.__node.create_publisher(PointCloud2, '/lidar', qos) if self.__lidar is not None else None
-        self.__radar_publisher = self.__node.create_publisher(PointCloud2, '/radar', qos)
+        self.__radar_publisher = (
+            self.__node.create_publisher(PointCloud2, '/radar', qos)
+            if self.__radar is not None else None)
         self.__joint_state_pub = self.__node.create_publisher(JointState, '/joint_states', qos)
         self.__odom_pub = self.__node.create_publisher(Odometry, '/odom', qos)
 
@@ -169,7 +174,7 @@ class VestaDriver:
         self.__brake = 0.0
         if abs(linear_x) > 1e-3:
             # atan, not atan2: atan2 maps any negative linear_x to ~+-pi (full lock when reversing).
-            self.__steer = _clamp(math.atan(-msg.angular.z * WHEELBASE / linear_x), -MAX_STEER, MAX_STEER)
+            self.__steer = _clamp(math.atan(-msg.angular.z * self.__wheelbase / linear_x), -MAX_STEER, MAX_STEER)
         self.__last_cmd_time = time.monotonic()
 
     def __on_teleport(self, msg):
@@ -211,7 +216,8 @@ class VestaDriver:
         self.__driver.setSteeringAngle(self.__steer)
         if self.__standin_tl:
             self.__publish_standin_tl()
-        self.__radar_publisher.publish(self.__radar_point_cloud())
+        if self.__radar_publisher is not None:
+            self.__radar_publisher.publish(self.__radar_point_cloud())
         self.__joint_state_pub.publish(self.__joint_states())
         base_link = self.__base_link_transform()
         if self.__publish_odom_tf:

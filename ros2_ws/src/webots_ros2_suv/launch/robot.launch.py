@@ -3,7 +3,7 @@ import os
 import pathlib
 import launch
 from launch.substitutions import  LaunchConfiguration
-from launch.actions import DeclareLaunchArgument
+from launch.actions import DeclareLaunchArgument, OpaqueFunction
 from launch.substitutions.path_join_substitution import PathJoinSubstitution
 from launch import LaunchDescription
 from ament_index_python.packages import get_package_share_directory
@@ -38,14 +38,26 @@ def generate_launch_description():
         ros2_supervisor=True,
         stream=True,
     )
-    robot_description_path = os.path.join(package_dir, pathlib.Path(os.path.join(package_dir, 'resource', 'vesta.urdf')))
-    vehicle_driver = WebotsController(
-        robot_name='vesta',
-        parameters=[
-            {'robot_description': robot_description_path}
-        ],
-        respawn=True
-    )
+
+    def vehicle_nodes(context):
+        buggy = pathlib.Path(world.perform(context)).name == 'robocross_buggy.wbt'
+        vehicle = 'buggy' if buggy else 'vesta'
+        description_path = os.path.join(package_dir, 'resource', vehicle + '.urdf')
+        robot_desc = pathlib.Path(description_path).read_text()
+        return [
+            WebotsController(
+                robot_name=vehicle,
+                parameters=[{'robot_description': description_path}],
+                respawn=True,
+            ),
+            Node(
+                package='robot_state_publisher',
+                executable='robot_state_publisher',
+                name='robot_state_publisher',
+                output='screen',
+                parameters=[{'use_sim_time': USE_SIM_TIME, 'robot_description': robot_desc}],
+            ),
+        ]
 
     # Automatic referee (РобоКросс.Трасса-2026 scoring), extern controller of the Robot "referee"
     referee = launch.actions.ExecuteProcess(
@@ -53,17 +65,6 @@ def generate_launch_description():
              '--robot-name=referee', referee_script.__file__],
         output='screen', respawn=True,
     )
-
-    with open(robot_description_path, 'r') as infp:
-        robot_desc = infp.read()
-    state_publisher_node = Node(
-        package='robot_state_publisher',
-        executable='robot_state_publisher',
-        name='robot_state_publisher',
-        output='screen',
-        parameters=[{'use_sim_time': USE_SIM_TIME, 'robot_description': robot_desc}],
-    )
-    
 
     return LaunchDescription([
         DeclareLaunchArgument(
@@ -81,10 +82,10 @@ def generate_launch_description():
             default_value='true',
             description='false runs Webots without rendering'
         ),
+        # WebotsLauncher rewrites the world launch configuration on execution.
+        OpaqueFunction(function=vehicle_nodes),
         webots,
         webots._supervisor,
-        vehicle_driver,
-        state_publisher_node,
         referee,
         launch.actions.RegisterEventHandler(
             event_handler=launch.event_handlers.OnProcessExit(

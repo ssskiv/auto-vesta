@@ -1,0 +1,205 @@
+#VRML_SIM R2025a utf8
+# Buggy frame mesh: ../models/buggy/buggy.obj.
+# +x forward, +y left, +z up; origin at the rear axle centre.
+# Sensor poses use the slot transforms below; keep resource/buggy.urdf in sync.
+
+EXTERNPROTO "webots/projects/vehicles/protos/abstract/Car.proto"
+EXTERNPROTO "BuggyWheel.proto"
+
+PROTO Buggy [
+  field SFVec3f translation 0 0 0.44155
+  field SFRotation rotation 0 0 1 0
+  field SFString name "buggy"
+  field SFString controller "<generic>"
+  field MFString controllerArgs []
+  field SFBool supervisor FALSE
+  field SFBool synchronization TRUE
+  field SFString window "automobile"
+  # Provisional dynamics; STEP supplies geometry, not mass or motor calibration.
+  field SFFloat mass 400
+  field MFNode sensorsSlotFront [
+    Camera {
+      translation -2.06 0 -0.17
+      rotation 0 0 1 0
+      name "rgb_camera"
+      width 1280
+      height 720
+      fieldOfView 1.0
+      near 0.1
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.05 0.05 0.05
+            metalness 0.3
+            roughness 0.5
+          }
+          geometry Box {
+            size 0.04 0.03 0.03
+          }
+        }
+      ]
+    }
+  ]
+  field MFNode sensorsSlotTop [
+    Lidar {
+      translation -0.21 0 -0.93
+      rotation 0 0 1 0
+      name "lidar"
+      type "rotating"
+      horizontalResolution 1800
+      fieldOfView 6.283185307
+      verticalFieldOfView 0.5236
+      numberOfLayers 16
+      near 0.05
+      minRange 0.3
+      maxRange 100
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.03 0.03 0.03
+            metalness 0.6
+            roughness 0.3
+          }
+          geometry Cylinder {
+            height 0.0717
+            radius 0.0517
+          }
+        }
+      ]
+    }
+    GPS {
+      translation -2.05 0 -1.06
+      rotation 0 0 1 0
+      name "gps"
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.05 0.05 0.05
+            metalness 0.2
+            roughness 0.6
+          }
+          geometry Cylinder {
+            height 0.015
+            radius 0.025
+          }
+        }
+      ]
+    }
+  ]
+  field MFNode sensorsSlotCenter [
+      Solid {
+      translation 0.96 0 0.03
+      rotation 0 0 1 0
+      physics Physics {
+        density -1
+        mass 0.2
+      }
+      boundingObject Box {
+        size 0.0574 0.0428 0.0235
+      }
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.12 0.12 0.14
+            metalness 0.6
+            roughness 0.3
+          }
+          geometry Box {
+            size 0.0574 0.0428 0.0235
+          }
+        }
+        InertialUnit {
+          name "imu"
+        }
+        Gyro {
+          name "imu_gyro"
+        }
+        Accelerometer {
+          name "imu_accelerometer"
+        }
+
+      ]
+    }
+  ]
+
+  field MFNode sensorsSlotRear []
+]
+{
+  Car {
+    translation IS translation
+    rotation IS rotation
+    name IS name
+    model "Buggy"
+    controller IS controller
+    controllerArgs IS controllerArgs
+    supervisor IS supervisor
+    synchronization IS synchronization
+    window IS window
+    trackFront 1.23840797219095
+    trackRear 1.23761246866659
+    wheelbase 1.799622521265
+    engineSound ""
+    wheelsDampingConstant 2
+    wheelFrontLeft BuggyWheel {
+      name "front left wheel"
+      wheelSide TRUE
+      physics DEF WHEEL_PHYSICS Physics {
+        density -1
+        mass 15
+      }
+    }
+    wheelFrontRight BuggyWheel {
+      name "front right wheel"
+      physics USE WHEEL_PHYSICS
+    }
+    wheelRearLeft BuggyWheel {
+      name "rear left wheel"
+      wheelSide TRUE
+      physics USE WHEEL_PHYSICS
+    }
+    wheelRearRight BuggyWheel {
+      name "rear right wheel"
+      physics USE WHEEL_PHYSICS
+    }
+    extensionSlot [
+      Transform {
+        translation 1.799763853433 0 -0.060584767156
+        rotation 0.000393547535 0 0.999999922560 3.141592653589793
+        scale 0.001 0.001 0.001
+        children [
+          CadShape {
+            url [ "../models/buggy/buggy.obj" ]
+          }
+        ]
+      }
+      Pose {
+        translation 4 0 0.45
+        children IS sensorsSlotFront
+      }
+      Pose {
+        translation -4 0 0.3
+        rotation 0 0 1 3.14159
+        children IS sensorsSlotRear
+      }
+      Pose {
+        translation 2 0 1.45
+        children IS sensorsSlotTop
+      }
+      Group {
+        children IS sensorsSlotCenter
+      }
+    ]
+    # Simple frame collision, clear of the wheels. Not the detailed CAD envelope.
+    boundingObject Pose {
+      translation 0.9 0 0.16
+      children [
+        Box { size 2.17 1.1 0.44 }
+      ]
+    }
+    physics Physics {
+      density -1
+      mass IS mass
+      centerOfMass [ 0.9 0 0.1 ]
+    }
+  }
+}
