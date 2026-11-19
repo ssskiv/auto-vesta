@@ -110,6 +110,8 @@ ros2 launch webots_ros2_suv robot.launch.py
 make demo                                           # сборка, запуск и ожидание готовности Nav2
 ```
 
+Обучение FreespaceSeg, FreespaceContour и ObjectSeg и экспорт весов для симулятора описаны в [training/README.md](training/README.md).
+
 В этой ветке оставлено только нужное для этого стека: Webots (`webots_ros2_suv`, судья, бочки), `offroad_nav2`, подмодули `oscc` и
 `ros2cco`. Autoware, обучение RL, нейро-контроллер и CARLA удалены (остались в истории git, ветки `sim`, `ai`).
 

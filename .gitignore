@@ -3,6 +3,11 @@ install/
 log/
 .build/
 /ml_models/
+/ml_models_snapshot/
+/training/checkpoints/
+/training/training/runs/
+/training/visualization/output/
+/training/outputs/
 /ros2_ws/src/webots_ros2_suv/protos/webots/projects/objects/traffic/controllers
 /ros2_ws/src/webots_ros2_suv/protos/webots/projects/vehicles/plugins
 __pycache__/

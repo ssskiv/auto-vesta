@@ -9,6 +9,7 @@ ImageNet normalisation, fp16 weights/activations and the argmax are part of the 
 Usage: export_onnx.py --ckpt-dir /models --out /onnx_out [--check]"""
 import argparse
 import os
+from pathlib import Path
 import sys
 
 import numpy as np
@@ -35,15 +36,24 @@ class Wrapper(torch.nn.Module):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('--ckpt-dir', default='/models')
+    ap.add_argument('--ckpt-dir', default=Path('/models'), type=Path,
+                    help='checkpoint root, with per-network subdirectories or flat last_*.pth files')
     ap.add_argument('--out', required=True)
     ap.add_argument('--check', action='store_true', help='compare with the PyTorch engine on a test image')
     ap.add_argument('--image', help='RGB image for --check (default: a smooth synthetic scene)')
     a = ap.parse_args()
+    checkpoints: dict[str, Path] = {}
+    for network in ('FreespaceSeg', 'FreespaceContour', 'ObjectSeg'):
+        filename = f'last_{network.lower()}.pth'
+        nested = a.ckpt_dir / network / filename
+        flat = a.ckpt_dir / filename
+        if not nested.is_file() and not flat.is_file():
+            ap.error(f'checkpoint missing: {nested} or {flat}')
+        checkpoints[network] = nested if nested.is_file() else flat
     nets = {
-        'seg': E._SegPath(E._build_freespace(f'{a.ckpt_dir}/last_freespaceseg.pth')),
-        'contour': E._ContourPath(E._build_freespace(f'{a.ckpt_dir}/last_freespacecontour.pth')),
-        'objseg': E._build_objectseg(f'{a.ckpt_dir}/last_objectseg.pth'),
+        'seg': E._SegPath(E._build_freespace(str(checkpoints['FreespaceSeg']))),
+        'contour': E._ContourPath(E._build_freespace(str(checkpoints['FreespaceContour']))),
+        'objseg': E._build_objectseg(str(checkpoints['ObjectSeg'])),
     }
     dev = 'cuda' if torch.cuda.is_available() else 'cpu'
     dummy = torch.randint(0, 255, (1, 3, 320, 640), dtype=torch.uint8, device=dev)

@@ -13,8 +13,8 @@ newlines are normalized. The upstream Apache 2.0 license is included as `LICENSE
 The package initializer and this README were added in auto-vesta.
 
 These definitions depend on Torch and Torchvision, already included in the
-simulation image. Training, data preparation, and unrelated model families are
-not included.
+simulation image. The [training workflow](../../../../../training/README.md)
+uses these definitions in its separate training container.
 
 Place completed checkpoint copies in the checkout's `ml_models/` directory:
 
@@ -28,3 +28,5 @@ Run `make onnx` from the checkout root. The exporter imports this package beside
 itself, both in the source tree and after ROS package installation. It constructs
 backbones with `pretrained=False`, loads checkpoint weights strictly, and writes
 `ml_models/onnx/{seg,contour,objseg}.onnx`. No external model repository is needed.
+It also accepts `FreespaceSeg/`, `FreespaceContour/`, and `ObjectSeg/`
+subdirectories containing the corresponding `last_*.pth` files.

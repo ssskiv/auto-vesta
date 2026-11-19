@@ -1,0 +1,6 @@
+id_to_color_mapping:
+  0:  [61, 93, 255]      # background             -> blue
+  1:  [255, 28, 145]     # man-made_structures    -> pink
+  2:  [255, 61, 61]      # vulnerable_living      -> red
+  3:  [255, 190, 61]     # vehicle                -> light orange
+  4:  [0, 100, 0]        # natural_obstacles      -> dark green

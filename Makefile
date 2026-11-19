@@ -264,7 +264,7 @@ onnx:
 	@$(PREAMBLE)
 	$(PREPARE)
 	mkdir -p "$$VESTA_MODELS/onnx"
-	exec $$COMPOSE run --pull never -T --rm -v "$$VESTA_MODELS/onnx:/models/onnx:rw" sim bash -lc 'cd /ros2_ws/src/offroad_nav2 && python3 tools/export_onnx.py --ckpt-dir /models --out /models/onnx --check --image docs/results/domain_gap/06_rgb.png 2>&1 | grep -E "exported|agrees|Error|error"'
+	exec $$COMPOSE run --pull never -T --rm -v "$$VESTA_MODELS/onnx:/models/onnx:rw" sim bash -lc 'cd /ros2_ws/src/offroad_nav2 && python3 tools/export_onnx.py --ckpt-dir /models --out /models/onnx --check --image docs/results/domain_gap/06_rgb.png'
 
 rebuild:
 	@$(PREAMBLE)
